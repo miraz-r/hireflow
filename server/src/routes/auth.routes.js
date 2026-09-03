@@ -1,12 +1,14 @@
 const express = require('express');
-const { register, registerValidators, login, loginValidators } = require('../controllers/auth.controller');
-const { authenticate, authorize } = require('../middleware/auth');
+const { register, registerValidators, login, loginValidators, toggleRole, roleValidators } = require('../controllers/auth.controller');
+const { authenticate } = require('../middleware/auth');
 const User = require('../models/User');
 
 const router = express.Router();
 
 router.post('/register', registerValidators, register);
 router.post('/login', loginValidators, login);
+
+router.post('/role', authenticate, roleValidators, toggleRole);
 
 router.get('/me', authenticate, async (req, res, next) => {
   try {

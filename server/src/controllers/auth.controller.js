@@ -19,9 +19,6 @@ const registerValidators = [
     .withMessage('Password must contain at least one letter')
     .matches(/\d/)
     .withMessage('Password must contain at least one number'),
-  body('role')
-    .isIn(['jobseeker', 'recruiter'])
-    .withMessage('Role must be jobseeker or recruiter'),
   body('fullName')
     .isString()
     .withMessage('Full name is required')
@@ -42,7 +39,10 @@ const register = async (req, res, next) => {
     return res.status(400).json({ error: errors.array()[0].msg });
   }
 
-  const { email, password, role, fullName, phone } = req.body;
+  // Everyone starts as a jobseeker. Users switch to recruiter from the UI
+  // after signing up (see toggleRole).
+  const { email, password, fullName, phone } = req.body;
+  const role = 'jobseeker';
 
   try {
     const passwordHash = await bcrypt.hash(password, env.bcryptRounds);
@@ -124,4 +124,91 @@ const login = async (req, res, next) => {
   }
 };
 
-module.exports = { register, registerValidators, login, loginValidators };
+const roleValidators = [
+  body('role')
+    .isIn(['jobseeker', 'recruiter'])
+    .withMessage('Role must be jobseeker or recruiter'),
+];
+
+// Fields that are only valid for one role. On toggle we clear the fields
+// belonging to the *previous* role so the profile stays valid for the new one.
+const RECRUITER_ONLY_FIELDS = [
+  'jobTitle',
+  'companyName',
+  'companyWebsite',
+  'companyDescription',
+];
+const JOBSEEKER_ONLY_FIELDS = [
+  'headline',
+  'bio',
+  'skills',
+  'education',
+  'experience',
+  'links',
+];
+
+/**
+ * POST /api/auth/role — switch the signed-in user between jobseeker and
+ * recruiter. Updates the User and mirrors it onto the Profile (clearing the
+ * previous role's fields so the profile passes schema validation), then
+ * re-issues a JWT that reflects the new role.
+ */
+const toggleRole = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
+  }
+
+  const newRole = req.body.role;
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (newRole !== user.role) {
+      user.role = newRole;
+      await user.save();
+
+      await Profile.updateOne(
+        { userId: user._id },
+        {
+          $set: { role: newRole },
+          $unset: Object.fromEntries(
+            (newRole === 'jobseeker'
+              ? RECRUITER_ONLY_FIELDS
+              : JOBSEEKER_ONLY_FIELDS
+            ).map((f) => [f, 1])
+          ),
+        }
+      ).catch((err) => next(err));
+    }
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      env.jwtSecret,
+      { expiresIn: env.jwtExpiresIn }
+    );
+
+    return res.status(200).json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+module.exports = {
+  register,
+  registerValidators,
+  login,
+  loginValidators,
+  toggleRole,
+  roleValidators,
+};
