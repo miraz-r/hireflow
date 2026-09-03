@@ -1,0 +1,112 @@
+/* Value Section — THE ONE strong brand section, deep indigo premium */
+
+.value-section {
+  position: relative;
+  padding: var(--space-24) 0 var(--space-24);
+  background-color: var(--color-brand-deep);
+  color: #FFFFFF;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Subtle layered indigo glow */
+.value-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 900px 500px at 50% 0%, rgba(79, 70, 229, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 400px at 50% 100%, rgba(124, 58, 237, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.value-header {
+  text-align: center;
+  margin-bottom: var(--space-12);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.value-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  margin: var(--space-4) 0 var(--space-3);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-snug);
+  color: #FFFFFF;
+}
+
+.value-subtitle {
+  font-size: var(--font-size-base);
+  color: rgba(199, 210, 254, 0.85);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.value-card {
+  position: relative;
+  padding: var(--space-6);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  transition: background-color var(--transition-base), border-color var(--transition-base);
+}
+
+.value-card:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.value-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background-color: rgba(79, 70, 229, 0.20);
+  color: #C7D2FE;
+  border: 1px solid rgba(124, 58, 237, 0.20);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+}
+
+.value-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-2);
+  color: #FFFFFF;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.value-card-description {
+  font-size: var(--font-size-sm);
+  color: rgba(199, 210, 254, 0.78);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+
+@media (max-width: 640px) {
+  .value-section {
+    padding: var(--space-16) 0;
+  }
+
+  .value-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .value-subtitle {
+    font-size: var(--font-size-base);
+  }
+
+  .value-grid {
+    grid-template-columns: 1fr;
+  }
+}
