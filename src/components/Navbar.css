@@ -170,6 +170,78 @@
   background-color: var(--color-bg-tertiary);
 }
 
+.profile-link {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-light);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.profile-link:hover {
+  color: var(--color-brand-primary-hover);
+  background-color: var(--color-brand-primary-light);
+}
+
+/* Role toggle — jobseeker / recruiter switch */
+.role-toggle {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 2px;
+}
+
+.role-toggle-btn {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.role-toggle-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.role-toggle-btn.active {
+  color: var(--color-text-inverse);
+  background: linear-gradient(180deg, var(--color-brand-primary) 0%, var(--color-brand-primary-hover) 100%);
+  box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25);
+}
+
+.mobile-user-info .role-toggle {
+  justify-content: center;
+}
+
+.post-job-link {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-inverse);
+  background: linear-gradient(180deg, var(--color-brand-accent) 0%, var(--color-brand-primary-hover) 100%);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 2px rgba(124, 58, 237, 0.25);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.post-job-link:hover {
+  color: var(--color-text-inverse);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3), 0 8px 20px -4px rgba(124, 58, 237, 0.35);
+}
+
 /* Mobile user info block */
 .mobile-user-info {
   display: flex;

@@ -43,14 +43,24 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  const register = async (email, password, role, fullName, phone) => {
+  const register = async (email, password, fullName, phone) => {
     const res = await apiPost('/auth/register', {
       email,
       password,
-      role,
       fullName,
       phone,
     });
+    return res.data;
+  };
+
+  // Switch the signed-in user between jobseeker and recruiter. The backend
+  // re-issues a JWT carrying the new role, so we persist it like login.
+  const toggleRole = async (role) => {
+    const res = await apiPost('/auth/role', { role });
+    const { token: newToken, user: newUser } = res.data;
+    localStorage.setItem(TOKEN_KEY, newToken);
+    setToken(newToken);
+    setUser(newUser);
     return res.data;
   };
 
@@ -61,7 +71,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, toggleRole, logout }}>
       {children}
     </AuthContext.Provider>
   );

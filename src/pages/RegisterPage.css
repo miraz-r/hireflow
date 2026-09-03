@@ -1,0 +1,185 @@
+/* =========================================================
+   RegisterPage — HireFlow registration screen
+   Layout (auth-page, auth-shell, auth-form-pane, etc.) is
+   shared with LoginPage and imported via LoginPage.css.
+   This file contains only RegisterPage-specific additions
+   and the overrides needed to keep the longer registration
+   form fitting within a single desktop viewport.
+   ========================================================= */
+@import './LoginPage.css';
+
+/* ---------- Tighter form spacing for the register form ----------
+   The register form has more fields than login, so we tighten
+   paddings, gaps, and header spacing on the register page only
+   to keep everything visible in a single viewport on desktop. */
+.auth-form-pane {
+  padding: var(--space-6) var(--space-6);
+  overflow-y: auto;
+}
+
+.auth-brand {
+  margin-bottom: var(--space-2);
+}
+
+.auth-form-header {
+  margin-bottom: var(--space-3);
+}
+
+.auth-form {
+  gap: var(--space-3);
+}
+
+.auth-footnote {
+  margin-top: var(--space-3);
+}
+
+/* Tighter field labels and inputs */
+.auth-field {
+  gap: var(--space-1);
+}
+
+.auth-label {
+  font-size: var(--font-size-xs);
+}
+
+.auth-input {
+  padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) * 2 + 18px);
+}
+
+.auth-submit {
+  margin-top: var(--space-1);
+  padding: var(--space-3) var(--space-6);
+}
+
+/* ---------- Role selector ---------- */
+
+/* Fieldset reset so the legend + disabled state work correctly */
+.auth-role {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.auth-role[disabled] .auth-role-option {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.auth-role-options {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Each option card — styled as a selectable card, not a plain radio */
+.auth-role-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 130px;
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  background-color: var(--color-bg-primary);
+}
+
+.auth-role-option:hover {
+  border-color: var(--color-brand-primary);
+  background-color: rgba(79, 70, 229, 0.04);
+}
+
+.auth-role-option--active {
+  border-color: var(--color-brand-primary);
+  background-color: rgba(79, 70, 229, 0.08);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+/* Visually hide the native radio but keep it accessible */
+.auth-role-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.auth-role-icon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.auth-role-option--active .auth-role-icon {
+  color: var(--color-brand-primary);
+}
+
+.auth-role-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.auth-role-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.auth-role-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-normal);
+}
+
+/* ---------- Password strength hint ---------- */
+.auth-hint {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--space-1);
+  padding-left: 2px;
+}
+
+.auth-hint--weak  { color: var(--color-error); }
+.auth-hint--ok    { color: var(--color-warning, #d97706); }
+.auth-hint--strong { color: var(--color-success, #059669); }
+
+/* ---------- Responsive tweaks for the role cards ---------- */
+@media (max-width: 480px) {
+  .auth-role-options {
+    flex-direction: column;
+  }
+
+  .auth-role-option {
+    min-width: 0;
+  }
+}
+
+/* ---------- Tablet/mobile: register form pane padding ---------- */
+@media (max-width: 960px) {
+  .auth-form-pane {
+    padding: var(--space-6) var(--space-6);
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-form-pane {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .auth-footnote {
+    margin-top: var(--space-3);
+  }
+}
