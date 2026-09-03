@@ -15,4 +15,7 @@ module.exports = {
   nodeEnv: optional('NODE_ENV', 'development'),
   clientOrigin: optional('CLIENT_ORIGIN', 'http://localhost:5173'),
   mongoUri: required('MONGODB_URI'),
+  jwtSecret: required('JWT_SECRET'),
+  jwtExpiresIn: optional('JWT_EXPIRES_IN', '7d'),
+  bcryptRounds: parseInt(optional('BCRYPT_ROUNDS', '12'), 10),
 };
