@@ -41,20 +41,33 @@ export default function ProfilePage() {
             Profile
           </button>
           {user.role === 'recruiter' && (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === 'post'}
-              className={`profile-tab ${tab === 'post' ? 'active' : ''}`}
-              onClick={() => setTab('post')}
-            >
-              Post a job
-            </button>
+            <>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === 'post'}
+                className={`profile-tab ${tab === 'post' ? 'active' : ''}`}
+                onClick={() => setTab('post')}
+              >
+                Post a job
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === 'applications'}
+                className={`profile-tab ${tab === 'applications' ? 'active' : ''}`}
+                onClick={() => setTab('applications')}
+              >
+                Applications
+              </button>
+            </>
           )}
         </div>
 
         {tab === 'post' ? (
           <PostJobTab />
+        ) : tab === 'applications' ? (
+          <ApplicationsTab />
         ) : (
           <ProfileTab user={user} />
         )}
@@ -74,6 +87,7 @@ function ProfileTab({ user }) {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [success, setSuccess] = useState('');
   const [form, setForm] = useState({});
   const [draftLink, setDraftLink] = useState({ label: '', url: '' });
@@ -81,6 +95,7 @@ function ProfileTab({ user }) {
   const fetchProfile = useCallback(async () => {
     setLoading(true);
     setError('');
+    setFieldErrors({});
     try {
       const res = await apiGet('/profile');
       setProfile(res.data);
@@ -102,17 +117,42 @@ function ProfileTab({ user }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const isRecruiter = user.role === 'recruiter';
+
+  // Build a role-aware payload. Only fields valid for the current role are
+  // sent, so a stale recruiter field can never leak into a jobseeker save
+  // (and vice versa). Shared fields go for both roles.
+  const buildPayload = (data) => {
+    const shared = ['fullName', 'phone', 'location'];
+    const roleFields = isRecruiter
+      ? ['jobTitle', 'companyName', 'companyWebsite', 'companyDescription']
+      : ['headline', 'bio', 'skills', 'education', 'experience', 'links', 'resumeUrl', 'resumeName'];
+    const payload = {};
+    for (const key of [...shared, ...roleFields]) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        payload[key] = data[key];
+      }
+    }
+    return payload;
+  };
 
   const saveProfile = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError('');
+    setFieldErrors({});
     setSuccess('');
     try {
-      const payload = { ...form };
+      const payload = buildPayload(form);
       let saved;
       if (profile) {
         const res = await apiPatch('/profile', payload);
@@ -126,6 +166,9 @@ function ProfileTab({ user }) {
       setSuccess('Profile saved successfully.');
     } catch (err) {
       setError(err?.message || 'Unable to save your profile.');
+      if (err?.data?.fieldErrors) {
+        setFieldErrors(err.data.fieldErrors);
+      }
     } finally {
       setSaving(false);
     }
@@ -177,10 +220,14 @@ function ProfileTab({ user }) {
 
   const addLink = () => {
     if (!draftLink.label.trim() || !draftLink.url.trim()) {
-      setError('Enter a label and URL for the link.');
+      setFieldErrors((prev) => ({ ...prev, links: 'Enter a label and URL for the link.' }));
       return;
     }
-    setError('');
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next.links;
+      return next;
+    });
     const links = Array.isArray(form.links) ? form.links : [];
     setForm((prev) => ({ ...prev, links: [...links, { label: draftLink.label.trim(), url: draftLink.url.trim() }] }));
     setDraftLink({ label: '', url: '' });
@@ -196,6 +243,11 @@ function ProfileTab({ user }) {
   }
 
   const avatarSrc = form.avatarUrl ? `${AVATAR_BASE}${form.avatarUrl}` : null;
+
+  const fieldError = (name) =>
+    fieldErrors[name] ? (
+      <span className="profile-field-error" role="alert">{fieldErrors[name]}</span>
+    ) : null;
 
   return (
     <>
@@ -235,7 +287,7 @@ function ProfileTab({ user }) {
           </p>
         </div>
         {profile && (
-          <span className="badge badge-neutral">
+          <span className="badge badge-neutral profile-status-badge">
             {isRecruiter ? 'Recruiting' : 'Looking for work'}
           </span>
         )}
@@ -270,35 +322,52 @@ function ProfileTab({ user }) {
               <input
                 id="fullName"
                 name="fullName"
-                className="input"
+                className={`input ${fieldErrors.fullName ? 'input-error' : ''}`}
                 value={form.fullName || ''}
                 onChange={handleChange}
                 required
                 placeholder="Jane Doe"
               />
+              {fieldError('fullName')}
+            </div>
+            <div className="profile-field">
+              <label className="profile-label" htmlFor="account-email">Email <span aria-hidden="true">*</span></label>
+              <input
+                id="account-email"
+                name="email"
+                className="input"
+                value={user.email || ''}
+                readOnly
+                disabled
+                aria-describedby="account-email-hint"
+              />
+              <span className="profile-field-hint" id="account-email-hint">Your account email — managed in your login details.</span>
             </div>
             <div className="profile-field">
               <label className="profile-label" htmlFor="phone">Phone <span aria-hidden="true">*</span></label>
               <input
                 id="phone"
                 name="phone"
-                className="input"
+                className={`input ${fieldErrors.phone ? 'input-error' : ''}`}
                 value={form.phone || ''}
                 onChange={handleChange}
                 required
                 placeholder="+1 555 123 4567"
               />
+              {fieldError('phone')}
             </div>
             <div className="profile-field">
-              <label className="profile-label" htmlFor="location">Location</label>
+              <label className="profile-label" htmlFor="location">Location <span aria-hidden="true">*</span></label>
               <input
                 id="location"
                 name="location"
-                className="input"
+                className={`input ${fieldErrors.location ? 'input-error' : ''}`}
                 value={form.location || ''}
                 onChange={handleChange}
+                required
                 placeholder="San Francisco, CA"
               />
+              {fieldError('location')}
             </div>
           </div>
         </fieldset>
@@ -309,19 +378,23 @@ function ProfileTab({ user }) {
             <div className="profile-grid">
               <div className="profile-field">
                 <label className="profile-label" htmlFor="jobTitle">Job title</label>
-                <input id="jobTitle" name="jobTitle" className="input" value={form.jobTitle || ''} onChange={handleChange} placeholder="Talent Acquisition Lead" />
+                <input id="jobTitle" name="jobTitle" className={`input ${fieldErrors.jobTitle ? 'input-error' : ''}`} value={form.jobTitle || ''} onChange={handleChange} placeholder="Talent Acquisition Lead" />
+                {fieldError('jobTitle')}
               </div>
               <div className="profile-field">
                 <label className="profile-label" htmlFor="companyName">Company name</label>
-                <input id="companyName" name="companyName" className="input" value={form.companyName || ''} onChange={handleChange} placeholder="Acme Corp" />
+                <input id="companyName" name="companyName" className={`input ${fieldErrors.companyName ? 'input-error' : ''}`} value={form.companyName || ''} onChange={handleChange} placeholder="Acme Corp" />
+                {fieldError('companyName')}
               </div>
               <div className="profile-field">
                 <label className="profile-label" htmlFor="companyWebsite">Company website</label>
-                <input id="companyWebsite" name="companyWebsite" className="input" value={form.companyWebsite || ''} onChange={handleChange} placeholder="https://acme.com" />
+                <input id="companyWebsite" name="companyWebsite" className={`input ${fieldErrors.companyWebsite ? 'input-error' : ''}`} value={form.companyWebsite || ''} onChange={handleChange} placeholder="https://acme.com" />
+                {fieldError('companyWebsite')}
               </div>
               <div className="profile-field profile-field--full">
                 <label className="profile-label" htmlFor="companyDescription">Company description</label>
                 <textarea id="companyDescription" name="companyDescription" className="input profile-textarea" value={form.companyDescription || ''} onChange={handleChange} rows={4} placeholder="What does your company do?" />
+                {fieldError('companyDescription')}
               </div>
             </div>
           </fieldset>
@@ -332,25 +405,35 @@ function ProfileTab({ user }) {
               <div className="profile-grid">
                 <div className="profile-field profile-field--full">
                   <label className="profile-label" htmlFor="headline">Headline</label>
-                  <input id="headline" name="headline" className="input" value={form.headline || ''} onChange={handleChange} placeholder="Senior React Engineer" />
+                  <input id="headline" name="headline" className={`input ${fieldErrors.headline ? 'input-error' : ''}`} value={form.headline || ''} onChange={handleChange} placeholder="Senior React Engineer" />
+                  {fieldError('headline')}
                 </div>
                 <div className="profile-field profile-field--full">
                   <label className="profile-label" htmlFor="bio">Bio</label>
                   <textarea id="bio" name="bio" className="input profile-textarea" value={form.bio || ''} onChange={handleChange} rows={4} placeholder="A short summary of who you are and what you're looking for." />
+                  {fieldError('bio')}
                 </div>
                 <div className="profile-field profile-field--full">
                   <label className="profile-label" htmlFor="skills">Skills (comma separated)</label>
                   <input
                     id="skills"
                     name="skills"
-                    className="input"
+                    className={`input ${fieldErrors.skills ? 'input-error' : ''}`}
                     value={Array.isArray(form.skills) ? form.skills.join(', ') : ''}
                     onChange={(e) => {
                       const skills = e.target.value.split(',').map((s) => s.trim()).filter(Boolean);
                       setForm((prev) => ({ ...prev, skills }));
+                      if (fieldErrors.skills) {
+                        setFieldErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.skills;
+                          return next;
+                        });
+                      }
                     }}
                     placeholder="React, TypeScript, Next.js"
                   />
+                  {fieldError('skills')}
                 </div>
               </div>
             </fieldset>
@@ -371,6 +454,7 @@ function ProfileTab({ user }) {
                 <input className="input profile-link-input" placeholder="https://github.com/you" value={draftLink.url} onChange={(e) => setDraftLink((p) => ({ ...p, url: e.target.value }))} />
                 <button type="button" className="btn btn-secondary" onClick={addLink}>Add link</button>
               </div>
+              {fieldError('links')}
             </fieldset>
 
             <fieldset className="profile-fieldset">
@@ -416,9 +500,7 @@ function ProfileTab({ user }) {
               ) : (
                 <p className="profile-empty">No experience added yet.</p>
               )}
-              <Link to="/" className="btn btn-secondary btn-sm" style={{ marginTop: 'var(--space-3)' }}>
-                Edit experience
-              </Link>
+              {fieldError('experience')}
             </fieldset>
           </>
         )}
@@ -568,6 +650,107 @@ function PostJobTab() {
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+/* ======================================================================= */
+/* Applications tab — recruiter-only list of applicants for their own jobs  */
+/* ======================================================================= */
+function ApplicationsTab() {
+  const [applications, setApplications] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await apiGet('/applications/mine');
+        if (!cancelled) setApplications(res.data?.applications || []);
+      } catch (err) {
+        if (!cancelled) setError(err?.message || 'Unable to load your applications.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return <div className="app-loading" aria-busy="true" />;
+  }
+
+  const fmtDate = (dateStr) => {
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  return (
+    <div className="card profile-form">
+      <div className="profile-header">
+        <div className="profile-header-text">
+          <span className="section-eyebrow">Recruiter</span>
+          <h1 className="profile-title">Applications</h1>
+          <p className="profile-subtitle">Candidates who have applied to your posted jobs.</p>
+        </div>
+      </div>
+
+      {error && <div className="auth-alert auth-alert-error" role="alert"><span>{error}</span></div>}
+
+      {!error && applications.length === 0 && (
+        <div className="applications-empty">
+          <p className="profile-empty">No applications yet.</p>
+          <p className="profile-hint">
+            When jobseekers apply to the jobs you post, their applications will appear here.
+          </p>
+        </div>
+      )}
+
+      {applications.length > 0 && (
+        <div className="applications-list">
+          {applications.map((app) => (
+            <div className="application-card" key={app.id}>
+              <div className="application-applicant">
+                <div className="application-avatar" aria-hidden="true">
+                  {app.applicant?.avatarUrl ? (
+                    <img src={`${AVATAR_BASE}${app.applicant.avatarUrl}`} alt="" />
+                  ) : (
+                    (app.applicant?.fullName || 'A').charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className="application-applicant-info">
+                  <strong className="application-name">{app.applicant?.fullName || 'Applicant'}</strong>
+                  {app.applicant?.headline && (
+                    <span className="application-headline">{app.applicant.headline}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="application-job">
+                <span className="application-job-title">{app.job?.title || 'Job'}</span>
+                <span className="application-company">
+                  {app.job?.company}
+                  {app.job?.location ? ` · ${app.job.location}` : ''}
+                </span>
+              </div>
+
+              <div className="application-meta">
+                <span className="badge badge-neutral">Applied {fmtDate(app.createdAt)}</span>
+                <span className={`badge application-status application-status--${app.status}`}>
+                  {app.status}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

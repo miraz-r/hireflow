@@ -1,0 +1,221 @@
+/* =========================================================
+   AuthCarousel.css
+   Reuses all auth visual pane / mock / glow / grid styles
+   from LoginPage.css (which RegisterPage.css imports).
+   Adds only carousel-specific layout: stage (mockups),
+   viewport (text slides), controls (dots only).
+   ========================================================= */
+@import '../pages/LoginPage.css';
+
+/* ---------- Carousel root ----------
+   Two vertically-stacked regions:
+     1. .auth-carousel-stage  → decorative mock cards (top)
+     2. .auth-carousel-viewport → readable text + pagination (bottom)
+*/
+.auth-carousel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-8) var(--space-10);
+  background: linear-gradient(135deg, #1E1B4B 0%, #17153F 100%);
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  gap: var(--space-4);
+}
+
+/* ---------- Decorative mockups stage ----------
+   A defined region in the upper half of the panel where
+   floating cards live. Cards are absolutely positioned
+   inside this stage so they NEVER overlap the text area.
+*/
+.auth-carousel-stage {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  height: 200px;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* Re-base mock cards to live inside the stage.
+   We override the absolute positions that .auth-visual-pane
+   used so the cards sit in a dedicated upper region. */
+.auth-carousel-stage .auth-mock {
+  position: absolute;
+}
+
+.auth-carousel-stage .auth-mock--back {
+  top: 0;
+  right: var(--space-6);
+  width: 200px;
+  transform: rotate(-4deg);
+}
+
+.auth-carousel-stage .auth-mock--front {
+  top: 36px;
+  right: var(--space-12);
+  width: 230px;
+  transform: rotate(2deg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Slides viewport (text + pagination) ----------
+   Lower content area with its own reserved vertical space.
+   Text and dots live here. No overlap with the stage.
+*/
+.auth-carousel-viewport {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+}
+
+.auth-carousel-viewport:active {
+  cursor: grabbing;
+}
+
+.auth-carousel-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* The slide content has a guaranteed readable area below the mockups.
+   No right-padding hack — text spans the full width of the panel. */
+.auth-carousel-slide .auth-visual-content {
+  width: 100%;
+  margin-top: 0;
+  padding-top: 0;
+  padding-right: 0;
+}
+
+/* ---------- Controls row (dots only) ---------- */
+.auth-carousel-controls {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: var(--space-5);
+}
+
+/* ---------- Pagination dots ---------- */
+.auth-carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auth-carousel-dots .auth-pager-dot {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color var(--transition-base),
+              width var(--transition-base);
+}
+
+.auth-carousel-dots .auth-pager-dot--active {
+  background: rgba(255, 255, 255, 0.85);
+  width: 32px;
+}
+
+.auth-carousel-dots .auth-pager-dot:hover:not(.auth-pager-dot--active) {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.auth-carousel-dots .auth-pager-dot:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+/* ---------- Screen-reader only label ---------- */
+.auth-carousel-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .auth-carousel-track {
+    transition: none;
+  }
+
+  .auth-carousel-dots .auth-pager-dot {
+    transition: none;
+  }
+}
+
+/* ---------- Tablet / mobile ---------- */
+@media (max-width: 960px) {
+  .auth-carousel {
+    padding: var(--space-6) var(--space-8);
+  }
+
+  .auth-carousel-stage {
+    height: 160px;
+  }
+
+  .auth-carousel-stage .auth-mock--back {
+    width: 150px;
+    right: var(--space-4);
+  }
+
+  .auth-carousel-stage .auth-mock--front {
+    width: 180px;
+    right: var(--space-8);
+    top: 24px;
+  }
+
+  .auth-carousel-controls {
+    padding-top: var(--space-4);
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-carousel {
+    padding: var(--space-5);
+  }
+
+  .auth-carousel-stage {
+    height: 130px;
+  }
+
+  .auth-carousel-stage .auth-mock--back {
+    width: 120px;
+    right: var(--space-3);
+  }
+
+  .auth-carousel-stage .auth-mock--front {
+    width: 150px;
+    right: var(--space-5);
+    top: 20px;
+  }
+}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchJobById } from '../utils/jobsApi';
+import api from '../utils/api';
 import './JobDetailPage.css';
 
 const formatSalary = (salary) => {
@@ -20,6 +21,21 @@ export default function JobDetailPage() {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applied, setApplied] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [applyError, setApplyError] = useState('');
+
+  const isJobseeker = user?.role === 'jobseeker';
+
+  // Return to the job list reliably. Prefer browser history when it points
+  // back to a job list (homepage), otherwise fall back to the homepage.
+  const handleBack = () => {
+    if (window.history.length > 1 && window.history.state?.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +52,33 @@ export default function JobDetailPage() {
       cancelled = true;
     };
   }, [id, navigate]);
+
+  // Restore the applied state from the backend after a refresh (jobseeker only).
+  useEffect(() => {
+    if (!job?.id) return;
+    setApplyError('');
+    if (!user || user.role !== 'jobseeker') {
+      setApplied(false);
+      setCheckingStatus(false);
+      return;
+    }
+    let cancelled = false;
+    setCheckingStatus(true);
+    api
+      .get(`/applications/${job.id}/me`, { timeout: 4000 })
+      .then((res) => {
+        if (!cancelled) setApplied(!!res.data?.applied);
+      })
+      .catch(() => {
+        if (!cancelled) setApplied(false);
+      })
+      .finally(() => {
+        if (!cancelled) setCheckingStatus(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [job?.id, user]);
 
   if (loading) {
     return (
@@ -54,25 +97,50 @@ export default function JobDetailPage() {
           <div className="card job-detail-empty">
             <h1>Job not found</h1>
             <p>The job you're looking for doesn't exist or was removed.</p>
-            <Link to="/" className="btn btn-primary">Back to jobs</Link>
+            <button onClick={handleBack} className="btn btn-primary">Back to jobs</button>
           </div>
         </div>
       </div>
     );
   }
 
-  const handleApply = () => {
+  const handleApply = async () => {
+    if (applied || submitting || checkingStatus) return;
     if (!user) {
       navigate('/login');
       return;
     }
-    setApplied(true);
+    if (!isJobseeker) return;
+
+    setApplyError('');
+    setSubmitting(true);
+    try {
+      await api.post('/applications', { jobId: job.id }, { timeout: 8000 });
+      setApplied(true);
+    } catch (err) {
+      if (err.status === 409) {
+        // Already applied server-side (e.g. an earlier tab or a race).
+        setApplied(true);
+      } else {
+        setApplyError(err?.message || 'Unable to submit your application. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  let buttonLabel = 'Apply now';
+  if (applied) buttonLabel = '✓ Applied';
+  else if (submitting) buttonLabel = 'Applying…';
+  else if (!user) buttonLabel = 'Sign in to apply';
+  else if (!isJobseeker) buttonLabel = "Recruiters can't apply";
+
+  const buttonDisabled = applied || submitting || checkingStatus || (!!user && !isJobseeker);
 
   return (
     <div className="job-detail-page">
       <div className="container">
-        <Link to="/" className="job-detail-back">← Back to all jobs</Link>
+        <button onClick={handleBack} className="job-detail-back">← Back to all jobs</button>
 
         <div className="job-detail-layout">
           <div className="job-detail-main">
@@ -127,12 +195,27 @@ export default function JobDetailPage() {
               <button
                 className={`btn btn-primary btn-lg job-detail-apply ${applied ? 'applied' : ''}`}
                 onClick={handleApply}
+                disabled={buttonDisabled}
+                aria-busy={submitting}
               >
-                {applied ? '✓ Applied' : user ? 'Apply now' : 'Sign in to apply'}
+                {buttonLabel}
               </button>
+
               {applied && (
                 <p className="job-detail-applied-note">
                   Your application has been submitted. Good luck!
+                </p>
+              )}
+
+              {applyError && (
+                <p className="job-detail-apply-error" role="alert">
+                  {applyError}
+                </p>
+              )}
+
+              {!!user && !isJobseeker && !applied && (
+                <p className="job-detail-apply-hint">
+                  You're signed in as a recruiter. Switch to a jobseeker account to apply.
                 </p>
               )}
             </div>

@@ -89,6 +89,14 @@ const jobSchema = new mongoose.Schema(
       maxlength: 40,
       default: '',
     },
+
+    // The recruiter who posted this job. Set server-side from the auth token on
+    // creation; owners can later manage their own jobs and see applicants.
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
   },
   { timestamps: true }
 );

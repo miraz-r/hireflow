@@ -115,6 +115,25 @@
   transition: all var(--transition-fast);
 }
 
+.footer-social .footer-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--color-text-secondary);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.footer-social .footer-social-btn:hover {
+  color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-light);
+  border-color: rgba(79, 70, 229, 0.20);
+}
+
 .footer-social a:hover {
   color: var(--color-brand-primary);
   background-color: var(--color-brand-primary-light);

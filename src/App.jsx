@@ -19,6 +19,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import JobDetailPage from './pages/JobDetailPage';
+import InfoPage from './pages/InfoPage';
 import './App.css';
 
 export default function App() {
@@ -31,6 +32,8 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   // Load jobs from the API (falls back to mock data if the backend is down).
   useEffect(() => {
@@ -73,15 +76,18 @@ export default function App() {
     setSearchQuery(query);
     setLocationQuery(location);
     setActiveCategory(null);
+    setCurrentPage(1);
   }, []);
 
   // Real-time search updates - single source of truth for the query
   const handleQueryChange = useCallback((query) => {
     setSearchQuery(query);
+    setCurrentPage(1);
   }, []);
 
   const handleLocationChange = useCallback((location) => {
     setLocationQuery(location);
+    setCurrentPage(1);
   }, []);
 
   const handleFilterChange = useCallback((name, value) => {
@@ -91,11 +97,13 @@ export default function App() {
       const isSame = JSON.stringify(current) === JSON.stringify(value);
       return { ...prev, [name]: isSame ? null : value };
     });
+    setCurrentPage(1);
   }, []);
 
   const handleCategorySelect = useCallback((name) => {
     setActiveCategory(prev => prev === name ? null : name);
     setSearchQuery('');
+    setCurrentPage(1);
   }, []);
 
   const handleSaveJob = useCallback((id) => {
@@ -110,9 +118,21 @@ export default function App() {
   const clearFilters = useCallback(() => {
     setFilters({ workType: null, employmentType: null, experienceLevel: null, salary: null });
     setActiveCategory(null);
+    setCurrentPage(1);
   }, []);
 
   const hasActiveFilters = filters.workType || filters.employmentType || filters.experienceLevel || filters.salary || activeCategory;
+
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedJobs = useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE;
+    return filteredJobs.slice(start, start + PAGE_SIZE);
+  }, [filteredJobs, safePage]);
+
+  const goToPage = useCallback((page) => {
+    setCurrentPage(Math.min(Math.max(1, page), totalPages));
+  }, [totalPages]);
 
   // Wait for the AuthProvider to finish restoring the session before
   // rendering the rest of the app, so we don't briefly flash an
@@ -135,6 +155,10 @@ export default function App() {
               activeCategory={activeCategory}
               hasActiveFilters={hasActiveFilters}
               filteredJobs={filteredJobs}
+              paginatedJobs={paginatedJobs}
+              currentPage={safePage}
+              totalPages={totalPages}
+              onPageChange={goToPage}
               onSearch={handleSearch}
               onQueryChange={handleQueryChange}
               onLocationChange={handleLocationChange}
@@ -148,6 +172,21 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/jobs/:id" element={<JobDetailPage />} />
+          <Route path="/resources" element={<InfoPage />} />
+          <Route path="/salary-guide" element={<InfoPage />} />
+          <Route path="/saved-jobs" element={<InfoPage />} />
+          <Route path="/career-advice" element={<InfoPage />} />
+          <Route path="/pricing" element={<InfoPage />} />
+          <Route path="/talent-search" element={<InfoPage />} />
+          <Route path="/solutions" element={<InfoPage />} />
+          <Route path="/about" element={<InfoPage />} />
+          <Route path="/blog" element={<InfoPage />} />
+          <Route path="/careers" element={<InfoPage />} />
+          <Route path="/press" element={<InfoPage />} />
+          <Route path="/privacy" element={<InfoPage />} />
+          <Route path="/terms" element={<InfoPage />} />
+          <Route path="/cookie-policy" element={<InfoPage />} />
+          <Route path="/accessibility" element={<InfoPage />} />
         </Routes>
       </main>
       <Footer />
@@ -157,7 +196,7 @@ export default function App() {
 }
 function HomePage({
   searchQuery, locationQuery, filters, savedJobs, activeCategory,
-  hasActiveFilters, filteredJobs,
+  hasActiveFilters, filteredJobs, paginatedJobs, currentPage, totalPages, onPageChange,
   onSearch, onQueryChange, onLocationChange,
   onFilterChange, onCategorySelect, onSaveJob, onClearFilters,
 }) {
@@ -195,7 +234,47 @@ function HomePage({
                   <span className="results-count">{filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} found</span>
                 </div>
                 {filteredJobs.length > 0 ? (
-                  <div className="jobs-grid">{filteredJobs.map(job => (<JobCard key={job.id} job={job} isSaved={savedJobs.has(job.id)} onSave={() => onSaveJob(job.id)} />))}</div>
+                  <>
+                    <div className="jobs-grid">{paginatedJobs.map(job => (<JobCard key={job.id} job={job} isSaved={savedJobs.has(job.id)} onSave={() => onSaveJob(job.id)} />))}</div>
+                    {totalPages > 1 && (
+                      <nav className="pagination" aria-label="Job list pagination">
+                        <button
+                          type="button"
+                          className="pagination-btn"
+                          onClick={() => onPageChange(currentPage - 1)}
+                          disabled={currentPage <= 1}
+                          aria-label="Previous page"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                          <span>Previous</span>
+                        </button>
+                        <div className="pagination-pages">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <button
+                              key={page}
+                              type="button"
+                              className={`pagination-page ${page === currentPage ? 'active' : ''}`}
+                              onClick={() => onPageChange(page)}
+                              aria-label={`Page ${page}`}
+                              aria-current={page === currentPage ? 'page' : undefined}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          className="pagination-btn"
+                          onClick={() => onPageChange(currentPage + 1)}
+                          disabled={currentPage >= totalPages}
+                          aria-label="Next page"
+                        >
+                          <span>Next</span>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </nav>
+                    )}
+                  </>
                 ) : (
                   <div className="empty-state">
                     <div className="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>

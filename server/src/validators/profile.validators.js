@@ -228,19 +228,62 @@ const createOrReplaceValidators = (role) =>
       .trim()
       .matches(/^[+0-9()\-\s]{6,32}$/)
       .withMessage('Invalid phone format'),
+    body('location')
+      .exists({ values: 'falsy' })
+      .withMessage('location is required')
+      .isString()
+      .trim()
+      .isLength({ max: 160 })
+      .withMessage('location cannot exceed 160 characters'),
   ]);
 
-/** Chain for PATCH (partial update) — all fields optional. */
-const patchValidators = (role) => buildRoleChain(role);
+/** Chain for PATCH (partial update) — all fields optional, but the profile's
+ * required shared details (fullName, phone, location) stay required so a
+ * profile is never persisted without them. */
+const patchValidators = (role) =>
+  buildRoleChain(role).concat([
+    body('fullName')
+      .exists({ values: 'falsy' })
+      .withMessage('fullName is required')
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 120 })
+      .withMessage('fullName must be 1-120 characters'),
+    body('phone')
+      .exists({ values: 'falsy' })
+      .withMessage('phone is required')
+      .isString()
+      .trim()
+      .matches(/^[+0-9()\-\s]{6,32}$/)
+      .withMessage('Invalid phone format'),
+    body('location')
+      .exists({ values: 'falsy' })
+      .withMessage('location is required')
+      .isString()
+      .trim()
+      .isLength({ max: 160 })
+      .withMessage('location cannot exceed 160 characters'),
+  ]);
 
 /**
- * Middleware-style runner — collects express-validator errors and returns the
- * first one as a 400 (mirroring the auth controller's convention).
+ * Middleware-style runner — collects express-validator errors and returns them
+ * as a 400 with both a human-readable `error` summary and a structured
+ * `fieldErrors` map (`{ field: message }`) so the client can place each error
+ * under the relevant form field.
  */
 const runValidation = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ error: errors.array()[0].msg });
+    const fieldErrors = {};
+    for (const err of errors.array()) {
+      if (err.path && !(err.path in fieldErrors)) {
+        fieldErrors[err.path] = err.msg;
+      }
+    }
+    return res.status(400).json({
+      error: errors.array()[0].msg,
+      fieldErrors,
+    });
   }
   return next();
 };

@@ -1,6 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import './CTA.css';
 
 export default function CTA() {
+  const navigate = useNavigate();
+
+  const handleBrowse = () => {
+    const el = document.getElementById('jobs');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    else navigate('/');
+  };
+
   return (
     <section className="cta-section" id="cta">
       <div className="container">
@@ -11,8 +20,8 @@ export default function CTA() {
               Join thousands of professionals who have discovered better career paths through HireFlow.
             </p>
             <div className="cta-actions">
-              <button className="btn btn-primary btn-lg">Create free account</button>
-              <button className="btn btn-secondary btn-lg">Browse jobs</button>
+              <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>Create free account</button>
+              <button className="btn btn-secondary btn-lg" onClick={handleBrowse}>Browse jobs</button>
             </div>
           </div>
           <div className="cta-decoration" aria-hidden="true">

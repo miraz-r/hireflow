@@ -1,7 +1,45 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import AuthCarousel from '../components/AuthCarousel';
+import { PEOPLE_ICON, TRACK_ICON, SHIELD_ICON, ZAP_ICON } from '../constants/authIcons';
 import './LoginPage.css';
+
+/* ---------- Carousel slide data ---------- */
+const LOGIN_SLIDES = [
+  {
+    id: 'hiring',
+    badge: 'Hiring made simple',
+    badgeIcon: PEOPLE_ICON,
+    title: 'The smarter way to connect talent with opportunity',
+    subtitle:
+      'HireFlow brings candidates, employers, and recruiters into one polished workspace — so the right people find each other, faster.',
+  },
+  {
+    id: 'track',
+    badge: 'Real-time updates',
+    badgeIcon: TRACK_ICON,
+    title: 'Track every application in one place',
+    subtitle:
+      'From submitted to interviewed — get live status updates and never lose track of an opportunity again.',
+  },
+  {
+    id: 'secure',
+    badge: 'Privacy-first',
+    badgeIcon: SHIELD_ICON,
+    title: 'Your data stays yours',
+    subtitle:
+      "We only share what you choose to share. Your profile, resume, and communications are encrypted and under your control.",
+  },
+  {
+    id: 'fast',
+    badge: 'Lightning fast',
+    badgeIcon: ZAP_ICON,
+    title: 'From search to applied in seconds',
+    subtitle:
+      'One-click apply, smart suggestions, and personalized dashboards mean less time applying and more time interviewing.',
+  },
+];
 
 /**
  * LoginPage
@@ -234,90 +272,9 @@ export default function LoginPage() {
           </p>
         </section>
 
-        {/* ---------- RIGHT: HireFlow branding / visual panel ---------- */}
-        <aside className="auth-visual-pane" aria-hidden="true">
-          <div className="auth-visual-grid" />
-          <div className="auth-visual-glow auth-visual-glow--top" />
-          <div className="auth-visual-glow auth-visual-glow--bottom" />
-
-          {/* Decorative floating "job card" mockups - pure CSS */}
-          <div className="auth-mock auth-mock--back">
-            <div className="auth-mock-header">
-              <div className="auth-mock-avatar auth-mock-avatar--indigo" />
-              <div className="auth-mock-lines">
-                <span className="auth-mock-line auth-mock-line--lg" />
-                <span className="auth-mock-line auth-mock-line--sm" />
-              </div>
-            </div>
-            <div className="auth-mock-tags">
-              <span className="auth-mock-tag" />
-              <span className="auth-mock-tag auth-mock-tag--short" />
-              <span className="auth-mock-tag" />
-            </div>
-            <div className="auth-mock-bar">
-              <span className="auth-mock-bar-fill auth-mock-bar-fill--teal" />
-            </div>
-          </div>
-
-          <div className="auth-mock auth-mock--front">
-            <div className="auth-mock-header">
-              <div className="auth-mock-avatar auth-mock-avatar--teal" />
-              <div className="auth-mock-lines">
-                <span className="auth-mock-line auth-mock-line--lg" />
-                <span className="auth-mock-line auth-mock-line--md" />
-              </div>
-              <span className="auth-mock-badge">New</span>
-            </div>
-            <div className="auth-mock-meta">
-              <span className="auth-mock-meta-item" />
-              <span className="auth-mock-meta-item auth-mock-meta-item--short" />
-            </div>
-            <div className="auth-mock-tags">
-              <span className="auth-mock-tag" />
-              <span className="auth-mock-tag auth-mock-tag--short" />
-            </div>
-            <div className="auth-mock-bar">
-              <span className="auth-mock-bar-fill auth-mock-bar-fill--indigo" />
-            </div>
-          </div>
-
-          <div className="auth-visual-content">
-            <div className="auth-visual-badge">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-              <span>Hiring made simple</span>
-            </div>
-            <h2 className="auth-visual-title">
-              The smarter way to connect talent with opportunity
-            </h2>
-            <p className="auth-visual-subtitle">
-              HireFlow brings candidates, employers, and recruiters into one polished workspace
-              {'—'} so the right people find each other, faster.
-            </p>
-          </div>
-
-          {/* Pager-style dots (purely decorative) */}
-          <div className="auth-visual-pager" aria-hidden="true">
-            <span className="auth-pager-dot auth-pager-dot--active" />
-            <span className="auth-pager-dot" />
-            <span className="auth-pager-dot" />
-            <span className="auth-pager-dot" />
-            <span className="auth-pager-dot" />
-          </div>
+        {/* ---------- RIGHT: HireFlow branding / product story carousel ---------- */}
+        <aside className="auth-visual-pane">
+          <AuthCarousel slides={LOGIN_SLIDES} />
         </aside>
       </div>
     </div>

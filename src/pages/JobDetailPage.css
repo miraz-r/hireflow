@@ -9,7 +9,13 @@
   gap: var(--space-2);
   color: var(--color-text-secondary);
   font-weight: 500;
+  font-family: inherit;
+  font-size: inherit;
   text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   margin-bottom: var(--space-6);
   transition: color 0.2s ease;
 }
@@ -148,6 +154,20 @@
 .job-detail-applied-note {
   margin: var(--space-3) 0 0;
   color: var(--color-brand-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.job-detail-apply-error {
+  margin: var(--space-3) 0 0;
+  color: var(--color-error);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.job-detail-apply-hint {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-tertiary);
   font-size: 0.875rem;
   text-align: center;
 }

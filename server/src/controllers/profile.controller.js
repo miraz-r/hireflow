@@ -35,6 +35,18 @@ const ALLOWED_FIELDS = [
   'companyDescription',
 ];
 
+// Format a Mongoose ValidationError into a fieldErrors map for the client.
+const validationFieldErrors = (err) => {
+  const fieldErrors = {};
+  if (err && err.name === 'ValidationError' && err.errors) {
+    for (const key of Object.keys(err.errors)) {
+      const base = key.split('.')[0];
+      if (!(base in fieldErrors)) fieldErrors[base] = err.errors[key].message;
+    }
+  }
+  return fieldErrors;
+};
+
 /**
  * Build a clean document payload from req.body.
  * - Drops unknown fields (defense in depth: we never write what we don't know).
@@ -155,14 +167,11 @@ const createMyProfile = async (req, res, next) => {
         return res.status(409).json({ error: 'Profile already exists' });
       }
       if (err.name === 'ValidationError' || err.status === 400) {
-        return res.status(400).json({ error: err.message });
+        return res.status(400).json({ error: err.message, fieldErrors: validationFieldErrors(err) });
       }
       return next(err);
     }
   } catch (err) {
-    if (err.status === 400) {
-      return res.status(400).json({ error: err.message });
-    }
     return next(err);
   }
 };
@@ -187,7 +196,7 @@ const updateMyProfile = async (req, res, next) => {
     return res.status(200).json(formatProfile(updated));
   } catch (err) {
     if (err.name === 'ValidationError' || err.status === 400) {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: err.message, fieldErrors: validationFieldErrors(err) });
     }
     return next(err);
   }
@@ -213,7 +222,7 @@ const patchMyProfile = async (req, res, next) => {
     return res.status(200).json(formatProfile(updated));
   } catch (err) {
     if (err.name === 'ValidationError' || err.status === 400) {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: err.message, fieldErrors: validationFieldErrors(err) });
     }
     return next(err);
   }

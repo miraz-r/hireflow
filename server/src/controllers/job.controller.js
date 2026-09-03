@@ -95,6 +95,8 @@ const getJob = async (req, res, next) => {
 const createJob = async (req, res, next) => {
   try {
     const payload = pickFields(req.body);
+    // Ownership is derived from the auth token, never from the client body.
+    payload.postedBy = req.user.id;
     const job = await Job.create(payload);
     return res.status(201).json(job);
   } catch (err) {

@@ -170,6 +170,11 @@
   background-color: var(--color-bg-tertiary);
 }
 
+.logout-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .profile-link {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);

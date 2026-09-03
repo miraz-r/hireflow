@@ -24,6 +24,8 @@
 
 .profile-header-text {
   max-width: 640px;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .profile-title {
@@ -49,10 +51,10 @@
 }
 
 .profile-form {
-  padding: var(--space-8);
+  padding: var(--space-10);
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-8);
 }
 
 .profile-fieldset {
@@ -60,23 +62,29 @@
   padding: 0;
   margin: 0;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 .profile-fieldset-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-4);
-  display: block;
+  margin: 0 0 var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   width: 100%;
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--color-border-default);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .profile-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 .profile-grid .profile-field--full {
@@ -91,17 +99,63 @@
 
 .profile-label {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
+  letter-spacing: 0.01em;
 }
 
 .profile-label span {
   color: var(--color-brand-primary);
 }
 
+/* ---------- Field-level validation ---------- */
+.input-error {
+  border-color: var(--color-error) !important;
+}
+
+.profile-field-error {
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  line-height: var(--line-height-normal);
+  margin-top: -4px;
+}
+
+.profile-field-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-normal);
+  margin-top: -4px;
+}
+
+/* ---------- Status badge (header) ---------- */
+.profile-status-badge {
+  white-space: normal;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1.4;
+  padding: var(--space-2) var(--space-3);
+}
+
 .profile-textarea {
   resize: vertical;
   min-height: 90px;
+}
+
+/* Selects render the full selected value without clipping */
+.profile-form select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234B5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  padding-right: var(--space-10);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-link-add {
+  flex-wrap: wrap;
 }
 
 .profile-list {
@@ -136,8 +190,11 @@
 .profile-actions {
   display: flex;
   justify-content: flex-end;
-  padding-top: var(--space-4);
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-6);
   border-top: 1px solid var(--color-border-default);
+  flex-wrap: wrap;
 }
 
 /* ---------- Alerts (self-contained, mirrors LoginPage) ---------- */
@@ -304,10 +361,12 @@
   display: flex;
   gap: var(--space-2);
   margin-top: var(--space-3);
+  flex-wrap: wrap;
 }
 
 .profile-link-input {
-  flex: 1;
+  flex: 1 1 200px;
+  min-width: 160px;
 }
 
 /* ---------- Resume upload ---------- */
@@ -353,6 +412,119 @@ label.btn.disabled {
   pointer-events: none;
 }
 
+/* ---------- Applications (recruiter) ---------- */
+.applications-empty {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+}
+
+.applications-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.application-card {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-secondary);
+}
+
+.application-applicant {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.application-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  overflow: hidden;
+}
+
+.application-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.application-applicant-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.application-name {
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.application-headline {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.application-job {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.application-job-title {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.application-company {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.application-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.application-status {
+  text-transform: capitalize;
+}
+
+.application-status--applied { background-color: var(--color-brand-primary-light); color: var(--color-brand-primary); }
+.application-status--under-review { background-color: var(--color-bg-tertiary); color: var(--color-text-primary); }
+.application-status--interview { background-color: var(--color-brand-secondary-light); color: var(--color-brand-secondary); }
+.application-status--offer { background-color: var(--color-success-bg, #ecfdf5); color: #065f46; }
+.application-status--hired { background-color: var(--color-brand-secondary); color: #fff; }
+.application-status--rejected { background-color: var(--color-error-bg); color: #991b1b; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
   .profile-page {
@@ -369,5 +541,16 @@ label.btn.disabled {
 
   .profile-grid .profile-field--full {
     grid-column: auto;
+  }
+
+  .application-card {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .application-meta {
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
