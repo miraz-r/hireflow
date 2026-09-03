@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const Profile = require('../models/Profile');
 const env = require('../config/env');
 
 const registerValidators = [
@@ -21,6 +22,18 @@ const registerValidators = [
   body('role')
     .isIn(['jobseeker', 'recruiter'])
     .withMessage('Role must be jobseeker or recruiter'),
+  body('fullName')
+    .isString()
+    .withMessage('Full name is required')
+    .trim()
+    .isLength({ min: 1, max: 120 })
+    .withMessage('Full name must be 1-120 characters'),
+  body('phone')
+    .isString()
+    .withMessage('Phone is required')
+    .trim()
+    .matches(/^[+0-9()\-\s]{6,32}$/)
+    .withMessage('Invalid phone format'),
 ];
 
 const register = async (req, res, next) => {
@@ -29,11 +42,27 @@ const register = async (req, res, next) => {
     return res.status(400).json({ error: errors.array()[0].msg });
   }
 
-  const { email, password, role } = req.body;
+  const { email, password, role, fullName, phone } = req.body;
 
   try {
     const passwordHash = await bcrypt.hash(password, env.bcryptRounds);
     const user = await User.create({ email, passwordHash, role });
+
+    try {
+      await Profile.create({
+        userId: user._id,
+        role: user.role,
+        fullName,
+        phone,
+      });
+    } catch (profileErr) {
+      // Roll back the User so registration does not leave an orphan.
+      await User.findByIdAndDelete(user._id).catch(() => {});
+      if (profileErr.code === 11000) {
+        return res.status(409).json({ error: 'Profile already exists for this user' });
+      }
+      return next(profileErr);
+    }
 
     return res.status(201).json({
       user: {

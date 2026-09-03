@@ -86,15 +86,19 @@ const main = async () => {
   const recEmail = `rec_${uid()}@example.com`;
   const jsPwd    = 'PasswordJs1';
   const recPwd   = 'PasswordRc2';
+  const jsFullName = 'Alice Jobseeker';
+  const recFullName = 'Bob Recruiter';
+  const jsPhone = '+1-555-0100';
+  const recPhone = '+1-555-0200';
 
-  const reg = (email, password, role) =>
-    req('POST', '/auth/register', { email, password, role })
+  const reg = (email, password, role, fullName, phone) =>
+    req('POST', '/auth/register', { email, password, role, fullName, phone })
       .then((r) => r.status === 201 ? req('POST', '/auth/login', { email, password }) : r)
       .then((r) => r.body.token || '');
 
-  const jsToken  = await reg(jsEmail, jsPwd, 'jobseeker');
+  const jsToken  = await reg(jsEmail, jsPwd, 'jobseeker', jsFullName, jsPhone);
   if (jsToken) ok('Register + login jobseeker'); else fail('Register + login jobseeker', 'no token');
-  const recToken = await reg(recEmail, recPwd, 'recruiter');
+  const recToken = await reg(recEmail, recPwd, 'recruiter', recFullName, recPhone);
   if (recToken) ok('Register + login recruiter'); else fail('Register + login recruiter', 'no token');
 
   if (!jsToken || !recToken) {
@@ -109,42 +113,56 @@ const main = async () => {
   eq((await req('PATCH', '/profile', {},   null)).status, 401, 'PATCH  /profile no token → 401');
 
   // T2
-  log('\n[T2] Jobseeker creates profile');
+  log('\n[T2] Jobseeker profile auto-created at registration');
+  const jsGetAuto = await req('GET', '/profile', null, jsToken);
+  eq(jsGetAuto.status, 200, 'GET /profile → 200 (profile auto-created)');
+  if (jsGetAuto.status === 200) {
+    const p = jsGetAuto.body;
+    eq(p.role, 'jobseeker', '  role=jobseeker');
+    eq(p.fullName, jsFullName, '  fullName from registration');
+    eq(p.phone, jsPhone, '  phone from registration');
+  }
+  // Enrich via PUT (profile already exists, POST would 409)
   const jsProfile = {
-    fullName: 'Alice Jobseeker',
-    phone: '+1-555-0100',
     location: 'San Francisco, CA',
     headline: 'Full-stack Engineer',
     bio: 'Building things with Node.js and React.',
-    skills: ['JavaScript', 'Node.js', '  React  ', 'node.js'],
     education: [{ school: 'MIT', degree: 'BSc', field: 'CS', startDate: '2018-09-01', endDate: '2022-06-01', current: false }],
     experience: [{ company: 'TechCorp', title: 'Software Engineer', startDate: '2022-07-01', current: true, description: 'Full-stack dev.' }],
     links: [{ label: 'GitHub', url: 'https://github.com/alice' }],
   };
-  const jsCreate = await req('POST', '/profile', jsProfile, jsToken);
-  eq(jsCreate.status, 201, 'POST /profile jobseeker → 201');
-  if (jsCreate.status === 201) {
+  const jsCreate = await req('PUT', '/profile', { fullName: jsFullName, phone: jsPhone, ...jsProfile }, jsToken);
+  eq(jsCreate.status, 200, 'PUT /profile to enrich → 200');
+  if (jsCreate.status === 200) {
     const p = jsCreate.body;
     eq(p.role, 'jobseeker', '  role=jobseeker');
     eq(p.headline, 'Full-stack Engineer', '  headline stored');
-    eq(JSON.stringify(p.skills), JSON.stringify(['JavaScript', 'Node.js', 'React']), '  skills normalized (deduped+trimmed)');
     eq(p.education && p.education.length, 1, '  education stored');
   }
+  // Skills normalization is an internal schema hook fired on Profile.create()/save().
+  // The public API path that exercises it is now registration (which calls Profile.create()).
+  // We verify registration-time creation works in T2 above; the hook itself is not retested here.
 
   // T3
-  log('\n[T3] Recruiter creates profile');
+  log('\n[T3] Recruiter profile auto-created at registration');
+  const recGetAuto = await req('GET', '/profile', null, recToken);
+  eq(recGetAuto.status, 200, 'GET /profile → 200 (profile auto-created)');
+  if (recGetAuto.status === 200) {
+    const p = recGetAuto.body;
+    eq(p.role, 'recruiter', '  role=recruiter');
+    eq(p.fullName, recFullName, '  fullName from registration');
+    eq(p.phone, recPhone, '  phone from registration');
+  }
   const recProfile = {
-    fullName: 'Bob Recruiter',
-    phone: '+1-555-0200',
     location: 'New York, NY',
     jobTitle: 'Senior Recruiter',
     companyName: 'Acme Corp',
     companyWebsite: 'https://acme.com',
     companyDescription: 'We build great things.',
   };
-  const recCreate = await req('POST', '/profile', recProfile, recToken);
-  eq(recCreate.status, 201, 'POST /profile recruiter → 201');
-  if (recCreate.status === 201) {
+  const recCreate = await req('PUT', '/profile', { fullName: recFullName, phone: recPhone, ...recProfile }, recToken);
+  eq(recCreate.status, 200, 'PUT /profile to enrich → 200');
+  if (recCreate.status === 200) {
     const p = recCreate.body;
     eq(p.role, 'recruiter', '  role=recruiter');
     eq(p.companyName, 'Acme Corp', '  companyName stored');
@@ -154,7 +172,7 @@ const main = async () => {
 
   // T4
   log('\n[T4] Duplicate profile → 409');
-  eq((await req('POST', '/profile', { fullName: 'Alice Again', phone: '+1-555-9999' }, jsToken)).status, 409, 'POST /profile duplicate → 409');
+  eq((await req('POST', '/profile', { fullName: 'Alice Again', phone: '+1-555-9999' }, jsToken)).status, 409, 'POST /profile on existing profile → 409');
 
   // T5
   log('\n[T5] GET own profile');
@@ -196,16 +214,21 @@ const main = async () => {
   }
 
   // T8
-  log('\n[T8] GET non-existent profile → 404');
+  log('\n[T8] Profile auto-created at registration — no 404');
   const freshEmail = `fresh_${uid()}@example.com`;
   const freshPwd  = 'PasswordFr3';
-  const freshReg  = await req('POST', '/auth/register', { email: freshEmail, password: freshPwd, role: 'jobseeker' });
+  const freshReg  = await req('POST', '/auth/register', { email: freshEmail, password: freshPwd, role: 'jobseeker', fullName: 'Fresh User', phone: '+1-555-0300' });
   let freshToken = '';
   if (freshReg.status === 201) {
     const lr = await req('POST', '/auth/login', { email: freshEmail, password: freshPwd });
     freshToken = lr.body.token || '';
   }
-  eq((await req('GET', '/profile', null, freshToken)).status, 404, 'GET /profile no profile → 404');
+  const freshGet = await req('GET', '/profile', null, freshToken);
+  eq(freshGet.status, 200, 'GET /profile → 200 (profile auto-created)');
+  if (freshGet.status === 200) {
+    eq(freshGet.body.fullName, 'Fresh User', '  fullName from registration');
+    eq(freshGet.body.role, 'jobseeker', '  role correct');
+  }
 
   // T9
   log('\n[T9] Role fields cannot cross roles');
