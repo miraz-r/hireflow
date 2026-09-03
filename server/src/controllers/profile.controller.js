@@ -1,4 +1,5 @@
 const Profile = require('../models/Profile');
+const { publicPathFor } = require('../config/uploads');
 
 /**
  * Profile controller.
@@ -17,6 +18,7 @@ const ALLOWED_FIELDS = [
   'fullName',
   'phone',
   'location',
+  'avatarUrl',
   // jobseeker-only
   'headline',
   'bio',
@@ -24,6 +26,8 @@ const ALLOWED_FIELDS = [
   'education',
   'experience',
   'links',
+  'resumeUrl',
+  'resumeName',
   // recruiter-only
   'jobTitle',
   'companyName',
@@ -56,6 +60,8 @@ const pickPayload = (body, role) => {
     'education',
     'experience',
     'links',
+    'resumeUrl',
+    'resumeName',
   ];
   const forbiddenForRole =
     role === 'jobseeker' ? recruiterOnly : jobseekerOnly;
@@ -96,12 +102,15 @@ const formatProfile = (doc) => {
     fullName: obj.fullName,
     phone: obj.phone,
     location: obj.location,
+    avatarUrl: obj.avatarUrl,
     headline: obj.headline,
     bio: obj.bio,
     skills: obj.skills,
     education: obj.education,
     experience: obj.experience,
     links: obj.links,
+    resumeUrl: obj.resumeUrl,
+    resumeName: obj.resumeName,
     jobTitle: obj.jobTitle,
     companyName: obj.companyName,
     companyWebsite: obj.companyWebsite,
@@ -210,9 +219,62 @@ const patchMyProfile = async (req, res, next) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// POST /api/profile/upload/avatar  — set the profile picture
+// multer (avatarUpload) runs first and populates req.file.
+// ---------------------------------------------------------------------------
+const uploadAvatar = async (req, res, next) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No avatar file provided' });
+  }
+  try {
+    const avatarUrl = publicPathFor(req.file.path);
+    const profile = await Profile.findOneAndUpdate(
+      { userId: req.user.id },
+      { $set: { avatarUrl } },
+      { new: true, runValidators: true, context: 'query' }
+    );
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    return res.status(200).json(formatProfile(profile));
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// POST /api/profile/upload/resume  — set the jobseeker's CV
+// Recruiters are not allowed to upload a resume.
+// ---------------------------------------------------------------------------
+const uploadResume = async (req, res, next) => {
+  if (req.user.role !== 'jobseeker') {
+    return res.status(403).json({ error: 'Only jobseekers can upload a resume' });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: 'No resume file provided' });
+  }
+  try {
+    const resumeUrl = publicPathFor(req.file.path);
+    const profile = await Profile.findOneAndUpdate(
+      { userId: req.user.id },
+      { $set: { resumeUrl, resumeName: req.file.originalname } },
+      { new: true, runValidators: true, context: 'query' }
+    );
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    return res.status(200).json(formatProfile(profile));
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   getMyProfile,
   createMyProfile,
   updateMyProfile,
   patchMyProfile,
+  uploadAvatar,
+  uploadResume,
 };

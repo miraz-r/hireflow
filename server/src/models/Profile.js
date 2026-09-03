@@ -84,6 +84,12 @@ const profileSchema = new mongoose.Schema(
       maxlength: 160,
       default: '',
     },
+    avatarUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: '',
+    },
 
     // ---------- Jobseeker-only fields ----------
     headline: {
@@ -109,6 +115,18 @@ const profileSchema = new mongoose.Schema(
     education: { type: [educationSchema], default: [] },
     experience: { type: [experienceSchema], default: [] },
     links: { type: [linkSchema], default: [] },
+    resumeUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: '',
+    },
+    resumeName: {
+      type: String,
+      trim: true,
+      maxlength: 200,
+      default: '',
+    },
 
     // ---------- Recruiter-only fields ----------
     jobTitle: {
@@ -159,6 +177,8 @@ profileSchema.pre('validate', function (next) {
     'education',
     'experience',
     'links',
+    'resumeUrl',
+    'resumeName',
   ];
 
   const hasValue = (v) => {
