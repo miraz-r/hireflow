@@ -40,4 +40,15 @@ export const apiPut = (url, data, config) => api.put(url, data, config);
 export const apiPatch = (url, data, config) => api.patch(url, data, config);
 export const apiDelete = (url, config) => api.delete(url, config);
 
+/**
+ * Multipart upload helper. The instance defaults to `application/json`, but
+ * axios must let the browser set the `multipart/form-data` boundary. Passing an
+ * explicit `multipart/form-data` header makes axios fill in the boundary.
+ */
+export const apiUpload = (url, formData) =>
+  api.post(url, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 20000,
+  });
+
 export default api;
