@@ -1,3 +1,10 @@
+// Node's default DNS resolver may be misconfigured on some Windows/machine setups
+// (pointing to 127.0.0.1 instead of actual upstream DNS), breaking SRV record
+// resolution for mongodb+srv:// connections. Set the correct servers before any
+// MongoDB driver code runs so SRV discovery succeeds.
+const dns = require('dns');
+dns.setServers(['1.1.1.1', '1.0.0.1']);
+
 const mongoose = require('mongoose');
 const env = require('./env');
 
