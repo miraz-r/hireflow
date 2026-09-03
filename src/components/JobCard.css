@@ -2,19 +2,24 @@
 
 .job-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-5);
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
   transition: border-color var(--transition-base), box-shadow var(--transition-base);
-  cursor: pointer;
 }
 
 .job-card:hover {
   border-color: var(--color-border-strong);
   box-shadow: var(--shadow-sm);
+}
+
+.job-card-link {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 /* Header */
@@ -219,7 +224,7 @@
 }
 
 @media (max-width: 640px) {
-  .job-card {
+  .job-card-link {
     padding: var(--space-4);
   }
 

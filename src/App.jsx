@@ -1,6 +1,7 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { jobs, categories, companies, popularSearches, workTypes, employmentTypes, experienceLevels, salaryRanges } from './data/mockData';
+import { categories, companies, popularSearches, workTypes, employmentTypes, experienceLevels, salaryRanges } from './data/mockData';
+import { fetchJobs } from './utils/jobsApi';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -13,7 +14,11 @@ import ValueSection from './components/ValueSection';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
+import Reveal from './components/Reveal';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
+import JobDetailPage from './pages/JobDetailPage';
 import './App.css';
 
 export default function App() {
@@ -24,6 +29,23 @@ export default function App() {
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [activeCategory, setActiveCategory] = useState(null);
   const [toast, setToast] = useState(null);
+  const [jobs, setJobs] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+
+  // Load jobs from the API (falls back to mock data if the backend is down).
+  useEffect(() => {
+    let cancelled = false;
+    fetchJobs()
+      .then((data) => {
+        if (!cancelled) setJobs(data);
+      })
+      .finally(() => {
+        if (!cancelled) setJobsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const showToast = useCallback((message) => {
     setToast(message);
@@ -45,7 +67,7 @@ export default function App() {
       if (activeCategory && job.category !== activeCategory) return false;
       return true;
     });
-  }, [searchQuery, locationQuery, filters, activeCategory]);
+  }, [jobs, searchQuery, locationQuery, filters, activeCategory]);
 
   const handleSearch = useCallback((query, location) => {
     setSearchQuery(query);
@@ -123,7 +145,9 @@ export default function App() {
             />
           } />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<PlaceholderPage title="Create your account" subtitle="Join HireFlow and start your journey." />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/jobs/:id" element={<JobDetailPage />} />
         </Routes>
       </main>
       <Footer />
@@ -147,53 +171,47 @@ function HomePage({
         locationQuery={locationQuery}
         popularSearches={popularSearches}
       />
-      <TrustStrip />
+      <Reveal><TrustStrip /></Reveal>
       <section className="jobs-section" id="jobs">
         <div className="container">
-          <CategorySection categories={categories} activeCategory={activeCategory} onCategorySelect={onCategorySelect} />
-          <div className="jobs-layout">
-            <JobFilters
-              filters={filters}
-              onFilterChange={onFilterChange}
-              workTypes={workTypes}
-              employmentTypes={employmentTypes}
-              experienceLevels={experienceLevels}
-              salaryRanges={salaryRanges}
-              onClearFilters={onClearFilters}
-              hasActiveFilters={hasActiveFilters}
-            />
-            <div className="jobs-results">
-              <div className="results-header">
-                <h2 className="results-title">{activeCategory ? `${activeCategory} Jobs` : searchQuery ? 'Search Results' : 'Featured Jobs'}</h2>
-                <span className="results-count">{filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} found</span>
-              </div>
-              {filteredJobs.length > 0 ? (
-                <div className="jobs-grid">{filteredJobs.map(job => (<JobCard key={job.id} job={job} isSaved={savedJobs.has(job.id)} onSave={() => onSaveJob(job.id)} />))}</div>
-              ) : (
-                <div className="empty-state">
-                  <div className="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
-                  <h3>No jobs found</h3>
-                  <p>Try adjusting your search or filters to find more opportunities.</p>
-                  <button className="btn btn-secondary" onClick={onClearFilters}>Clear all filters</button>
+          <Reveal>
+            <CategorySection categories={categories} activeCategory={activeCategory} onCategorySelect={onCategorySelect} />
+          </Reveal>
+          <Reveal>
+            <div className="jobs-layout">
+              <JobFilters
+                filters={filters}
+                onFilterChange={onFilterChange}
+                workTypes={workTypes}
+                employmentTypes={employmentTypes}
+                experienceLevels={experienceLevels}
+                salaryRanges={salaryRanges}
+                onClearFilters={onClearFilters}
+                hasActiveFilters={hasActiveFilters}
+              />
+              <div className="jobs-results">
+                <div className="results-header">
+                  <h2 className="results-title">{activeCategory ? `${activeCategory} Jobs` : searchQuery ? 'Search Results' : 'Featured Jobs'}</h2>
+                  <span className="results-count">{filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} found</span>
                 </div>
-              )}
+                {filteredJobs.length > 0 ? (
+                  <div className="jobs-grid">{filteredJobs.map(job => (<JobCard key={job.id} job={job} isSaved={savedJobs.has(job.id)} onSave={() => onSaveJob(job.id)} />))}</div>
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+                    <h3>No jobs found</h3>
+                    <p>Try adjusting your search or filters to find more opportunities.</p>
+                    <button className="btn btn-secondary" onClick={onClearFilters}>Clear all filters</button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
-      <CompanySection companies={companies} />
-      <ValueSection />
-      <CTA />
+      <Reveal><CompanySection companies={companies} /></Reveal>
+      <Reveal><ValueSection /></Reveal>
+      <Reveal><CTA /></Reveal>
     </>
-  );
-}
-function PlaceholderPage({ title, subtitle }) {
-  return (
-    <div style={{ padding: '80px 0', textAlign: 'center' }}>
-      <div className="container">
-        <h1 style={{ fontSize: 'var(--font-size-3xl)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)', marginBottom: 'var(--space-3)' }}>{title}</h1>
-        <p style={{ fontSize: 'var(--font-size-base)', color: 'var(--color-text-secondary)' }}>{subtitle}</p>
-      </div>
-    </div>
   );
 }
