@@ -1,8 +1,18 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    setMobileOpen(false);
+    navigate('/');
+  };
 
   const links = [
     { label: 'Find Jobs', href: '#jobs' },
@@ -28,8 +38,19 @@ export default function Navbar() {
         </nav>
 
         <div className="navbar-actions">
-          <a className="sign-in-link" href="#">Sign in</a>
-          <a className="sign-up-link" href="#">Sign up</a>
+          {user ? (
+            <div className="user-menu">
+              <span className="user-email">{user.email}</span>
+              <button className="logout-btn" onClick={handleLogout} type="button">
+                Logout
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="sign-in-link">Sign in</Link>
+              <Link to="/register" className="sign-up-link">Sign up</Link>
+            </>
+          )}
         </div>
 
         <button
@@ -49,11 +70,47 @@ export default function Navbar() {
         <div className="mobile-menu" id="mobile-menu">
           <nav className="mobile-nav" aria-label="Mobile navigation">
             {links.map(link => (
-              <a key={link.label} href={link.href} className="mobile-link" onClick={() => setMobileOpen(false)}>{link.label}</a>
+              <a
+                key={link.label}
+                href={link.href}
+                className="mobile-link"
+                onClick={() => setMobileOpen(false)}
+              >
+                {link.label}
+              </a>
             ))}
             <div className="mobile-actions">
-              <a className="btn btn-secondary btn-full" href="#">Sign in</a>
-              <a className="btn btn-primary btn-full" href="#">Sign up</a>
+              {user ? (
+                <>
+                  <div className="mobile-user-info">
+                    <span className="mobile-user-email">{user.email}</span>
+                    <button
+                      className="btn btn-secondary btn-full"
+                      onClick={handleLogout}
+                      type="button"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="btn btn-secondary btn-full"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="btn btn-primary btn-full"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>
