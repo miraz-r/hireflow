@@ -70,8 +70,27 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Update just the display name on the signed-in user (e.g. after a profile
+  // save) so the navbar greeting stays in sync without a full reload.
+  const setUserFullName = (fullName) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = fullName && String(fullName).trim() ? String(fullName).trim() : prev.fullName;
+      return next === prev.fullName ? prev : { ...prev, fullName: next };
+    });
+  };
+
+  // Sync the avatar URL into the user state so the navbar avatar updates
+  // immediately after an upload without requiring a page reload.
+  const setUserAvatarUrl = (avatarUrl) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      return prev.avatarUrl === avatarUrl ? prev : { ...prev, avatarUrl };
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, toggleRole, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, toggleRole, logout, setUserFullName, setUserAvatarUrl }}>
       {children}
     </AuthContext.Provider>
   );
