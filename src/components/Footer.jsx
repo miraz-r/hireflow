@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Footer.css';
 
 function FooterLink({ to, children }) {
@@ -17,11 +18,7 @@ function FooterLink({ to, children }) {
       }
     }
     e.preventDefault();
-    navigate('/');
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }, 60);
+    navigate('/', { state: { scrollTo: id } });
   };
 
   if (to.startsWith('#')) {
@@ -54,24 +51,12 @@ function FooterSocial({ label, to }) {
   );
 }
 
-const footerLinks = {
+const publicLinks = {
   product: [
     { label: 'Find Jobs', to: '#jobs' },
     { label: 'Companies', to: '#companies' },
     { label: 'Salary Guide', to: '/salary-guide' },
     { label: 'Resources', to: '/resources' }
-  ],
-  candidates: [
-    { label: 'Create Profile', to: '/profile' },
-    { label: 'Saved Jobs', to: '/saved-jobs' },
-    { label: 'Applications', to: '/profile?tab=applications' },
-    { label: 'Career Advice', to: '/career-advice' }
-  ],
-  employers: [
-    { label: 'Post a Job', to: '/profile?tab=post' },
-    { label: 'Pricing', to: '/pricing' },
-    { label: 'Talent Search', to: '/talent-search' },
-    { label: 'Solutions', to: '/solutions' }
   ],
   company: [
     { label: 'About Us', to: '/about' },
@@ -87,7 +72,54 @@ const footerLinks = {
   ]
 };
 
+const jobseekerLinks = {
+  product: publicLinks.product,
+  candidates: [
+    { label: 'Profile', to: '/profile' },
+    { label: 'Saved Jobs', to: '/saved-jobs' },
+    { label: 'Applications', to: '/profile?tab=my-applications' },
+    { label: 'Career Advice', to: '/career-advice' }
+  ],
+  company: publicLinks.company,
+  legal: publicLinks.legal
+};
+
+const recruiterLinks = {
+  product: publicLinks.product,
+  employers: [
+    { label: 'Profile', to: '/profile' },
+    { label: 'Post a Job', to: '/profile?tab=post' },
+    { label: 'Pricing', to: '/pricing' },
+    { label: 'Talent Search', to: '/talent-search' },
+    { label: 'Solutions', to: '/solutions' }
+  ],
+  company: publicLinks.company,
+  legal: publicLinks.legal
+};
+
+const guestLinks = {
+  product: publicLinks.product,
+  company: publicLinks.company,
+  legal: publicLinks.legal
+};
+
+const COLUMN_HEADINGS = {
+  product: 'Product',
+  candidates: 'Candidates',
+  employers: 'Employers',
+  company: 'Company',
+  legal: 'Legal'
+};
+
 export default function Footer() {
+  const { user } = useAuth();
+
+  const links = user?.role === 'recruiter'
+    ? recruiterLinks
+    : user?.role === 'jobseeker'
+      ? jobseekerLinks
+      : guestLinks;
+
   return (
     <footer className="footer">
       <div className="container">
@@ -103,12 +135,12 @@ export default function Footer() {
             <p className="footer-tagline">Find work worth working for.</p>
           </div>
 
-          <div className="footer-links">
-            {Object.entries(footerLinks).map(([key, links]) => (
+          <div className={`footer-links footer-links--count-${Object.keys(links).length}`}>
+            {Object.entries(links).map(([key, linkList]) => (
               <div className="footer-column" key={key}>
-                <h4 className="footer-heading">{key === 'product' ? 'Product' : key === 'candidates' ? 'Candidates' : key === 'employers' ? 'Employers' : key === 'company' ? 'Company' : 'Legal'}</h4>
+                <h4 className="footer-heading">{COLUMN_HEADINGS[key]}</h4>
                 <ul className="footer-list">
-                  {links.map(link => (
+                  {linkList.map(link => (
                     <li key={link.label}><FooterLink to={link.to}>{link.label}</FooterLink></li>
                   ))}
                 </ul>

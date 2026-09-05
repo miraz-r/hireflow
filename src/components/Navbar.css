@@ -11,11 +11,31 @@
 }
 
 .navbar-container {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  height: 68px;
+  min-width: 0;
+}
+
+/* Auth navbar: dedicated minimal flex layout.
+   [logo + name] on the LEFT, [Sign in][Sign up] grouped on the RIGHT.
+   No middle nav exists in the auth variant. */
+.navbar--auth .navbar-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 68px;
-  gap: var(--space-8);
+  gap: var(--space-3);
+}
+
+.navbar--auth .navbar-brand {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.navbar--auth .navbar-actions {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .navbar-brand {
@@ -49,8 +69,8 @@
 .navbar-nav {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-6);
-  flex: 1;
 }
 
 .nav-link {
@@ -102,6 +122,7 @@
   gap: var(--space-3);
 }
 
+/* Sign-in / Sign-up links (unauthenticated) */
 .sign-in-link {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -136,134 +157,240 @@
   box-shadow: 0 2px 4px rgba(79, 70, 229, 0.25), 0 8px 20px -4px rgba(79, 70, 229, 0.35);
 }
 
-/* User menu — shown when authenticated */
-.user-menu {
+/* =========================================================
+   Account menu — role label + clickable avatar trigger
+   ========================================================= */
+.account-wrapper {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  position: relative;
 }
 
-.user-email {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
-}
-
-.logout-btn {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  background: none;
-  border: none;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: color var(--transition-fast), background-color var(--transition-fast);
-}
-
-.logout-btn:hover {
-  color: var(--color-brand-primary);
-  background-color: var(--color-bg-tertiary);
-}
-
-.logout-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.profile-link {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-brand-primary);
-  background-color: var(--color-brand-primary-light);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  white-space: nowrap;
-  transition: color var(--transition-fast), background-color var(--transition-fast);
-}
-
-.profile-link:hover {
-  color: var(--color-brand-primary-hover);
-  background-color: var(--color-brand-primary-light);
-}
-
-/* Role toggle — jobseeker / recruiter switch */
-.role-toggle {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  padding: 3px;
-  gap: 2px;
-}
-
-.role-toggle-btn {
+.account-role-label {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
-  background: transparent;
-  border: none;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  cursor: pointer;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: capitalize;
   white-space: nowrap;
-  transition: color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+  user-select: none;
 }
 
-.role-toggle-btn:hover {
-  color: var(--color-text-primary);
-}
-
-.role-toggle-btn.active {
-  color: var(--color-text-inverse);
-  background: linear-gradient(180deg, var(--color-brand-primary) 0%, var(--color-brand-primary-hover) 100%);
-  box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25);
-}
-
-.mobile-user-info .role-toggle {
+/* Avatar trigger button */
+.account-trigger {
+  display: flex;
+  align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  cursor: pointer;
+  border: 1.5px solid var(--color-border-default);
+  background: none;
+  padding: 0;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.post-job-link {
+.account-trigger:hover {
+  border-color: var(--color-border-default);
+}
+
+.account-trigger:focus-visible {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--color-bg-secondary), 0 0 0 4px var(--color-brand-primary);
+}
+
+.account-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-full);
+}
+
+.account-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-full);
+  line-height: 1;
+  user-select: none;
+}
+
+/* Dropdown menu — z-index must exceed the navbar's z-index (200)
+   so the menu sits above the navbar border and page content. */
+.account-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  min-width: 220px;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  z-index: calc(var(--z-sticky) + 1);
+  padding: var(--space-2);
+  animation: menuFadeIn 150ms ease-out;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.account-menu-header {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.account-menu-name {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-inverse);
-  background: linear-gradient(180deg, var(--color-brand-accent) 0%, var(--color-brand-primary-hover) 100%);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-menu-email {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-menu-divider {
+  height: 1px;
+  background-color: var(--color-border-default);
+  margin: var(--space-1) 0;
+}
+
+.account-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  background: none;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
   text-decoration: none;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  box-shadow: 0 1px 2px rgba(124, 58, 237, 0.25);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  white-space: nowrap;
+  transition: background-color var(--transition-fast);
 }
 
-.post-job-link:hover {
-  color: var(--color-text-inverse);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3), 0 8px 20px -4px rgba(124, 58, 237, 0.35);
+.account-menu-item svg {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
 }
 
-/* Mobile user info block */
+.account-menu-item:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+.account-menu-item--danger {
+  color: var(--color-error);
+}
+
+.account-menu-item--danger svg {
+  color: var(--color-error);
+}
+
+.account-menu-item--danger:hover {
+  background-color: var(--color-error-bg);
+}
+
+.account-menu-item:disabled {
+  opacity: 0.6;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* =========================================================
+   Mobile user info block
+   ========================================================= */
 .mobile-user-info {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.mobile-user-email {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  text-align: center;
-  padding: var(--space-1) 0;
-  word-break: break-all;
+.mobile-user-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
 }
 
-/* Mobile Toggle */
+.mobile-user-avatar-img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 2px solid var(--color-border-default);
+}
+
+.mobile-user-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  user-select: none;
+  border: 1.5px solid var(--color-border-default);
+}
+
+.mobile-user-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mobile-user-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-user-role {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-transform: capitalize;
+}
+
+/* =========================================================
+   Mobile Toggle
+   ========================================================= */
 .mobile-toggle {
   display: none;
   padding: var(--space-2);
@@ -305,7 +432,9 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* Mobile Menu */
+/* =========================================================
+   Mobile Menu
+   ========================================================= */
 .mobile-menu {
   position: absolute;
   top: 100%;
@@ -374,11 +503,97 @@
     display: none;
   }
 
-  .mobile-toggle {
+  /* Auth pages keep their grouped Sign in / Sign up on the right */
+  .navbar--auth .navbar-actions {
     display: flex;
+  }
+
+  .navbar--auth .mobile-toggle {
+    display: none;
+  }
+
+  .mobile-toggle {
+    grid-column: 3;
+    display: flex;
+    justify-self: end;
   }
 
   .navbar-container {
     height: 60px;
+  }
+}
+
+/* Very narrow viewports: keep auth navbar on one row without overflow */
+@media (max-width: 360px) {
+  .navbar--auth .navbar-container {
+    gap: var(--space-2);
+  }
+
+  .navbar--auth .navbar-actions {
+    gap: var(--space-1);
+  }
+
+  .navbar--auth .sign-in-link {
+    padding: var(--space-2);
+    font-size: var(--font-size-xs);
+  }
+
+  .navbar--auth .sign-up-link {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .brand-text {
+    font-size: var(--font-size-base);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 280px) {
+  .navbar--auth .navbar-container {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 60px;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    row-gap: var(--space-2);
+  }
+
+  .navbar--auth .sign-in-link,
+  .navbar--auth .sign-up-link {
+    font-size: var(--font-size-2xs);
+  }
+}
+
+/* Main navbar: ensure it never overflows at narrow widths */
+@media (max-width: 360px) {
+  .navbar-container {
+    gap: var(--space-2);
+  }
+
+  .navbar-brand {
+    min-width: 0;
+  }
+
+  .brand-text {
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+  }
+}
+
+/* Account dropdown must never exceed the viewport at narrow widths.
+   min-width would otherwise beat max-width, so reset it here. */
+.account-menu {
+  max-width: calc(100vw - var(--space-8));
+}
+
+@media (max-width: 360px) {
+  .account-menu {
+    min-width: 0;
+    max-width: calc(100vw - var(--space-4));
+  }
+
+  .account-menu-item {
+    white-space: normal;
   }
 }

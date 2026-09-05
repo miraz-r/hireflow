@@ -45,6 +45,7 @@
   text-align: left;
   transition: border-color var(--transition-base), background-color var(--transition-base), box-shadow var(--transition-base);
   width: 100%;
+  min-width: 0;
   position: relative;
 }
 
@@ -115,5 +116,12 @@
   .section-title {
     font-size: var(--font-size-xl);
     letter-spacing: var(--letter-spacing-tight);
+  }
+}
+
+@media (max-width: 360px) {
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
   }
 }

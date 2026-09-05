@@ -9,10 +9,11 @@
 
 .footer-main {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   gap: var(--space-12);
   padding-bottom: var(--space-12);
   border-bottom: 1px solid var(--color-border-default);
+  min-width: 0;
 }
 
 .footer-brand {
@@ -46,8 +47,26 @@
 
 .footer-links {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
   gap: var(--space-8);
+  min-width: 0;
+}
+
+/* Column count comes from a class (not inline style) so responsive
+   breakpoints below can reflow the columns without being overridden. */
+.footer-links--count-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.footer-links--count-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.footer-links--count-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.footer-column {
+  min-width: 0;
 }
 
 .footer-heading {
@@ -74,6 +93,7 @@
   text-decoration: none;
   transition: color var(--transition-fast);
   line-height: var(--line-height-normal);
+  overflow-wrap: break-word;
 }
 
 .footer-list a:hover {
@@ -142,12 +162,15 @@
 
 @media (max-width: 1024px) {
   .footer-main {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-10);
   }
 
-  .footer-links {
-    grid-template-columns: repeat(3, 1fr);
+  .footer-links,
+  .footer-links--count-3,
+  .footer-links--count-4,
+  .footer-links--count-5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-6);
   }
 }
@@ -157,15 +180,43 @@
     padding: var(--space-12) 0 var(--space-6);
   }
 
-  .footer-links {
-    grid-template-columns: repeat(2, 1fr);
+  .footer-links,
+  .footer-links--count-3,
+  .footer-links--count-4,
+  .footer-links--count-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-6);
   }
 }
 
 @media (max-width: 480px) {
-  .footer-links {
-    grid-template-columns: 1fr;
+  .footer-links,
+  .footer-links--count-3,
+  .footer-links--count-4,
+  .footer-links--count-5 {
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
+  }
+}
+
+/* Very narrow viewports (down to 220px): footer becomes a vertical
+   layout with tighter padding so nothing extends past the viewport. */
+@media (max-width: 360px) {
+  .footer {
+    padding: var(--space-8) 0 var(--space-5);
+  }
+
+  .footer-main {
+    gap: var(--space-6);
+    padding-bottom: var(--space-6);
+  }
+
+  .footer-tagline {
+    max-width: none;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

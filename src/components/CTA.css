@@ -90,3 +90,9 @@
     width: 100%;
   }
 }
+
+@media (max-width: 360px) {
+  .cta-card {
+    padding: var(--space-6) var(--space-4);
+  }
+}

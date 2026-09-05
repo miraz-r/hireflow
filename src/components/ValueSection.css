@@ -110,3 +110,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 360px) {
+  .value-grid {
+    gap: var(--space-2);
+  }
+}
