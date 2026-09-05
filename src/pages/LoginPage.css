@@ -3,21 +3,28 @@
    Reuses existing CSS variables (brand, spacing, radius, etc.).
    ========================================================= */
 
+/* Auth pages fill exactly the space below the sticky navbar so the page
+   itself never scrolls under normal viewport sizes. Scoped to auth only —
+   no global overflow rules. Inner panes may scroll internally only when
+   the viewport is too short to fit the form (usability over clipping). */
 .auth-page {
-  min-height: 100vh;
+  height: calc(100vh - 68px);
+  height: calc(100dvh - 68px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-2) var(--space-4) var(--space-6);
+  padding: var(--space-2) var(--space-4);
+  overflow: hidden;
   background:
     radial-gradient(1200px 600px at 0% 0%, rgba(79, 70, 229, 0.06), transparent 60%),
     radial-gradient(900px 500px at 100% 100%, rgba(124, 58, 237, 0.05), transparent 60%),
-    var(--color-bg-primary);}
+    var(--color-bg-primary);
+}
 
 .auth-shell {
   width: 100%;
   max-width: 1080px;
-  max-height: calc(100vh - var(--space-6) * 2);
+  max-height: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   background: var(--color-bg-secondary);
@@ -26,6 +33,7 @@
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   min-height: 0;
+  min-width: 0;
   align-self: center;
 }
 
@@ -33,9 +41,13 @@
 .auth-form-pane {
   display: flex;
   flex-direction: column;
-  padding: var(--space-8) var(--space-8);
+  padding: var(--space-6) var(--space-8);
   background: var(--color-bg-secondary);
   position: relative;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .auth-brand {
@@ -302,6 +314,8 @@
   overflow: hidden;
   isolation: isolate;
   padding: var(--space-8) var(--space-8);
+  min-height: 0;
+  min-width: 0;
 }
 
 .auth-visual-grid {
@@ -530,10 +544,27 @@
    Responsive
    ========================================================= */
 
+/* Auth navbar — visible on auth pages */
+.navbar--auth .navbar-nav {
+  display: none;
+}
+
+.navbar--auth .navbar-actions {
+  display: flex;
+}
+
+/* On small screens, always show auth navbar actions (Sign in / Sign up) */
+@media (max-width: 768px) {
+  .navbar--auth .navbar-actions {
+    display: flex;
+  }
+}
+
 /* Tablet — stack visual above form */
 @media (max-width: 960px) {
   .auth-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
     max-width: 520px;
     min-height: 0;
   }
@@ -651,5 +682,104 @@
 
   .auth-submit:hover:not(:disabled) {
     transform: none;
+  }
+}
+
+/* =========================================================
+   Short viewport overrides — ensure form stays accessible
+   on very short screens without global overflow: hidden.
+   ========================================================= */
+@media (max-height: 700px) {
+  .auth-page {
+    padding: var(--space-1) var(--space-3);
+  }
+
+  .auth-visual-pane {
+    min-height: 120px;
+    padding: var(--space-4) var(--space-6);
+  }
+}
+
+@media (max-height: 580px) {
+  /* Extremely short viewport: prioritize a usable form over no-scroll. */
+  .auth-page {
+    padding: 0 var(--space-3);
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .auth-shell {
+    border-radius: var(--radius-xl);
+    max-height: none;
+  }
+
+  .auth-visual-pane {
+    min-height: 80px;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .auth-form-pane {
+    padding: var(--space-4) var(--space-5);
+  }
+}
+
+/* Mobile navbar is 60px tall, so the auth page fills accordingly. */
+@media (max-width: 768px) {
+  .auth-page {
+    height: calc(100vh - 60px);
+    height: calc(100dvh - 60px);
+  }
+}
+
+/* Very narrow viewports (down to 220px): reduce padding, keep inputs
+   inside the viewport, let long words wrap. */
+@media (max-width: 360px) {
+  .auth-page {
+    padding: var(--space-1);
+  }
+
+  .auth-shell {
+    border-radius: var(--radius-lg);
+    max-width: 100%;
+  }
+
+  .auth-form-pane {
+    padding: var(--space-3) var(--space-3);
+    min-width: 0;
+  }
+
+  .auth-form-inner {
+    min-width: 0;
+  }
+
+  .auth-title {
+    font-size: var(--font-size-xl);
+    overflow-wrap: break-word;
+  }
+
+  .auth-subtitle {
+    font-size: var(--font-size-xs);
+    overflow-wrap: break-word;
+  }
+
+  .auth-input {
+    min-width: 0;
+    padding: var(--space-3) var(--space-3) var(--space-3) calc(var(--space-3) * 2 + 18px);
+    font-size: var(--font-size-xs);
+  }
+
+  .auth-submit {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-xs);
+  }
+
+  .auth-visual-pane {
+    display: none;
+  }
+
+  .auth-form {
+    gap: var(--space-3);
   }
 }

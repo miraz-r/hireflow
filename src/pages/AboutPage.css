@@ -1,0 +1,362 @@
+/* =========================================================
+   AboutPage — editorial About Us redesign
+   ========================================================= */
+
+.about-page {
+  background-color: var(--color-bg-primary);
+}
+
+/* =========================================================
+   1. HERO — dark editorial opening
+   ========================================================= */
+.about-hero {
+  background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
+  padding: var(--space-20) 0 var(--space-16);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-hero-glow {
+  position: absolute;
+  top: -30%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.06);
+  pointer-events: none;
+}
+
+.about-hero-glow--secondary {
+  top: auto;
+  right: auto;
+  bottom: -20%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.about-hero-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.about-hero-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: var(--space-4);
+}
+
+.about-hero-title {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: var(--line-height-tight);
+  max-width: 580px;
+  margin-bottom: var(--space-5);
+}
+
+.about-hero-desc {
+  font-size: var(--font-size-lg);
+  color: rgba(221, 230, 255, 0.85);
+  line-height: var(--line-height-relaxed);
+  max-width: 480px;
+}
+
+/* Hero visual — values preview */
+.about-hero-visual {
+  display: flex;
+}
+
+.about-hero-visual-card {
+  width: 100%;
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(8px);
+}
+
+.about-hero-visual-label {
+  display: block;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: var(--space-4);
+}
+
+.about-hero-visual-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.about-hero-visual-pill {
+  display: inline-block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+}
+
+/* =========================================================
+   2. MISSION — statement as focal point
+   ========================================================= */
+.about-mission {
+  padding: var(--space-20) 0;
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.about-section-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-light);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
+}
+
+.about-mission-statement {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  max-width: 700px;
+  margin: 0 0 var(--space-8);
+  padding: 0;
+  border: none;
+}
+
+.about-mission-body {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  max-width: 580px;
+}
+
+/* =========================================================
+   3. PRINCIPLES — numbered editorial grid
+   ========================================================= */
+.about-principles {
+  padding: var(--space-20) 0 var(--space-24);
+}
+
+.about-principles-heading {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-12);
+  max-width: 480px;
+}
+
+.about-principles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-10) var(--space-12);
+}
+
+.about-principle {
+  position: relative;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.about-principle-number {
+  display: block;
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-bg-tertiary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1;
+  margin-bottom: var(--space-3);
+  user-select: none;
+}
+
+.about-principle-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.about-principle-body {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* =========================================================
+   4. CTA — deep indigo closing section
+   ========================================================= */
+.about-cta {
+  background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);
+  border-radius: var(--radius-2xl);
+  margin: 0 var(--space-6) var(--space-16);
+  padding: var(--space-16) 0;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.about-cta-glow {
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.08);
+  pointer-events: none;
+}
+
+.about-cta-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.about-cta-heading {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-4);
+}
+
+.about-cta-desc {
+  font-size: var(--font-size-lg);
+  color: rgba(221, 230, 255, 0.8);
+  line-height: var(--line-height-relaxed);
+  max-width: 480px;
+  margin: 0 auto var(--space-8);
+}
+
+.about-cta .btn {
+  background-color: #ffffff;
+  color: var(--color-brand-deep);
+  border: none;
+}
+
+.about-cta .btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--color-brand-deep);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 960px) {
+  .about-hero-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .about-hero-visual {
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-hero {
+    padding: var(--space-16) 0 var(--space-12);
+  }
+
+  .about-hero-title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .about-mission {
+    padding: var(--space-16) 0;
+  }
+
+  .about-mission-statement {
+    font-size: var(--font-size-3xl);
+  }
+
+  .about-principles {
+    padding: var(--space-16) 0 var(--space-20);
+  }
+
+  .about-principles-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .about-cta {
+    margin: 0 var(--space-4) var(--space-12);
+    padding: var(--space-12) 0;
+    border-radius: var(--radius-xl);
+  }
+
+  .about-cta-heading {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .about-hero-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .about-hero-desc {
+    font-size: var(--font-size-base);
+  }
+
+  .about-mission-statement {
+    font-size: var(--font-size-2xl);
+  }
+
+  .about-principle-number {
+    font-size: var(--font-size-4xl);
+  }
+
+  .about-cta {
+    margin: 0 var(--space-3) var(--space-10);
+    padding: var(--space-10) var(--space-4);
+  }
+}
+
+@media (max-width: 360px) {
+  .about-hero {
+    padding: var(--space-12) 0 var(--space-10);
+  }
+
+  .about-hero-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .about-mission {
+    padding: var(--space-12) 0;
+  }
+
+  .about-principles {
+    padding: var(--space-12) 0 var(--space-16);
+  }
+
+  .about-cta {
+    margin: 0 var(--space-3) var(--space-8);
+    padding: var(--space-8) var(--space-3);
+  }
+}
