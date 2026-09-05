@@ -466,10 +466,43 @@ input, textarea, select {
 .container {
   width: 100%;
   max-width: var(--container-max);
+  min-width: 0;
   margin-left: auto;
   margin-right: auto;
   padding-left: var(--container-padding);
   padding-right: var(--container-padding);
+}
+
+/* ---------- Narrow-viewport safety (down to 220px) ----------
+ * Fix actual layout causes of horizontal overflow: reduce outer
+ * padding, keep form controls inside the viewport, let media shrink
+ * and buttons wrap. No global overflow-x hiding. */
+input,
+textarea,
+select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+@media (max-width: 360px) {
+  :root {
+    --container-padding: var(--space-3);
+  }
+
+  .btn {
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: break-word;
+  }
+
+  .card {
+    min-width: 0;
+  }
 }
 
 /* ---------- Section Eyebrow (small label above titles) ---------- */

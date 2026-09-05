@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './Hero.css';
 
-export default function Hero({ onSearch, onQueryChange, onLocationChange, searchQuery, locationQuery, popularSearches }) {
+export default function Hero({ onSearch, onQueryChange, onLocationChange, searchQuery, locationQuery, popularSearches, user }) {
+  const isRecruiter = user?.role === 'recruiter';
   // Local state for input display
   const [localQuery, setLocalQuery] = useState(searchQuery || '');
   const [localLocation, setLocalLocation] = useState(locationQuery || '');
@@ -62,16 +63,21 @@ export default function Hero({ onSearch, onQueryChange, onLocationChange, search
         <div className="hero-content">
           <span className="hero-eyebrow">
             <span className="eyebrow-dot"></span>
-            <span>Now with 2,400+ new opportunities</span>
+            <span>{isRecruiter ? 'Hire top talent with HireFlow' : 'Now with 2,400+ new opportunities'}</span>
           </span>
           
           <h1 className="hero-headline">
-            Find work <span className="hero-highlight">worth working for.</span>
+            {isRecruiter ? (
+              <>Find the people who move <span className="hero-highlight">your company forward.</span></>
+            ) : (
+              <>Find work <span className="hero-highlight">worth working for.</span></>
+            )}
           </h1>
           
           <p className="hero-subheadline">
-            Discover opportunities that match your skills, values, and ambitions. 
-            HireFlow connects ambitious professionals with companies that care.
+            {isRecruiter
+              ? 'Post roles, reach qualified candidates, and build your team — all in one place. HireFlow connects you with talent across engineering, design, product, and more.'
+              : 'Discover opportunities that match your skills, values, and ambitions. HireFlow connects ambitious professionals with companies that care.'}
           </p>
 
           <form className="search-form" onSubmit={handleSubmit} role="search">

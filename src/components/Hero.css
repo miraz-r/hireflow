@@ -25,7 +25,7 @@
   top: 60%;
   left: 50%;
   transform: translateX(-50%);
-  width: 1200px;
+  width: min(1200px, 100vw);
   height: 600px;
   background-image: radial-gradient(circle at center, rgba(17, 24, 39, 0.04) 1px, transparent 1.5px);
   background-size: 24px 24px;
@@ -74,12 +74,13 @@
 }
 
 .hero-headline {
-  font-size: clamp(2.25rem, 5.5vw, 4rem);
+  font-size: clamp(2.25rem, 4.4vw, 3.5rem);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--letter-spacing-tighter);
-  line-height: 1.05;
+  line-height: 1.1;
   margin-bottom: var(--space-5);
   color: var(--color-text-primary);
+  overflow-wrap: break-word;
 }
 
 .hero-highlight {
@@ -88,7 +89,6 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  display: inline-block;
 }
 
 .hero-subheadline {
@@ -141,7 +141,12 @@
 }
 
 .search-field:hover {
-  background-color: var(--color-bg-tertiary);
+  background-color: transparent;
+}
+
+.search-field:focus-within {
+  outline: 1.5px solid var(--color-border-default);
+  outline-offset: -1.5px;
 }
 
 .search-icon {
@@ -324,5 +329,37 @@
     width: 100%;
     padding: 14px;
     font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 360px) {
+  .hero {
+    padding: var(--space-10) 0 var(--space-8);
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .search-form {
+    padding: 4px;
+  }
+
+  .search-field {
+    padding: 8px 10px;
+  }
+
+  .search-btn {
+    padding: 12px;
+    font-size: var(--font-size-sm);
+  }
+
+  .popular-searches {
+    gap: var(--space-1);
+  }
+
+  .popular-tag {
+    padding: 4px 10px;
+    font-size: var(--font-size-2xs);
   }
 }
