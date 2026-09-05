@@ -26,7 +26,8 @@
   .hero-headline,
   .hero-subheadline,
   .search-form,
-  .popular-searches {
+  .popular-searches,
+  .auth-page {
     animation: none !important;
   }
 }
@@ -57,6 +58,11 @@
   animation-delay: 0.45s;
 }
 
+/* --- Auth page entry (fade + slight upward slide) --- */
+.auth-page {
+  animation: heroFadeUp 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .eyebrow-dot {
   animation: pulseDot 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -83,25 +89,16 @@
   }
 }
 
-/* --- Job cards cascade in as they mount (async data) --- */
+/* --- Job cards fade in as they mount (async data) — no staggered timer:
+   job results must appear promptly once data has loaded. */
 .jobs-grid .job-card {
-  animation: cardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-
-.jobs-grid .job-card:nth-child(2) { animation-delay: 0.05s; }
-.jobs-grid .job-card:nth-child(3) { animation-delay: 0.1s; }
-.jobs-grid .job-card:nth-child(4) { animation-delay: 0.15s; }
-.jobs-grid .job-card:nth-child(5) { animation-delay: 0.2s; }
-.jobs-grid .job-card:nth-child(6) { animation-delay: 0.25s; }
-.jobs-grid .job-card:nth-child(7) { animation-delay: 0.3s; }
-.jobs-grid .job-card:nth-child(8) { animation-delay: 0.35s; }
-.jobs-grid .job-card:nth-child(9) { animation-delay: 0.4s; }
-.jobs-grid .job-card:nth-child(n + 10) { animation-delay: 0.45s; }
 
 @keyframes cardIn {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;

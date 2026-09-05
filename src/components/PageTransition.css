@@ -1,0 +1,55 @@
+/* =========================================================
+   Global route transition — premium cross-fade
+
+   Architecture:
+   - On route change, the wrapper gets page-exit (CSS transition)
+   - Simultaneously, new content renders with page-enter (CSS animation)
+   - Both run at the same time → true cross-fade effect
+   - Total transition: ~200ms (100ms exit overlap + 200ms enter)
+   ========================================================= */
+
+.page-transition {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  will-change: opacity, transform;
+}
+
+/* --- Exit (outgoing page) — fast, simple fade out --- */
+.page-exit {
+  opacity: 0;
+  transition: opacity 100ms ease-out;
+  pointer-events: none;
+}
+
+/* --- Enter (incoming page) — subtle fade + tiny upward slide + micro-scale --- */
+.page-enter {
+  animation: pageEnter 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* --- Accessibility: disable transitions for reduced-motion users --- */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .page-exit {
+    transition: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .page-enter {
+    animation: none;
+  }
+}
