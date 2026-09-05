@@ -111,12 +111,20 @@ const login = async (req, res, next) => {
       { expiresIn: env.jwtExpiresIn }
     );
 
+    // Surface the user's name in the auth response so the UI can greet them
+    // without a separate profile fetch. The Profile holds fullName (1:1).
+    const profile = await Profile.findOne({ userId: user.id }).select('fullName avatarUrl').lean();
+    const fullName = profile && profile.fullName ? profile.fullName : null;
+    const avatarUrl = profile && profile.avatarUrl ? profile.avatarUrl : null;
+
     return res.status(200).json({
       token,
       user: {
         id: user.id,
         email: user.email,
         role: user.role,
+        fullName,
+        avatarUrl,
       },
     });
   } catch (err) {
@@ -191,12 +199,18 @@ const toggleRole = async (req, res, next) => {
       { expiresIn: env.jwtExpiresIn }
     );
 
+    const profile = await Profile.findOne({ userId: user.id }).select('fullName avatarUrl').lean();
+    const fullName = profile && profile.fullName ? profile.fullName : null;
+    const avatarUrl = profile && profile.avatarUrl ? profile.avatarUrl : null;
+
     return res.status(200).json({
       token,
       user: {
         id: user.id,
         email: user.email,
         role: user.role,
+        fullName,
+        avatarUrl,
       },
     });
   } catch (err) {

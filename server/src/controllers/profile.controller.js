@@ -1,4 +1,7 @@
 const Profile = require('../models/Profile');
+const User = require('../models/User');
+const Job = require('../models/Job');
+const Application = require('../models/Application');
 const { publicPathFor } = require('../config/uploads');
 
 /**
@@ -279,6 +282,36 @@ const uploadResume = async (req, res, next) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// DELETE /api/profile — delete the current user's account and all data
+// ---------------------------------------------------------------------------
+const deleteMyProfile = async (req, res, next) => {
+  try {
+    // req.user.id is derived from the JWT — never from the client body.
+    const userId = req.user.id;
+
+    // Remove associated data: profile, jobs posted, applications.
+    // Use independent deleteMany calls — if one collection is empty the
+    // operation still succeeds.  We deliberately do NOT cascade-delete
+    // jobs posted by other users or unrelated global seed data.
+    await Promise.all([
+      Profile.deleteOne({ userId }),
+      Job.deleteMany({ postedBy: userId }),
+      Application.deleteMany({ userId }),
+    ]);
+
+    // Finally remove the user account itself.
+    const deleted = await User.findByIdAndDelete(userId);
+    if (!deleted) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(204).end();
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   getMyProfile,
   createMyProfile,
@@ -286,4 +319,5 @@ module.exports = {
   patchMyProfile,
   uploadAvatar,
   uploadResume,
+  deleteMyProfile,
 };
