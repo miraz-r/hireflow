@@ -28,6 +28,26 @@ const applicationSchema = new mongoose.Schema(
       },
       default: 'applied',
     },
+
+    // Optional application details submitted via the application form.
+    coverLetter: {
+      type: String,
+      trim: true,
+      maxlength: 5000,
+      default: '',
+    },
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: 32,
+      default: '',
+    },
+    resumeUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: '',
+    },
   },
   { timestamps: true }
 );

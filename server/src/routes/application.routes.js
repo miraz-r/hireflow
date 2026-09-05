@@ -4,6 +4,7 @@ const {
   createApplication,
   getMyApplication,
   listMyApplications,
+  listJobseekerApplications,
 } = require('../controllers/application.controller');
 const {
   createValidators,
@@ -19,6 +20,9 @@ router.use(authenticate);
 // Recruiter-only: applications for the recruiter's own jobs.
 // Defined before the :jobId routes to keep the URL shape unambiguous.
 router.get('/mine', authorize('recruiter'), listMyApplications);
+
+// Jobseeker-only: list the current user's own applications
+router.get('/my-applications', authorize('jobseeker'), listJobseekerApplications);
 
 // Jobseeker-only: apply to a job
 router.post('/', authorize('jobseeker'), createValidators, createApplication);

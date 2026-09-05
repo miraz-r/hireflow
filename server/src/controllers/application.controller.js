@@ -29,6 +29,9 @@ const createApplication = async (req, res, next) => {
     const application = await Application.create({
       jobId,
       userId: req.user.id,
+      coverLetter: req.body.coverLetter || '',
+      phone: req.body.phone || '',
+      resumeUrl: req.body.resumeUrl || '',
     });
 
     return res.status(201).json(application);
@@ -123,9 +126,45 @@ const listMyApplications = async (req, res, next) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// GET /api/applications/my-applications  — jobseeker sees their own applications
+// Returns the jobseeker's applications with populated job data.
+// ---------------------------------------------------------------------------
+const listJobseekerApplications = async (req, res, next) => {
+  try {
+    const applications = await Application.find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate('jobId', 'title company location workType employmentType experienceLevel category');
+
+    const result = applications.map((a) => ({
+      id: a.id,
+      status: a.status,
+      createdAt: a.createdAt,
+      updatedAt: a.updatedAt,
+      job: a.jobId
+        ? {
+            id: a.jobId._id,
+            title: a.jobId.title,
+            company: a.jobId.company,
+            location: a.jobId.location,
+            workType: a.jobId.workType,
+            employmentType: a.jobId.employmentType,
+            experienceLevel: a.jobId.experienceLevel,
+            category: a.jobId.category,
+          }
+        : null,
+    }));
+
+    return res.status(200).json({ applications: result });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   createApplication,
   getMyApplication,
   listMyApplications,
+  listJobseekerApplications,
 };
 
