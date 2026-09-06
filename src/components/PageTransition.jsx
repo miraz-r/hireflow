@@ -1,66 +1,79 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, cloneElement } from 'react';
 import { useLocation } from 'react-router-dom';
 import './PageTransition.css';
 
 export default function PageTransition({ children }) {
   const location = useLocation();
-  const [animKey, setAnimKey] = useState(0);
-  const [phase, setPhase] = useState('idle');
+  const [outgoingLocation, setOutgoingLocation] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const prevPathRef = useRef(location.pathname);
-  const animatingRef = useRef(false);
-  const timeoutRef = useRef(null);
+  const prevLocationRef = useRef(location);
+  const timerRef = useRef(null);
   const isInitialRef = useRef(true);
 
   useEffect(() => {
     if (isInitialRef.current) {
       isInitialRef.current = false;
-      prevPathRef.current = location.pathname;
+      prevLocationRef.current = location;
       return;
     }
 
-    if (location.pathname === prevPathRef.current) return;
+    const prevPathname = prevLocationRef.current.pathname;
+    const currentPathname = location.pathname;
 
-    prevPathRef.current = location.pathname;
+    if (prevPathname === currentPathname) {
+      prevLocationRef.current = location;
+      return;
+    }
 
-    if (animatingRef.current) return;
-    animatingRef.current = true;
+    const oldLocation = prevLocationRef.current;
+    prevLocationRef.current = location;
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    setPhase('exiting');
+    if (reducedMotion) {
+      setOutgoingLocation(null);
+      setIsTransitioning(false);
+      return;
+    }
 
-    // Exit phase duration — must match the CSS transition (100ms).
-    // Reduced motion skips the visual exit entirely.
-    const exitDuration = reducedMotion ? 0 : 100;
+    setOutgoingLocation(oldLocation);
+    setIsTransitioning(true);
 
-    timeoutRef.current = setTimeout(() => {
-      setPhase('idle');
-      setAnimKey((k) => k + 1);
-      animatingRef.current = false;
-    }, exitDuration);
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
+    timerRef.current = setTimeout(() => {
+      setOutgoingLocation(null);
+      setIsTransitioning(false);
+      timerRef.current = null;
+    }, 380);
   }, [location.pathname]);
 
-  const handleAnimEnd = () => {
-    if (phase === 'exiting') {
-      setPhase('idle');
-      setAnimKey((k) => k + 1);
-      animatingRef.current = false;
-    }
-  };
-
-  const className =
-    'page-transition' +
-    (phase === 'exiting' ? ' page-exit' : '') +
-    (animKey > 0 ? ' page-enter' : '');
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   return (
-    <div className={className} key={animKey} onAnimationEnd={handleAnimEnd}>
-      {children}
+    <div className="page-transition-wrapper">
+      {outgoingLocation && (
+        <div className="route-layer route-outgoing" aria-hidden="true">
+          {cloneElement(children, {
+            location: outgoingLocation,
+            key: `out-${outgoingLocation.pathname}-${outgoingLocation.search}`
+          })}
+        </div>
+      )}
+      <div className={`route-layer route-incoming${isTransitioning ? ' route-incoming--animating' : ''}`}>
+        {cloneElement(children, {
+          location,
+          key: `in-${location.pathname}-${location.search}`
+        })}
+      </div>
     </div>
   );
 }
