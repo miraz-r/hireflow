@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import Reveal from '../components/Reveal';
 import { CATEGORIES, RESOURCES, getResourcesByCategory } from '../data/resources';
 import './ResourcesPage.css';
 
@@ -150,6 +151,7 @@ export default function ResourcesPage() {
   return (
     <div className="resources-page">
       {/* 1. Hero */}
+      <Reveal>
       <section className="res-hero">
         <div className="container">
           <span className="res-hero-eyebrow">HireFlow Resources</span>
@@ -162,8 +164,10 @@ export default function ResourcesPage() {
           </p>
         </div>
       </section>
+      </Reveal>
 
       {/* 2. Featured Resource Grid */}
+      <Reveal>
       <section className="res-featured-section" aria-label="Featured resources">
         <div className="container">
           <div className="res-featured-grid">
@@ -173,8 +177,10 @@ export default function ResourcesPage() {
           </div>
         </div>
       </section>
+      </Reveal>
 
       {/* 3. Category Navigation */}
+      <Reveal>
       <section className="res-cat-nav-section">
         <div className="container">
           <nav className="res-cat-tabs" aria-label="Resource categories">
@@ -192,8 +198,10 @@ export default function ResourcesPage() {
           </nav>
         </div>
       </section>
+      </Reveal>
 
       {/* 4. Resource Article Grid */}
+      <Reveal>
       <section className="res-articles-section" aria-label="Resource articles">
         <div className="container">
           <div className="res-articles-grid">
@@ -222,8 +230,10 @@ export default function ResourcesPage() {
           </div>
         </div>
       </section>
+      </Reveal>
 
       {/* 5. Recent + Popular */}
+      <Reveal>
       <section className="res-recent-section" aria-label="Recent and popular resources">
         <div className="container">
           <div className="res-recent-layout">
@@ -255,8 +265,10 @@ export default function ResourcesPage() {
           </div>
         </div>
       </section>
+      </Reveal>
 
       {/* 6. Expertise Areas */}
+      <Reveal>
       <section className="res-expertise-section" aria-label="Resource expertise areas">
         <div className="container">
           <span className="res-section-label">RESOURCE FOCUS AREAS</span>
@@ -271,8 +283,10 @@ export default function ResourcesPage() {
           </div>
         </div>
       </section>
+      </Reveal>
 
       {/* 7. Newsletter / CTA */}
+      <Reveal>
       <section className="res-newsletter" aria-label="Newsletter subscription">
         <div className="container">
           <div className="res-newsletter-inner">
@@ -330,6 +344,7 @@ export default function ResourcesPage() {
           </div>
         </div>
       </section>
+      </Reveal>
     </div>
   );
 }

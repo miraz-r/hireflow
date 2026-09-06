@@ -1,4 +1,5 @@
 ﻿import { Link } from 'react-router-dom';
+import Reveal from '../components/Reveal';
 import './SalaryGuidePage.css';
 
 const SALARY_DATA = [
@@ -43,6 +44,7 @@ export default function SalaryGuidePage() {
       <section className="sg-hero">
         <div className="container">
           <div className="sg-hero-layout">
+            <Reveal>
             <div className="sg-hero-text">
               <span className="sg-hero-eyebrow">Compensation</span>
               <h1 className="sg-hero-title">Salary Guide</h1>
@@ -50,6 +52,7 @@ export default function SalaryGuidePage() {
                 Transparent salary benchmarks across roles, experience levels, and locations to help you negotiate with confidence.
               </p>
             </div>
+          </Reveal>
             <div className="sg-hero-visual" aria-hidden="true">
               <div className="sg-hero-stat-card">
                 <span className="sg-hero-stat-label">Avg. Senior Range</span>
@@ -78,6 +81,7 @@ export default function SalaryGuidePage() {
       </section>
 
       {/* Salary Table */}
+      <Reveal>
       <section className="sg-section sg-salary-section" aria-label="Salary data">
         <div className="container">
           <div className="sg-section-header">
@@ -139,8 +143,9 @@ export default function SalaryGuidePage() {
           </div>
         </div>
       </section>
+      </Reveal>
 
-      {/* Data Context */}
+      <Reveal>
       <section className="sg-section sg-context-section">
         <div className="container">
           <div className="sg-context-layout">
@@ -194,8 +199,10 @@ export default function SalaryGuidePage() {
           </p>
         </div>
       </section>
+      </Reveal>
 
       {/* How to Use */}
+      <Reveal>
       <section className="sg-section sg-steps-section">
         <div className="container">
           <div className="sg-section-header">
@@ -215,8 +222,10 @@ export default function SalaryGuidePage() {
           </div>
         </div>
       </section>
+      </Reveal>
 
       {/* CTA */}
+      <Reveal>
       <section className="sg-section sg-cta-section">
         <div className="container">
           <div className="sg-cta-card">
@@ -232,6 +241,7 @@ export default function SalaryGuidePage() {
           </div>
         </div>
       </section>
+      </Reveal>
     </div>
   );
 }

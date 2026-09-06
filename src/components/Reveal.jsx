@@ -40,7 +40,7 @@ export default function Reveal({ children, delay = 0, as: Tag = 'div', className
   return (
     <Tag
       ref={ref}
-      className={`reveal ${revealed ? 'reveal--in' : ''} ${className}`.trim()}
+      className={`reveal reveal-scroll ${revealed ? 'reveal--in' : ''} ${className}`.trim()}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}

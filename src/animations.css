@@ -3,6 +3,7 @@
    ========================================================= */
 
 /* --- Scroll reveal (driven by Reveal component) --- */
+/* --- Scroll reveal (driven by Reveal component) --- */
 .reveal {
   opacity: 0;
   transform: translateY(22px);
@@ -14,6 +15,64 @@
 .reveal--in {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* --- Scroll-driven reveal (CSS animation-timeline: view) --- */
+.reveal-scroll {
+  /* Safe default for browsers that don't support scroll-driven animation */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@supports (animation-timeline: view()) {
+  .reveal-scroll {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: revealSlideUp linear both;
+    animation-timeline: view();
+    animation-range: entry 8% cover 30%;
+  }
+}
+
+.reveal-scroll.reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fallback for browsers without scroll-driven animation support */
+@supports not (animation-timeline: view()) {
+  .reveal-scroll {
+    animation: none;
+    opacity: 1;
+    transform: translateY(0);
+    transition: none;
+  }
+  /* If the observer-based reveal is used, keep it smooth but safe */
+  .reveal-scroll.reveal--in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion disables both systems */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-scroll,
+  .reveal--in,
+  .reveal-scroll.reveal--in {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .hero-eyebrow,
+  .hero-headline,
+  .hero-subheadline,
+  .search-form,
+  .popular-searches,
+  .auth-page {
+    animation: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -65,6 +124,17 @@
 
 .eyebrow-dot {
   animation: pulseDot 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes revealSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes heroFadeUp {
