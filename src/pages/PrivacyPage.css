@@ -1,0 +1,336 @@
+/* =========================================================
+   PrivacyPage — editorial legal-document layout
+   ========================================================= */
+
+.privacy-page {
+  background-color: var(--color-bg-primary);
+  overflow-wrap: break-word;
+}
+
+/* =========================================================
+   1. HEADER — dark editorial hero matching Blog/About
+   ========================================================= */
+.privacy-header {
+  background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
+  padding: var(--space-20) 0 var(--space-16);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.privacy-header-glow {
+  position: absolute;
+  top: -30%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.06);
+  pointer-events: none;
+}
+
+.privacy-header-glow--secondary {
+  top: auto;
+  right: auto;
+  bottom: -20%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.privacy-title {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-4);
+  position: relative;
+  z-index: 1;
+}
+
+.privacy-date {
+  font-size: var(--font-size-sm);
+  color: rgba(221, 230, 255, 0.85);
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   2. TWO-COLUMN LAYOUT
+   ========================================================= */
+.privacy-layout {
+  display: flex;
+  gap: var(--space-16);
+  align-items: flex-start;
+  padding: var(--space-16) 0 var(--space-24);
+}
+
+/* =========================================================
+   3. TABLE OF CONTENTS — left column, sticky
+   ========================================================= */
+.privacy-toc {
+  width: 220px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 84px;
+}
+
+.privacy-toc-inner {
+  padding-right: var(--space-4);
+}
+
+.privacy-toc-heading {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-5);
+}
+
+.privacy-toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.privacy-toc-link {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  line-height: var(--line-height-snug);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.privacy-toc-link:hover {
+  color: var(--color-text-primary);
+}
+
+.privacy-toc-link--active {
+  color: var(--color-brand-primary);
+  border-left-color: var(--color-brand-primary);
+}
+
+/* =========================================================
+   4. MAIN CONTENT — right column
+   ========================================================= */
+.privacy-content {
+  flex: 1;
+  min-width: 0;
+  max-width: 680px;
+}
+
+.privacy-section {
+  scroll-margin-top: calc(68px + var(--space-8));
+}
+
+.privacy-section-heading {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-snug);
+  margin-bottom: var(--space-4);
+}
+
+.privacy-section-body {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* =========================================================
+   5. SECTION DIVIDERS
+   ========================================================= */
+.privacy-rule {
+  border: none;
+  border-top: 1px solid var(--color-border-default);
+  margin: var(--space-10) 0;
+}
+
+/* =========================================================
+   6. RESPONSIVE — Tablet (<=960px)
+   ========================================================= */
+@media (max-width: 960px) {
+  .privacy-toc {
+    width: 200px;
+  }
+
+  .privacy-layout {
+    gap: var(--space-10);
+  }
+}
+
+/* =========================================================
+   7. RESPONSIVE — Mobile (<=768px)
+   Stack TOC above content
+   ========================================================= */
+@media (max-width: 768px) {
+  .privacy-header {
+    padding: var(--space-16) 0 var(--space-10);
+  }
+
+  .privacy-title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .privacy-layout {
+    flex-direction: column;
+    gap: var(--space-10);
+    padding: var(--space-10) 0 var(--space-20);
+  }
+
+  .privacy-toc {
+    width: 100%;
+    position: static;
+  }
+
+  .privacy-toc-inner {
+    padding: var(--space-5);
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+  }
+
+  .privacy-toc-heading {
+    margin-bottom: var(--space-4);
+  }
+
+  .privacy-toc-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .privacy-toc-link {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+  }
+
+  .privacy-toc-link--active {
+    border-bottom-color: var(--color-brand-primary);
+    border-left-color: transparent;
+  }
+
+  .privacy-content {
+    max-width: 100%;
+  }
+
+  .privacy-section {
+    scroll-margin-top: calc(60px + var(--space-6));
+  }
+
+  .privacy-rule {
+    margin: var(--space-8) 0;
+  }
+}
+
+/* =========================================================
+   8. RESPONSIVE — Small mobile (<=480px)
+   ========================================================= */
+@media (max-width: 480px) {
+  .privacy-header {
+    padding: var(--space-12) 0 var(--space-8);
+  }
+
+  .privacy-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .privacy-section-heading {
+    font-size: var(--font-size-lg);
+  }
+
+  .privacy-rule {
+    margin: var(--space-6) 0;
+  }
+}
+
+/* =========================================================
+   9. RESPONSIVE — Ultra-small (<=360px)
+   ========================================================= */
+@media (max-width: 360px) {
+  .privacy-header {
+    padding: var(--space-10) 0 var(--space-6);
+  }
+
+  .privacy-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .privacy-date {
+    font-size: var(--font-size-xs);
+  }
+
+  .privacy-toc-inner {
+    padding: var(--space-4);
+  }
+
+  .privacy-toc-link {
+    font-size: var(--font-size-xs);
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .privacy-section-heading {
+    font-size: var(--font-size-base);
+  }
+
+  .privacy-section-body {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* =========================================================
+   10. RESPONSIVE — Narrow viewport (<=260px for 240px/220px)
+   ========================================================= */
+@media (max-width: 260px) {
+  .privacy-title {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-snug);
+  }
+
+  .privacy-date {
+    font-size: var(--font-size-xs);
+  }
+
+  .privacy-toc-inner {
+    padding: var(--space-3);
+  }
+
+  .privacy-toc-heading {
+    font-size: var(--font-size-2xs);
+  }
+
+  .privacy-toc-link {
+    font-size: var(--font-size-2xs);
+    padding: var(--space-1);
+  }
+
+  .privacy-section-heading {
+    font-size: var(--font-size-sm);
+  }
+
+  .privacy-section-body {
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+  }
+
+  .privacy-rule {
+    margin: var(--space-4) 0;
+  }
+}

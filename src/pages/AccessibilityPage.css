@@ -1,0 +1,324 @@
+/* =========================================================
+   AccessibilityPage — modern inclusion/product design
+   ========================================================= */
+
+.accessibility-page {
+  background-color: var(--color-bg-primary);
+  overflow-wrap: break-word;
+}
+
+/* Hero */
+.accessibility-hero {
+  background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
+  padding: var(--space-20) 0 var(--space-16);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.accessibility-hero-glow {
+  position: absolute;
+  top: -30%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.06);
+  pointer-events: none;
+}
+.accessibility-hero-glow--secondary {
+  top: auto;
+  right: auto;
+  bottom: -20%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.accessibility-hero-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-12);
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.accessibility-hero-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: var(--space-4);
+}
+
+.accessibility-hero-title {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: var(--line-height-tight);
+  max-width: 720px;
+  margin: 0 auto var(--space-5);
+}
+
+.accessibility-hero-desc {
+  font-size: var(--font-size-lg);
+  color: rgba(221, 230, 255, 0.85);
+  line-height: var(--line-height-relaxed);
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.accessibility-hero-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.accessibility-hero-visual-card {
+  width: 260px;
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(8px);
+  text-align: center;
+}
+
+.accessibility-hero-visual-label {
+  display: block;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: var(--space-3);
+}
+.accessibility-hero-visual-count {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+.accessibility-hero-visual-desc {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Sections */
+.accessibility-commitment,
+.accessibility-practices,
+.accessibility-known,
+.accessibility-feedback {
+  padding: var(--space-20) 0;
+}
+
+.accessibility-commitment {
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.accessibility-section-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-light);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
+}
+
+.accessibility-commitment-heading,
+.accessibility-practices-heading,
+.accessibility-known-heading,
+.accessibility-feedback-heading {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  max-width: 720px;
+  margin-bottom: var(--space-6);
+}
+
+.accessibility-commitment-body {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  max-width: 680px;
+}
+
+/* What we do — practices grid */
+.accessibility-practices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+}
+
+.accessibility-practice-card {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-secondary);
+  transition: box-shadow var(--transition-base), border-color var(--transition-base);
+}
+.accessibility-practice-card:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-border-strong);
+}
+
+.accessibility-practice-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-deep));
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-4);
+}
+
+.accessibility-practice-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-2);
+}
+
+.accessibility-practice-desc {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* Known limitations */
+.accessibility-known-card {
+  padding: var(--space-8);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-secondary);
+}
+
+.accessibility-known-body {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* Feedback / CTA */
+.accessibility-feedback {
+  padding-bottom: var(--space-24);
+}
+
+.accessibility-feedback-heading {
+  max-width: 640px;
+}
+
+.accessibility-feedback-desc {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  max-width: 640px;
+  margin-bottom: var(--space-8);
+}
+
+.accessibility-feedback-btn,
+.accessibility-return-btn {
+  display: inline-flex;
+}
+.accessibility-return-btn {
+  margin-top: var(--space-6);
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .accessibility-hero-layout {
+    grid-template-columns: 1fr;
+  }
+  .accessibility-hero-visual {
+    max-width: 260px;
+    margin: 0 auto;
+  }
+  .accessibility-practices-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .accessibility-hero {
+    padding: var(--space-16) 0 var(--space-12);
+  }
+  .accessibility-hero-title {
+    font-size: var(--font-size-4xl);
+  }
+  .accessibility-hero-desc {
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .accessibility-hero-title {
+    font-size: var(--font-size-3xl);
+  }
+  .accessibility-commitment-heading,
+  .accessibility-practices-heading,
+  .accessibility-known-heading,
+  .accessibility-feedback-heading {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+@media (max-width: 360px) {
+  .accessibility-hero {
+    padding: var(--space-12) 0 var(--space-8);
+  }
+  .accessibility-hero-title {
+    font-size: var(--font-size-2xl);
+  }
+  .accessibility-hero-desc {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 240px) {
+  .accessibility-hero-title {
+    font-size: var(--font-size-xl);
+  }
+  .accessibility-hero-desc,
+  .accessibility-commitment-body,
+  .accessibility-feedback-desc {
+    font-size: var(--font-size-sm);
+  }
+  .accessibility-commitment-heading,
+  .accessibility-practices-heading,
+  .accessibility-known-heading,
+  .accessibility-feedback-heading {
+    font-size: var(--font-size-lg);
+  }
+  .accessibility-practice-card {
+    padding: var(--space-4);
+  }
+  .accessibility-known-card {
+    padding: var(--space-5);
+  }
+}
