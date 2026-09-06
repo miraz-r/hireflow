@@ -28,7 +28,7 @@ const PAGES = {
 
   '/salary-guide': {
     title: 'Salary Guide',
-    eyebrow: 'Compensation',
+    eyebrow: 'For job seekers',
     hero: 'Transparent salary benchmarks across roles, experience levels, and locations to help you negotiate with confidence.',
     sections: [
       {
@@ -84,7 +84,7 @@ const PAGES = {
 
   '/career-advice': {
     title: 'Career Advice',
-    eyebrow: 'Guidance',
+    eyebrow: 'For job seekers',
     hero: 'Practical advice on resumes, interviews, and navigating your next career move from the HireFlow team.',
     sections: [
       {
@@ -104,8 +104,8 @@ const PAGES = {
   },
 
   '/pricing': {
-    title: 'Pricing',
-    eyebrow: 'Plans',
+    title: 'Simple, transparent pricing',
+    eyebrow: 'For every team',
     hero: 'Simple, transparent pricing for jobseekers and employers. Posting a job and applying are free to get started.',
     sections: [
       {
@@ -283,7 +283,7 @@ const PAGES = {
 
   '/press': {
     title: 'Press',
-    eyebrow: 'Media',
+    eyebrow: 'Newsroom',
     hero: 'Press releases, media kits, and contact information for journalists covering HireFlow.',
     sections: [
       {

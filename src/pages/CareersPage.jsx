@@ -120,7 +120,7 @@ export default function CareersPage() {
             <h2 className="careers-cta-heading">Ready to join us?</h2>
           </Reveal>
           <Reveal delay={80}>
-            <p className="careers-cta-desc">We are a small team working on something that matters.</p>
+            <p className="careers-cta-desc">Work on meaningful problems alongside people who care about craft.</p>
           </Reveal>
           <Reveal delay={160}>
             <Link to="/" className="btn btn-primary btn-lg">See open roles</Link>

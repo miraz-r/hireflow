@@ -33,7 +33,7 @@ export default function PressPage() {
         <div className="container press-hero-layout">
           <div className="press-hero-content">
             <Reveal>
-              <span className="press-hero-eyebrow">Media</span>
+              <span className="press-hero-eyebrow">Newsroom</span>
             </Reveal>
             <Reveal delay={80}>
               <h1 className="press-hero-title">Press</h1>
@@ -70,7 +70,7 @@ export default function PressPage() {
                 </h2>
                 <p className="press-inquiries-body">
                   For media inquiries, interview requests, or to request our brand assets,
-                  reach out to our press team. We respond to all legitimate press inquiries
+                  send us a message. We respond to all legitimate press inquiries
                   within one business day.
                 </p>
               </div>
@@ -97,7 +97,7 @@ export default function PressPage() {
           <Reveal>
             <span className="press-section-eyebrow">Recent coverage</span>
           </Reveal>
-          <h2 className="press-coverage-heading">Recent coverage</h2>
+          <h2 className="press-coverage-heading">What the press is saying about HireFlow</h2>
           <div className="press-coverage-grid">
             {COVERAGE.map((item, i) => (
               <Reveal key={item.source} delay={100 + i * 80}>
@@ -135,17 +135,16 @@ export default function PressPage() {
           <div className="press-cta-glow" aria-hidden="true" />
           <div className="press-cta-inner">
             <Reveal>
-              <h2 className="press-cta-heading">Get in touch</h2>
+              <h2 className="press-cta-heading">Learn more about HireFlow</h2>
             </Reveal>
             <Reveal delay={80}>
               <p className="press-cta-desc">
-                Have a story to cover or want to interview the HireFlow team?
-                We would love to hear from you.
+                Discover our mission, team, and the story behind the platform.
               </p>
             </Reveal>
             <Reveal delay={160}>
               <Link to="/about" className="btn btn-lg press-cta-btn">
-                Contact press team
+                About HireFlow
               </Link>
             </Reveal>
           </div>
