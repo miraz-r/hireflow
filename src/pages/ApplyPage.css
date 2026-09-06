@@ -55,7 +55,7 @@
   flex-shrink: 0;
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
-  color: #fff;
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -314,7 +314,7 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                className="auth-submit"
+                className="btn btn-primary btn-lg auth-submit"
                 disabled={submitting}
                 aria-busy={submitting}
               >

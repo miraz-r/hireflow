@@ -218,7 +218,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="auth-submit"
+                className="btn btn-primary btn-lg auth-submit"
                 disabled={submitting}
                 aria-busy={submitting}
               >

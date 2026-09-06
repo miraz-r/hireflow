@@ -46,7 +46,7 @@
   align-items: center;
   justify-content: center;
   background-color: var(--color-brand-primary);
-  color: white;
+  color: var(--color-text-inverse);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   border-radius: var(--radius-lg);

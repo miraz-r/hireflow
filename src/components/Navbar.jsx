@@ -117,7 +117,7 @@ export default function Navbar() {
           </Link>
           <div className="navbar-actions">
             <Link to="/login" className="sign-in-link">Sign in</Link>
-            <Link to="/register" className="sign-up-link">Sign up</Link>
+            <Link to="/register" className="sign-up-link btn btn-primary btn-sm">Sign up</Link>
           </div>
         </div>
       </header>
@@ -246,27 +246,22 @@ export default function Navbar() {
                     {switchLabel}
                   </button>
                   <div className="account-menu-divider" />
-                  <div className="account-menu-theme" role="group" aria-label="Theme selection">
-                    <span className="account-menu-theme-label">Appearance</span>
-                    <div className="account-menu-theme-buttons">
-                      <button
-                        type="button"
-                        className={`account-menu-theme-btn ${theme === 'light' ? 'active' : ''}`}
-                        onClick={() => updateTheme('light')}
-                        aria-pressed={theme === 'light'}
-                      >
-                        Light
-                      </button>
-                      <button
-                        type="button"
-                        className={`account-menu-theme-btn ${theme === 'dark' ? 'active' : ''}`}
-                        onClick={() => updateTheme('dark')}
-                        aria-pressed={theme === 'dark'}
-                      >
-                        Dark
-                      </button>
-                    </div>
-                  </div>
+                  <button
+                    type="button"
+                    className="account-menu-item account-menu-theme-toggle"
+                    role="menuitem"
+                    onClick={() => updateTheme(theme === 'dark' ? 'light' : 'dark')}
+                    aria-pressed={theme === 'dark'}
+                    aria-label="Toggle dark mode"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    Dark mode
+                    <span className="toggle-switch" aria-hidden="true">
+                      <span className={`toggle-thumb ${theme === 'dark' ? 'on' : ''}`} />
+                    </span>
+                  </button>
                   <div className="account-menu-divider" />
                   <button
                     type="button"
@@ -288,7 +283,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link to="/login" className="sign-in-link">Sign in</Link>
-              <Link to="/register" className="sign-up-link">Sign up</Link>
+              <Link to="/register" className="sign-up-link btn btn-primary btn-sm">Sign up</Link>
             </>
           )}
         </div>

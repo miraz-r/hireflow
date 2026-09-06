@@ -161,7 +161,7 @@
 .auth-input:focus {
   outline: none;
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px var(--color-brand-primary-light);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
   background-color: var(--color-bg-secondary);
 }
 
@@ -178,50 +178,7 @@
 /* ---------- Submit button ---------- */
 .auth-submit {
   width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
   margin-top: var(--space-2);
-  padding: var(--space-4) var(--space-6);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  line-height: 1;
-  color: var(--color-text-inverse);
-  background-color: var(--color-brand-primary);
-  border: none;
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    opacity var(--transition-fast);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-}
-
-.auth-submit:hover:not(:disabled) {
-  background-color: var(--color-brand-primary-hover);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
-  transform: translateY(-1px);
-}
-
-.auth-submit:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-}
-
-.auth-submit:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 3px var(--color-brand-primary-light),
-    0 1px 2px rgba(15, 23, 42, 0.08);
-}
-
-.auth-submit:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
 }
 
 .auth-spinner { animation: auth-spin 0.8s linear infinite; }
@@ -271,6 +228,11 @@
   background-color: var(--color-error-bg);
   color: #991B1B;
   border: 1px solid #FECACA;
+}
+
+[data-theme="dark"] .auth-alert-error {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .auth-alert-icon {
@@ -772,7 +734,7 @@
 
   .auth-submit {
     padding: var(--space-3) var(--space-4);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
   }
 
   .auth-visual-pane {

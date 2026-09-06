@@ -101,7 +101,7 @@
   flex-shrink: 0;
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
-  color: #fff;
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,6 +180,11 @@
   color: var(--color-error);
 }
 
+.saved-jobs-remove-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
 .saved-jobs-remove-btn:disabled {
   opacity: 0.6;
   cursor: default;
@@ -201,6 +206,11 @@
   background-color: var(--color-error-bg);
   color: #991b1b;
   border: 1px solid #fecaca;
+}
+
+[data-theme="dark"] .auth-alert-error {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 @media (max-width: 640px) {

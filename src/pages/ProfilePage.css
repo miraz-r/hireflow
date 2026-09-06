@@ -317,6 +317,14 @@
   margin: 0;
 }
 
+[data-theme="dark"] .profile-danger-header {
+  border-bottom-color: rgba(239, 68, 68, 0.3);
+}
+
+[data-theme="dark"] .profile-danger-title {
+  color: #fca5a5;
+}
+
 .profile-danger-body {
   display: flex;
   align-items: center;
@@ -333,26 +341,7 @@
   flex: 1;
 }
 
-.btn-danger {
-  background-color: var(--color-error);
-  color: var(--color-text-inverse);
-  padding: var(--space-3) var(--space-5);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-  white-space: nowrap;
-}
-
-.btn-danger:hover {
-  background-color: #dc2626;
-}
-
-.btn-danger:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+/* btn-danger is defined in the shared button system (index.css) */
 
 /* ---------- Delete confirmation modal ---------- */
 .modal-overlay {
@@ -374,6 +363,7 @@
 
 .modal-content {
   background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   max-width: 420px;
@@ -425,6 +415,16 @@
   border: 1px solid #a7f3d0;
 }
 
+[data-theme="dark"] .auth-alert-error {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+[data-theme="dark"] .auth-alert-success {
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
 /* ---------- Profile tabs ---------- */
 .profile-tabs {
   display: flex;
@@ -459,6 +459,11 @@
   background-color: var(--color-bg-tertiary);
 }
 
+.profile-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
 .profile-tab.active {
   color: var(--color-brand-primary);
   background-color: var(--color-brand-primary-light);
@@ -481,7 +486,7 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
-  color: #fff;
+  color: var(--color-text-inverse);
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   border: 3px solid var(--color-bg-secondary);
@@ -500,7 +505,7 @@
   height: 34px;
   border-radius: 50%;
   background-color: var(--color-brand-primary);
-  color: #fff;
+  color: var(--color-text-inverse);
   border: 2px solid var(--color-bg-secondary);
   display: flex;
   align-items: center;
@@ -514,6 +519,11 @@
 .profile-avatar-upload:hover {
   background-color: var(--color-brand-primary-hover);
   transform: scale(1.05);
+}
+
+.profile-avatar-upload:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .profile-avatar-upload input {
@@ -569,6 +579,11 @@
 .profile-link-remove:hover {
   color: var(--color-error);
   background-color: var(--color-error-bg);
+}
+
+.profile-link-remove:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .profile-link-add {
@@ -838,6 +853,19 @@ label.btn.disabled {
 }
 .rc-metric--green .rc-metric-value { color: #059669; }
 .rc-metric-progress-fill--green { background-color: #059669; }
+
+[data-theme="dark"] .rc-metric--indigo .rc-metric-icon {
+  background-color: rgba(99, 102, 241, 0.15);
+}
+[data-theme="dark"] .rc-metric--purple .rc-metric-icon {
+  background-color: rgba(124, 58, 237, 0.15);
+}
+[data-theme="dark"] .rc-metric--green .rc-metric-icon {
+  background-color: rgba(5, 150, 105, 0.15);
+}
+[data-theme="dark"] .rc-metric--blue .rc-metric-icon {
+  background-color: rgba(79, 70, 229, 0.15);
+}
 
 /* ── Panel Titles ──────────────────────────────────────────────── */
 .rc-panel-title {
@@ -1112,7 +1140,7 @@ label.btn.disabled {
   height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
-  color: #fff;
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1283,7 +1311,7 @@ label.btn.disabled {
   flex-shrink: 0;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
-  color: #fff;
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1377,6 +1405,9 @@ label.btn.disabled {
 .application-status--hired { background-color: var(--color-brand-secondary); color: #fff; }
 .application-status--rejected { background-color: var(--color-error-bg); color: #991b1b; }
 
+[data-theme="dark"] .application-status--offer { color: #6ee7b7; }
+[data-theme="dark"] .application-status--rejected { color: #fca5a5; }
+
 /* ── Legacy Application Card (jobseeker views) ─────────────────── */
 .application-card {
   display: grid;
@@ -1402,7 +1433,7 @@ label.btn.disabled {
   flex-shrink: 0;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
-  color: #fff;
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1539,7 +1570,7 @@ label.btn.disabled {
   flex-shrink: 0;
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
-  color: #fff;
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -69,7 +69,7 @@
   flex-shrink: 0;
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
-  color: #fff;
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -145,6 +145,11 @@
 .job-detail-save-btn:hover {
   color: var(--color-brand-primary);
   border-color: var(--color-brand-primary);
+}
+
+.job-detail-save-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .job-detail-save-btn.saved {

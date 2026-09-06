@@ -154,7 +154,7 @@ export default function ResourcesPage() {
       <Reveal>
       <section className="res-hero">
         <div className="container">
-          <span className="res-hero-eyebrow">HireFlow Resources</span>
+          <span className="res-hero-eyebrow">Career resources</span>
           <h1 className="res-hero-title">
             Your guide to every career move
           </h1>
@@ -334,7 +334,7 @@ export default function ResourcesPage() {
                 </div>
                 <button
                   type="submit"
-                  className="res-newsletter-btn"
+                  className="res-newsletter-btn btn btn-primary"
                   disabled={newsletterSubmitting}
                 >
                   {newsletterSubmitting ? 'Subscribing...' : 'Subscribe'}

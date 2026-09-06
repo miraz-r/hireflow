@@ -160,6 +160,11 @@
   border-color: rgba(79, 70, 229, 0.20);
 }
 
+[data-theme="dark"] .footer-social .footer-social-btn:hover,
+[data-theme="dark"] .footer-social a:hover {
+  border-color: var(--color-brand-primary);
+}
+
 @media (max-width: 1024px) {
   .footer-main {
     grid-template-columns: minmax(0, 1fr);

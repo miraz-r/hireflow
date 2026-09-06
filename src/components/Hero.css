@@ -211,31 +211,11 @@
 }
 
 .search-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
   padding: 12px 24px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-inverse);
-  background: linear-gradient(180deg, var(--color-brand-primary) 0%, var(--color-brand-primary-hover) 100%);
-  border: none;
   border-radius: 10px;
-  cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(79, 70, 229, 0.20), 0 6px 16px -4px rgba(79, 70, 229, 0.30);
-}
-
-.search-btn:hover {
-  background: linear-gradient(180deg, var(--color-brand-primary-hover) 0%, #3730A3 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.25), 0 10px 24px -4px rgba(79, 70, 229, 0.40);
-}
-
-.search-btn:active {
-  transform: translateY(0);
 }
 
 /* Popular Searches */
@@ -271,6 +251,11 @@
   color: var(--color-brand-primary);
   border-color: rgba(79, 70, 229, 0.40);
   background-color: var(--color-brand-primary-light);
+}
+
+.popular-tag:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .popular-tag--selected {

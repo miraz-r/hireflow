@@ -47,7 +47,6 @@
 
 .auth-submit {
   margin-top: var(--space-1);
-  padding: var(--space-3) var(--space-6);
 }
 
 /* ---------- Role selector ---------- */
@@ -210,7 +209,7 @@
 
   .auth-submit {
     padding: var(--space-3) var(--space-4);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
   }
 
   .auth-footnote {
@@ -229,4 +228,32 @@
   .auth-role-desc {
     font-size: 10px;
   }
+}
+
+/* ---------- Alert (error) ---------- */
+.auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+
+.auth-alert-error {
+  background-color: var(--color-error-bg);
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+.auth-alert-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--color-error);
+}
+
+[data-theme="dark"] .auth-alert-error {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
 }

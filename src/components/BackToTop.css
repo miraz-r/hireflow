@@ -33,7 +33,7 @@
 
 .back-to-top:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--color-brand-primary-light);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 @media (max-width: 480px) {

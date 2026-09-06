@@ -54,6 +54,11 @@
   box-shadow: var(--shadow-xs);
 }
 
+.category-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
 .category-card.active {
   border-color: var(--color-brand-primary);
   background-color: var(--color-brand-primary-light);
@@ -75,7 +80,7 @@
 
 .category-card.active .category-icon {
   background-color: var(--color-brand-primary);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .category-info {
