@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getResourceBySlug, getRelatedResources } from '../data/resources';
 import './ResourceDetailPage.css';
 
@@ -127,7 +127,7 @@ export default function ResourceDetailPage() {
             <p className="resource-detail-cta-desc">
               Browse thousands of opportunities on HireFlow and take the next step in your career.
             </p>
-            <Link to="/jobs" className="resource-detail-cta-btn">
+            <Link to="/" className="resource-detail-cta-btn">
               Browse Jobs
             </Link>
           </div>

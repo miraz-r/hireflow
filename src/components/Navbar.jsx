@@ -2,12 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
+import { useTheme } from '../hooks/useTheme';
 
 const LOGOUT_VISIBLE_MS = 750;
 const AVATAR_BASE = 'http://localhost:5000';
 
 export default function Navbar() {
   const { user, logout, toggleRole } = useAuth();
+  const { theme, updateTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -79,17 +81,18 @@ export default function Navbar() {
     if (window.location.pathname === '/') {
       const el = document.getElementById(id);
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
     }
     navigate('/', { state: { scrollTo: id } });
   };
 
-  const handleLogoClick = () => {
+  const handleLogoClick = (e) => {
     setMobileOpen(false);
     if (window.location.pathname === '/') {
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      e.preventDefault();
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   };
 
@@ -242,6 +245,28 @@ export default function Navbar() {
                     </svg>
                     {switchLabel}
                   </button>
+                  <div className="account-menu-divider" />
+                  <div className="account-menu-theme" role="group" aria-label="Theme selection">
+                    <span className="account-menu-theme-label">Appearance</span>
+                    <div className="account-menu-theme-buttons">
+                      <button
+                        type="button"
+                        className={`account-menu-theme-btn ${theme === 'light' ? 'active' : ''}`}
+                        onClick={() => updateTheme('light')}
+                        aria-pressed={theme === 'light'}
+                      >
+                        Light
+                      </button>
+                      <button
+                        type="button"
+                        className={`account-menu-theme-btn ${theme === 'dark' ? 'active' : ''}`}
+                        onClick={() => updateTheme('dark')}
+                        aria-pressed={theme === 'dark'}
+                      >
+                        Dark
+                      </button>
+                    </div>
+                  </div>
                   <div className="account-menu-divider" />
                   <button
                     type="button"
