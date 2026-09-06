@@ -17,6 +17,7 @@ import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import PageTransition from './components/PageTransition';
 import Toast from './components/Toast';
+import BackToTop from './components/BackToTop';
 import Reveal from './components/Reveal';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -29,7 +30,13 @@ import ResourceDetailPage from './pages/ResourceDetailPage';
 import SalaryGuidePage from './pages/SalaryGuidePage';
 import AboutPage from './pages/AboutPage';
 import BlogPage from './pages/BlogPage';
+import CareersPage from './pages/CareersPage';
+import PressPage from './pages/PressPage';
 import InfoPage from './pages/InfoPage';
+import AccessibilityPage from './pages/AccessibilityPage';
+import PrivacyPage from './pages/PrivacyPage';
+import CookiePolicyPage from './pages/CookiePolicyPage';
+import TermsPage from './pages/TermsPage';
 import './App.css';
 
 export default function App() {
@@ -277,17 +284,18 @@ export default function App() {
           <Route path="/solutions" element={<InfoPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog" element={<BlogPage />} />
-          <Route path="/careers" element={<InfoPage />} />
-          <Route path="/press" element={<InfoPage />} />
-          <Route path="/privacy" element={<InfoPage />} />
-          <Route path="/terms" element={<InfoPage />} />
-          <Route path="/cookie-policy" element={<InfoPage />} />
-          <Route path="/accessibility" element={<InfoPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+          <Route path="/press" element={<PressPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+          <Route path="/accessibility" element={<AccessibilityPage />} />
         </Routes>
         </PageTransition>
       </main>
       {location.pathname !== '/login' && location.pathname !== '/register' && <Footer />}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      <BackToTop />
     </div>
   );
 }
