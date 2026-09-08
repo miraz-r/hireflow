@@ -30,7 +30,7 @@ export default function Reveal({ children, delay = 0, as: Tag = 'div', className
           }
         });
       },
-      { threshold: 0.12 }
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
     );
 
     observer.observe(node);
@@ -40,7 +40,7 @@ export default function Reveal({ children, delay = 0, as: Tag = 'div', className
   return (
     <Tag
       ref={ref}
-      className={`reveal reveal-scroll ${revealed ? 'reveal--in' : ''} ${className}`.trim()}
+      className={`reveal ${revealed ? 'reveal--in' : ''} ${className}`.trim()}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}

@@ -71,25 +71,19 @@ export default function CareerAdvicePage() {
         <div className="ca-hero-glow ca-hero-glow--secondary" aria-hidden="true" />
         <div className="container ca-hero-layout">
           <div className="ca-hero-content">
-            <Reveal>
-              <span className="ca-hero-eyebrow">For job seekers</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="ca-hero-title">Career Advice</h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="ca-hero-desc">
-                Practical advice on resumes, interviews, and navigating your next career move from the HireFlow team.
-              </p>
-            </Reveal>
+            <span className="ca-hero-eyebrow">For job seekers</span>
+            <h1 className="ca-hero-title">Career Advice</h1>
+            <p className="ca-hero-desc">
+              Practical advice on resumes, interviews, and navigating your next career move from the HireFlow team.
+            </p>
           </div>
-          <Reveal delay={240} className="ca-hero-visual">
+          <div className="ca-hero-visual">
             <div className="ca-hero-visual-card">
               <span className="ca-hero-visual-label">Career guides</span>
               <div className="ca-hero-visual-count">{ARTICLES.length}</div>
               <span className="ca-hero-visual-desc">Practical guides for your next move</span>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 

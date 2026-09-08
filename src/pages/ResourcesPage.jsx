@@ -151,7 +151,6 @@ export default function ResourcesPage() {
   return (
     <div className="resources-page">
       {/* 1. Hero */}
-      <Reveal>
       <section className="res-hero">
         <div className="container">
           <span className="res-hero-eyebrow">Career resources</span>
@@ -164,7 +163,6 @@ export default function ResourcesPage() {
           </p>
         </div>
       </section>
-      </Reveal>
 
       {/* 2. Featured Resource Grid */}
       <Reveal>

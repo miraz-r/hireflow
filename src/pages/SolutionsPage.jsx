@@ -68,25 +68,19 @@ export default function SolutionsPage() {
         <div className="sol-hero-glow sol-hero-glow--secondary" aria-hidden="true" />
         <div className="container sol-hero-layout">
           <div className="sol-hero-content">
-            <Reveal>
-              <span className="sol-hero-eyebrow">How HireFlow helps</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="sol-hero-title">Solutions</h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="sol-hero-desc">
-                Learn how HireFlow powers hiring for companies of every size — from first job posting to building an entire team.
-              </p>
-            </Reveal>
+            <span className="sol-hero-eyebrow">How HireFlow helps</span>
+            <h1 className="sol-hero-title">Solutions</h1>
+            <p className="sol-hero-desc">
+              Learn how HireFlow powers hiring for companies of every size — from first job posting to building an entire team.
+            </p>
           </div>
-          <Reveal delay={240} className="sol-hero-visual">
+          <div className="sol-hero-visual">
             <div className="sol-hero-visual-card">
               <span className="sol-hero-visual-label">Solutions</span>
               <div className="sol-hero-visual-count">{SEGMENTS.length}</div>
               <span className="sol-hero-visual-desc">Solutions for growing teams</span>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 

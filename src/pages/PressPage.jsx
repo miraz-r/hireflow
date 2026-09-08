@@ -32,26 +32,18 @@ export default function PressPage() {
         <div className="press-hero-glow press-hero-glow--secondary" aria-hidden="true" />
         <div className="container press-hero-layout">
           <div className="press-hero-content">
-            <Reveal>
-              <span className="press-hero-eyebrow">Newsroom</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="press-hero-title">Press</h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="press-hero-desc">
-                Press releases, media kits, and contact information for journalists covering HireFlow.
-              </p>
-            </Reveal>
+            <span className="press-hero-eyebrow">Newsroom</span>
+            <h1 className="press-hero-title">Press</h1>
+            <p className="press-hero-desc">
+              Press releases, media kits, and contact information for journalists covering HireFlow.
+            </p>
           </div>
           <div className="press-hero-visual">
-            <Reveal delay={240}>
-              <div className="press-hero-visual-stat">
-                <div className="press-hero-visual-label">Publications</div>
-                <div className="press-hero-visual-count">3</div>
-                <div className="press-hero-visual-desc">In major outlets</div>
-              </div>
-            </Reveal>
+            <div className="press-hero-visual-stat">
+              <div className="press-hero-visual-label">Publications</div>
+              <div className="press-hero-visual-count">3</div>
+              <div className="press-hero-visual-desc">In major outlets</div>
+            </div>
           </div>
         </div>
       </section>

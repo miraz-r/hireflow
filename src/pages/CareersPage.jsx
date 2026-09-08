@@ -46,23 +46,17 @@ export default function CareersPage() {
         <div className="careers-hero-glow careers-hero-glow--secondary" aria-hidden="true" />
         <div className="container careers-hero-layout">
           <div className="careers-hero-content">
-            <Reveal>
-              <span className="careers-hero-eyebrow">Join the team</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="careers-hero-title">Build the future of work with us.</h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="careers-hero-desc">We are always looking for passionate people to join our team.</p>
-            </Reveal>
+            <span className="careers-hero-eyebrow">Join the team</span>
+            <h1 className="careers-hero-title">Build the future of work with us.</h1>
+            <p className="careers-hero-desc">We are always looking for passionate people to join our team.</p>
           </div>
-          <Reveal delay={240} className="careers-hero-visual">
+          <div className="careers-hero-visual">
             <div className="careers-hero-visual-card">
               <span className="careers-hero-visual-label">Open roles</span>
               <div className="careers-hero-visual-count">{POSITIONS.length}</div>
               <span className="careers-hero-visual-desc">positions</span>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 

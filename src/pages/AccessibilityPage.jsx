@@ -43,25 +43,19 @@ export default function AccessibilityPage() {
         <div className="accessibility-hero-glow accessibility-hero-glow--secondary" aria-hidden="true" />
         <div className="container accessibility-hero-layout">
           <div className="accessibility-hero-content">
-            <Reveal>
-              <span className="accessibility-hero-eyebrow">Inclusive by design</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="accessibility-hero-title">Accessibility</h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="accessibility-hero-desc">
-                Our commitment to making HireFlow usable and accessible for everyone.
-              </p>
-            </Reveal>
+            <span className="accessibility-hero-eyebrow">Inclusive by design</span>
+            <h1 className="accessibility-hero-title">Accessibility</h1>
+            <p className="accessibility-hero-desc">
+              Our commitment to making HireFlow usable and accessible for everyone.
+            </p>
           </div>
-          <Reveal delay={240} className="accessibility-hero-visual">
+          <div className="accessibility-hero-visual">
             <div className="accessibility-hero-visual-card">
               <span className="accessibility-hero-visual-label">Standard</span>
               <div className="accessibility-hero-visual-count">WCAG 2.1 AA</div>
               <span className="accessibility-hero-visual-desc">Our accessibility target</span>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 

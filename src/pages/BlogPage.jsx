@@ -73,23 +73,17 @@ export default function BlogPage() {
         <div className="blog-hero-glow blog-hero-glow--secondary" aria-hidden="true" />
         <div className="container blog-hero-layout">
           <div className="blog-hero-content">
-            <Reveal>
-              <span className="blog-hero-eyebrow">Insights</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="blog-hero-title">Ideas for your next career move.</h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="blog-hero-desc">Stories, guides, and hiring insights from the HireFlow team.</p>
-            </Reveal>
+            <span className="blog-hero-eyebrow">Insights</span>
+            <h1 className="blog-hero-title">Ideas for your next career move.</h1>
+            <p className="blog-hero-desc">Stories, guides, and hiring insights from the HireFlow team.</p>
           </div>
-          <Reveal delay={240} className="blog-hero-visual">
+          <div className="blog-hero-visual">
             <div className="blog-hero-visual-card">
               <span className="blog-hero-visual-label">Published</span>
               <div className="blog-hero-visual-count">{POSTS.length}</div>
               <span className="blog-hero-visual-desc">articles</span>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 

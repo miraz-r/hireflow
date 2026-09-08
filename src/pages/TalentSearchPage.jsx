@@ -73,25 +73,19 @@ export default function TalentSearchPage() {
         <div className="ts-hero-glow ts-hero-glow--secondary" aria-hidden="true" />
         <div className="container ts-hero-layout">
           <div className="ts-hero-content">
-            <Reveal>
-              <span className="ts-hero-eyebrow">For employers</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="ts-hero-title">Talent Search</h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="ts-hero-desc">
-                Find and connect with qualified candidates across engineering, design, product, and more.
-              </p>
-            </Reveal>
+            <span className="ts-hero-eyebrow">For employers</span>
+            <h1 className="ts-hero-title">Talent Search</h1>
+            <p className="ts-hero-desc">
+              Find and connect with qualified candidates across engineering, design, product, and more.
+            </p>
           </div>
-          <Reveal delay={240} className="ts-hero-visual">
+          <div className="ts-hero-visual">
             <div className="ts-hero-visual-card">
               <span className="ts-hero-visual-label">Talent Search</span>
               <div className="ts-hero-visual-count">{FEATURES.length}</div>
               <span className="ts-hero-visual-desc">Tools for finding candidates</span>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 

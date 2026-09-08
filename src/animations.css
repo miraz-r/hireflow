@@ -2,11 +2,12 @@
    Sitewide animations — Hero entrance + scroll-reveal system
    ========================================================= */
 
-/* --- Scroll reveal (driven by Reveal component) --- */
-/* --- Scroll reveal (driven by Reveal component) --- */
+/* --- Scroll reveal (IntersectionObserver-driven via Reveal component) ---
+   Elements start hidden and fade/slide in once when they scroll into view.
+   The Reveal component toggles the .reveal--in class via IntersectionObserver. */
 .reveal {
   opacity: 0;
-  transform: translateY(22px);
+  transform: translateY(20px);
   transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
@@ -17,9 +18,11 @@
   transform: translateY(0);
 }
 
-/* --- Scroll-driven reveal (CSS animation-timeline: view) --- */
+/* --- CSS-only scroll-driven reveal (animation-timeline: view) ---
+   Used on long-form pages (Privacy, Terms, Cookie Policy) where sections
+   should reveal as they enter the viewport without JS intervention.
+   Safe default: fully visible in browsers without scroll-driven animation. */
 .reveal-scroll {
-  /* Safe default for browsers that don't support scroll-driven animation */
   opacity: 1;
   transform: translateY(0);
 }
@@ -27,16 +30,11 @@
 @supports (animation-timeline: view()) {
   .reveal-scroll {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(20px);
     animation: revealSlideUp linear both;
     animation-timeline: view();
     animation-range: entry 8% cover 30%;
   }
-}
-
-.reveal-scroll.reveal--in {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* Fallback for browsers without scroll-driven animation support */
@@ -45,26 +43,20 @@
     animation: none;
     opacity: 1;
     transform: translateY(0);
-    transition: none;
-  }
-  /* If the observer-based reveal is used, keep it smooth but safe */
-  .reveal-scroll.reveal--in {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
-/* Reduced motion disables both systems */
+/* --- Reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
   .reveal,
-  .reveal-scroll,
   .reveal--in,
-  .reveal-scroll.reveal--in {
+  .reveal-scroll {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
     animation: none !important;
   }
+
   .hero-eyebrow,
   .hero-headline,
   .hero-subheadline,
@@ -73,20 +65,8 @@
   .auth-page {
     animation: none !important;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .hero-eyebrow,
-  .hero-headline,
-  .hero-subheadline,
-  .search-form,
-  .popular-searches,
-  .auth-page {
+  .jobs-grid .job-card {
     animation: none !important;
   }
 }
@@ -126,10 +106,11 @@
   animation: pulseDot 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* --- Keyframes --- */
 @keyframes revealSlideUp {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -173,11 +154,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .jobs-grid .job-card {
-    animation: none;
   }
 }

@@ -34,22 +34,16 @@ export default function AboutPage() {
         <div className="about-hero-glow about-hero-glow--secondary" aria-hidden="true" />
         <div className="container about-hero-layout">
           <div className="about-hero-content">
-            <Reveal>
-              <span className="about-hero-eyebrow">Our story</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="about-hero-title">
-                Building a better way to find work.
-              </h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="about-hero-desc">
-                HireFlow connects talent with opportunity. We are building a calmer,
-                clearer job marketplace for everyone.
-              </p>
-            </Reveal>
+            <span className="about-hero-eyebrow">Our story</span>
+            <h1 className="about-hero-title">
+              Building a better way to find work.
+            </h1>
+            <p className="about-hero-desc">
+              HireFlow connects talent with opportunity. We are building a calmer,
+              clearer job marketplace for everyone.
+            </p>
           </div>
-          <Reveal delay={240} className="about-hero-visual">
+          <div className="about-hero-visual">
             <div className="about-hero-visual-card">
               <span className="about-hero-visual-label">Built around</span>
               <div className="about-hero-visual-items">
@@ -59,7 +53,7 @@ export default function AboutPage() {
                 <span className="about-hero-visual-pill">Respect for people's time</span>
               </div>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 

@@ -58,25 +58,19 @@ export default function PricingPage() {
         <div className="pricing-hero-glow pricing-hero-glow--secondary" aria-hidden="true" />
         <div className="container pricing-hero-layout">
           <div className="pricing-hero-content">
-            <Reveal>
-              <span className="pricing-hero-eyebrow">For every team</span>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="pricing-hero-title">Simple, transparent pricing</h1>
-            </Reveal>
-            <Reveal delay={160}>
-              <p className="pricing-hero-desc">
-                Simple, transparent pricing for jobseekers and employers. Posting a job and applying are free to get started.
-              </p>
-            </Reveal>
+            <span className="pricing-hero-eyebrow">For every team</span>
+            <h1 className="pricing-hero-title">Simple, transparent pricing</h1>
+            <p className="pricing-hero-desc">
+              Simple, transparent pricing for jobseekers and employers. Posting a job and applying are free to get started.
+            </p>
           </div>
-          <Reveal delay={240} className="pricing-hero-visual">
+          <div className="pricing-hero-visual">
             <div className="pricing-hero-visual-card">
               <span className="pricing-hero-visual-label">Get started</span>
               <div className="pricing-hero-visual-price">$0</div>
               <span className="pricing-hero-visual-desc">Free to begin</span>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 
