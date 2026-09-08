@@ -1,0 +1,479 @@
+/* =========================================================
+   SolutionsPage — employer solutions/market segments identity
+   ========================================================= */
+
+.solutions-page {
+  background-color: var(--color-bg-primary);
+}
+
+/* =========================================================
+   1. HERO — dark editorial opening
+   ========================================================= */
+.sol-hero {
+  background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
+  padding: var(--space-20) 0 var(--space-16);
+  position: relative;
+  overflow: hidden;
+}
+
+.sol-hero-glow {
+  position: absolute;
+  top: -30%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.06);
+  pointer-events: none;
+}
+
+.sol-hero-glow--secondary {
+  top: auto;
+  right: auto;
+  bottom: -20%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.sol-hero-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.sol-hero-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: var(--space-4);
+}
+
+.sol-hero-title {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: var(--line-height-tight);
+  max-width: 580px;
+  margin-bottom: var(--space-5);
+}
+
+.sol-hero-desc {
+  font-size: var(--font-size-lg);
+  color: rgba(221, 230, 255, 0.85);
+  line-height: var(--line-height-relaxed);
+  max-width: 480px;
+}
+
+/* Hero visual — solution count */
+.sol-hero-visual {
+  display: flex;
+}
+
+.sol-hero-visual-card {
+  width: 100%;
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(8px);
+}
+
+.sol-hero-visual-label {
+  display: block;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: var(--space-4);
+}
+
+.sol-hero-visual-count {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+
+.sol-hero-visual-desc {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* =========================================================
+   2. SEGMENTS — asymmetric hierarchy
+   ========================================================= */
+.sol-segments {
+  padding: var(--space-20) 0 var(--space-16);
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.sol-section-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-light);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
+}
+
+.sol-segments-heading {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-12);
+}
+
+/* Primary segment — large block */
+.sol-segment-primary {
+  display: flex;
+  gap: var(--space-6);
+  padding: var(--space-8);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-6);
+}
+
+.sol-segment-primary-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  background-color: var(--color-brand-primary-light);
+  border-radius: var(--radius-lg);
+  color: var(--color-brand-primary);
+}
+
+.sol-segment-primary-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sol-segment-primary-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin: 0;
+}
+
+.sol-segment-primary-desc {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+  max-width: 560px;
+}
+
+/* Supporting segments — 2-column grid */
+.sol-segments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+.sol-segment-card {
+  padding: var(--space-6);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+}
+
+.sol-segment-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background-color: var(--color-brand-primary-light);
+  border-radius: var(--radius-md);
+  color: var(--color-brand-primary);
+  margin-bottom: var(--space-4);
+}
+
+.sol-segment-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.sol-segment-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* =========================================================
+   3. WHY HIREFLOW — editorial numbered list
+   ========================================================= */
+.sol-why {
+  padding: var(--space-20) 0 var(--space-24);
+}
+
+.sol-why-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: var(--space-12);
+  align-items: start;
+  margin-top: var(--space-6);
+}
+
+.sol-why-heading {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin: 0;
+}
+
+.sol-why-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sol-why-item {
+  display: flex;
+  gap: var(--space-5);
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.sol-why-item:last-child {
+  border-bottom: none;
+}
+
+.sol-why-marker {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  min-width: 28px;
+}
+
+.sol-why-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* =========================================================
+   4. CTA — deep indigo closing section
+   ========================================================= */
+.sol-cta {
+  background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);
+  border-radius: var(--radius-2xl);
+  margin: 0 var(--space-6) var(--space-16);
+  padding: var(--space-16) 0;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.sol-cta-glow {
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.08);
+  pointer-events: none;
+}
+
+.sol-cta-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.sol-cta-heading {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-4);
+}
+
+.sol-cta-desc {
+  font-size: var(--font-size-lg);
+  color: rgba(221, 230, 255, 0.8);
+  line-height: var(--line-height-relaxed);
+  max-width: 480px;
+  margin: 0 auto var(--space-8);
+}
+
+.sol-cta .btn {
+  background-color: #ffffff;
+  color: var(--color-brand-deep);
+  border: none;
+}
+
+.sol-cta .btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--color-brand-deep);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 960px) {
+  .sol-hero-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .sol-hero-visual {
+    max-width: 400px;
+  }
+
+  .sol-segments-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sol-segment-primary {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .sol-why-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+}
+
+@media (max-width: 768px) {
+  .sol-hero {
+    padding: var(--space-16) 0 var(--space-12);
+  }
+
+  .sol-hero-title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .sol-segments {
+    padding: var(--space-16) 0;
+  }
+
+  .sol-segments-heading {
+    font-size: var(--font-size-2xl);
+  }
+
+  .sol-why {
+    padding: var(--space-16) 0 var(--space-20);
+  }
+
+  .sol-why-heading {
+    font-size: var(--font-size-2xl);
+  }
+
+  .sol-cta {
+    margin: 0 var(--space-4) var(--space-12);
+    padding: var(--space-12) 0;
+    border-radius: var(--radius-xl);
+  }
+
+  .sol-cta-heading {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .sol-hero-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .sol-hero-desc {
+    font-size: var(--font-size-base);
+  }
+
+  .sol-segment-primary {
+    padding: var(--space-6);
+  }
+
+  .sol-segment-primary-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .sol-segment-card {
+    padding: var(--space-5);
+  }
+
+  .sol-segment-title {
+    font-size: var(--font-size-base);
+  }
+
+  .sol-why-item {
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4) 0;
+  }
+
+  .sol-why-marker {
+    min-width: auto;
+  }
+
+  .sol-cta {
+    margin: 0 var(--space-3) var(--space-10);
+    padding: var(--space-10) var(--space-4);
+  }
+
+  .sol-cta-heading {
+    font-size: var(--font-size-2xl);
+  }
+
+  .sol-cta-desc {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-5);
+  }
+}
+
+@media (max-width: 360px) {
+  .sol-hero {
+    padding: var(--space-12) 0 var(--space-10);
+  }
+
+  .sol-hero-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .sol-segments {
+    padding: var(--space-12) 0;
+  }
+
+  .sol-why {
+    padding: var(--space-12) 0 var(--space-16);
+  }
+
+  .sol-cta {
+    margin: 0 var(--space-3) var(--space-8);
+    padding: var(--space-8) var(--space-3);
+  }
+}

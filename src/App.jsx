@@ -33,6 +33,10 @@ import BlogPage from './pages/BlogPage';
 import CareersPage from './pages/CareersPage';
 import PressPage from './pages/PressPage';
 import InfoPage from './pages/InfoPage';
+import CareerAdvicePage from './pages/CareerAdvicePage';
+import PricingPage from './pages/PricingPage';
+import TalentSearchPage from './pages/TalentSearchPage';
+import SolutionsPage from './pages/SolutionsPage';
 import AccessibilityPage from './pages/AccessibilityPage';
 import PrivacyPage from './pages/PrivacyPage';
 import CookiePolicyPage from './pages/CookiePolicyPage';
@@ -278,10 +282,10 @@ export default function App() {
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/salary-guide" element={<SalaryGuidePage />} />
           <Route path="/saved-jobs" element={<SavedJobsPage />} />
-          <Route path="/career-advice" element={<InfoPage />} />
-          <Route path="/pricing" element={<InfoPage />} />
-          <Route path="/talent-search" element={<InfoPage />} />
-          <Route path="/solutions" element={<InfoPage />} />
+          <Route path="/career-advice" element={<CareerAdvicePage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/talent-search" element={<TalentSearchPage />} />
+          <Route path="/solutions" element={<SolutionsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/careers" element={<CareersPage />} />

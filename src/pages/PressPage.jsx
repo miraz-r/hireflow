@@ -130,26 +130,24 @@ export default function PressPage() {
       </section>
 
       {/* ── CTA ── */}
-      <div className="container">
-        <section className="press-cta">
-          <div className="press-cta-glow" aria-hidden="true" />
-          <div className="press-cta-inner">
-            <Reveal>
-              <h2 className="press-cta-heading">Learn more about HireFlow</h2>
-            </Reveal>
-            <Reveal delay={80}>
-              <p className="press-cta-desc">
-                Discover our mission, team, and the story behind the platform.
-              </p>
-            </Reveal>
-            <Reveal delay={160}>
-              <Link to="/about" className="btn btn-lg press-cta-btn">
-                About HireFlow
-              </Link>
-            </Reveal>
-          </div>
-        </section>
-      </div>
+      <section className="press-cta">
+        <div className="press-cta-glow" aria-hidden="true" />
+        <div className="container press-cta-inner">
+          <Reveal>
+            <h2 className="press-cta-heading">Learn more about HireFlow</h2>
+          </Reveal>
+          <Reveal delay={80}>
+            <p className="press-cta-desc">
+              Discover our mission, team, and the story behind the platform.
+            </p>
+          </Reveal>
+          <Reveal delay={160}>
+            <Link to="/about" className="btn btn-lg press-cta-btn">
+              About HireFlow
+            </Link>
+          </Reveal>
+        </div>
+      </section>
     </div>
   );
 }

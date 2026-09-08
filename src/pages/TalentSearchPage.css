@@ -1,0 +1,421 @@
+/* =========================================================
+   TalentSearchPage — employer/talent discovery identity
+   ========================================================= */
+
+.talent-search-page {
+  background-color: var(--color-bg-primary);
+}
+
+/* =========================================================
+   1. HERO — dark editorial opening
+   ========================================================= */
+.ts-hero {
+  background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
+  padding: var(--space-20) 0 var(--space-16);
+  position: relative;
+  overflow: hidden;
+}
+
+.ts-hero-glow {
+  position: absolute;
+  top: -30%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.06);
+  pointer-events: none;
+}
+
+.ts-hero-glow--secondary {
+  top: auto;
+  right: auto;
+  bottom: -20%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.ts-hero-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.ts-hero-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: var(--space-4);
+}
+
+.ts-hero-title {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: var(--line-height-tight);
+  max-width: 580px;
+  margin-bottom: var(--space-5);
+}
+
+.ts-hero-desc {
+  font-size: var(--font-size-lg);
+  color: rgba(221, 230, 255, 0.85);
+  line-height: var(--line-height-relaxed);
+  max-width: 480px;
+}
+
+/* Hero visual — tool count */
+.ts-hero-visual {
+  display: flex;
+}
+
+.ts-hero-visual-card {
+  width: 100%;
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(8px);
+}
+
+.ts-hero-visual-label {
+  display: block;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: var(--space-4);
+}
+
+.ts-hero-visual-count {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+
+.ts-hero-visual-desc {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* =========================================================
+   2. FEATURES — asymmetric composition
+   ========================================================= */
+.ts-features {
+  padding: var(--space-20) 0 var(--space-16);
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.ts-section-eyebrow {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-light);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
+}
+
+.ts-features-heading {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-12);
+}
+
+/* Primary feature — large block */
+.ts-feature-primary {
+  padding: var(--space-8);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-6);
+}
+
+.ts-feature-primary-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-brand-primary-light);
+  border-radius: var(--radius-lg);
+  color: var(--color-brand-primary);
+  margin-bottom: var(--space-5);
+}
+
+.ts-feature-primary-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin: 0 0 var(--space-3);
+}
+
+.ts-feature-primary-desc {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+  max-width: 560px;
+}
+
+/* Secondary features — 2x2 grid */
+.ts-features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+.ts-feature-card {
+  padding: var(--space-6);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+}
+
+.ts-feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-brand-primary-light);
+  border-radius: var(--radius-md);
+  color: var(--color-brand-primary);
+  margin-bottom: var(--space-4);
+}
+
+.ts-feature-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.ts-feature-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* =========================================================
+   3. HOW IT WORKS — connected explanatory section
+   ========================================================= */
+.ts-how {
+  padding: var(--space-20) 0 var(--space-24);
+}
+
+.ts-how-heading {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-6);
+}
+
+.ts-how-body {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  max-width: 640px;
+  margin: 0;
+}
+
+/* =========================================================
+   4. CTA — deep indigo closing section
+   ========================================================= */
+.ts-cta {
+  background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);
+  border-radius: var(--radius-2xl);
+  margin: 0 var(--space-6) var(--space-16);
+  padding: var(--space-16) 0;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.ts-cta-glow {
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.08);
+  pointer-events: none;
+}
+
+.ts-cta-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.ts-cta-heading {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: #ffffff;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-4);
+}
+
+.ts-cta-desc {
+  font-size: var(--font-size-lg);
+  color: rgba(221, 230, 255, 0.8);
+  line-height: var(--line-height-relaxed);
+  max-width: 480px;
+  margin: 0 auto var(--space-8);
+}
+
+.ts-cta .btn {
+  background-color: #ffffff;
+  color: var(--color-brand-deep);
+  border: none;
+}
+
+.ts-cta .btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--color-brand-deep);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 960px) {
+  .ts-hero-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .ts-hero-visual {
+    max-width: 400px;
+  }
+
+  .ts-features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .ts-hero {
+    padding: var(--space-16) 0 var(--space-12);
+  }
+
+  .ts-hero-title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .ts-features {
+    padding: var(--space-16) 0;
+  }
+
+  .ts-features-heading {
+    font-size: var(--font-size-2xl);
+  }
+
+  .ts-how {
+    padding: var(--space-16) 0 var(--space-20);
+  }
+
+  .ts-how-heading {
+    font-size: var(--font-size-2xl);
+  }
+
+  .ts-cta {
+    margin: 0 var(--space-4) var(--space-12);
+    padding: var(--space-12) 0;
+    border-radius: var(--radius-xl);
+  }
+
+  .ts-cta-heading {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .ts-hero-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .ts-hero-desc {
+    font-size: var(--font-size-base);
+  }
+
+  .ts-feature-primary {
+    padding: var(--space-6);
+  }
+
+  .ts-feature-primary-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .ts-feature-card {
+    padding: var(--space-5);
+  }
+
+  .ts-feature-title {
+    font-size: var(--font-size-base);
+  }
+
+  .ts-how-body {
+    font-size: var(--font-size-base);
+  }
+
+  .ts-cta {
+    margin: 0 var(--space-3) var(--space-10);
+    padding: var(--space-10) var(--space-4);
+  }
+
+  .ts-cta-heading {
+    font-size: var(--font-size-2xl);
+  }
+
+  .ts-cta-desc {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-5);
+  }
+}
+
+@media (max-width: 360px) {
+  .ts-hero {
+    padding: var(--space-12) 0 var(--space-10);
+  }
+
+  .ts-hero-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .ts-features {
+    padding: var(--space-12) 0;
+  }
+
+  .ts-how {
+    padding: var(--space-12) 0 var(--space-16);
+  }
+
+  .ts-cta {
+    margin: 0 var(--space-3) var(--space-8);
+    padding: var(--space-8) var(--space-3);
+  }
+}

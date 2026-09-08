@@ -62,7 +62,9 @@ const publicLinks = {
     { label: 'Find Jobs', to: '#jobs' },
     { label: 'Companies', to: '#companies' },
     { label: 'Salary Guide', to: '/salary-guide' },
-    { label: 'Resources', to: '/resources' }
+    { label: 'Resources', to: '/resources' },
+    { label: 'Pricing', to: '/pricing' },
+    { label: 'Career Advice', to: '/career-advice' }
   ],
   company: [
     { label: 'About Us', to: '/about' },
@@ -83,8 +85,7 @@ const jobseekerLinks = {
   candidates: [
     { label: 'Profile', to: '/profile' },
     { label: 'Saved Jobs', to: '/saved-jobs' },
-    { label: 'Applications', to: '/profile?tab=my-applications' },
-    { label: 'Career Advice', to: '/career-advice' }
+    { label: 'Applications', to: '/profile?tab=my-applications' }
   ],
   company: publicLinks.company,
   legal: publicLinks.legal
@@ -95,7 +96,6 @@ const recruiterLinks = {
   employers: [
     { label: 'Profile', to: '/profile' },
     { label: 'Post a Job', to: '/profile?tab=post' },
-    { label: 'Pricing', to: '/pricing' },
     { label: 'Talent Search', to: '/talent-search' },
     { label: 'Solutions', to: '/solutions' }
   ],
