@@ -63,13 +63,9 @@ export default function AccessibilityPage() {
         <div className="container">
           <Reveal>
             <span className="accessibility-section-eyebrow">Our commitment</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="accessibility-commitment-heading">
               Accessibility is not an afterthought.
             </h2>
-          </Reveal>
-          <Reveal delay={160}>
             <p className="accessibility-commitment-body">
               HireFlow is committed to ensuring digital accessibility for people with disabilities. We continually improve the user experience for everyone and apply relevant accessibility standards at every stage of design and development. If you experience any difficulty using HireFlow or have suggestions for improving accessibility, please contact us at <a href="mailto:accessibility@hireflow.com">accessibility@hireflow.com</a>. We take all feedback seriously and respond within two business days.
             </p>
@@ -81,8 +77,6 @@ export default function AccessibilityPage() {
         <div className="container">
           <Reveal>
             <span className="accessibility-section-eyebrow">What we do</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="accessibility-practices-heading">Practices that guide our work.</h2>
           </Reveal>
           <div className="accessibility-practices-grid">
@@ -103,11 +97,7 @@ export default function AccessibilityPage() {
         <div className="container">
           <Reveal>
             <span className="accessibility-section-eyebrow">Transparency</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="accessibility-known-heading">Known limitations.</h2>
-          </Reveal>
-          <Reveal delay={160}>
             <div className="accessibility-known-card">
               <p className="accessibility-known-body">
                 While we strive for full accessibility, some legacy content may not yet meet our target standards. We are actively working to address these gaps. If you encounter a barrier, please let us know — your feedback directly shapes our priorities.
@@ -121,18 +111,12 @@ export default function AccessibilityPage() {
         <div className="container">
           <Reveal>
             <h2 className="accessibility-feedback-heading">We want to hear from you.</h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="accessibility-feedback-desc">
               Your experience matters. If you have suggestions for improving accessibility on HireFlow, contact our team at <a href="mailto:accessibility@hireflow.com">accessibility@hireflow.com</a>. We respond within two business days and use every message to guide our priorities.
             </p>
-          </Reveal>
-          <Reveal delay={160}>
             <a href="mailto:accessibility@hireflow.com" className="btn btn-primary btn-lg accessibility-feedback-btn">
               Send accessibility feedback
             </a>
-          </Reveal>
-          <Reveal delay={240}>
             <Link to="/" className="btn btn-secondary btn-lg accessibility-return-btn">Return to homepage</Link>
           </Reveal>
         </div>

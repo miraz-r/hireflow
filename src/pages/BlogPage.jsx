@@ -92,8 +92,6 @@ export default function BlogPage() {
         <div className="container">
           <Reveal>
             <span className="blog-section-eyebrow">Featured</span>
-          </Reveal>
-          <Reveal delay={80}>
             <div className="blog-featured-card">
               <div className="blog-featured-image" style={{ backgroundImage: `url(${FEATURED.image})` }} role="img" aria-label={FEATURED.title} />
               <div className="blog-featured-content">
@@ -182,11 +180,7 @@ export default function BlogPage() {
         <div className="container blog-cta-inner">
           <Reveal>
             <h2 className="blog-cta-heading">Ready to put what you learned into practice?</h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="blog-cta-desc">Find roles that match your skills and goals.</p>
-          </Reveal>
-          <Reveal delay={160}>
             <Link to="/" className="btn btn-primary btn-lg">Find a job</Link>
           </Reveal>
         </div>

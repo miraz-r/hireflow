@@ -62,13 +62,9 @@ export default function AboutPage() {
         <div className="container">
           <Reveal>
             <span className="about-section-eyebrow">Our mission</span>
-          </Reveal>
-          <Reveal delay={80}>
             <blockquote className="about-mission-statement">
               Job searching should not feel like a second job.
             </blockquote>
-          </Reveal>
-          <Reveal delay={160}>
             <p className="about-mission-body">
               We started HireFlow because we believed the hiring process could be
               better. More transparent for candidates, more efficient for employers,
@@ -112,15 +108,11 @@ export default function AboutPage() {
             <h2 className="about-cta-heading">
               Help us build a better way to work.
             </h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="about-cta-desc">
               We are a small team working on something that matters. If you care
               about craft and want to do meaningful work, we would like to hear
               from you.
             </p>
-          </Reveal>
-          <Reveal delay={160}>
             <Link to="/careers" className="btn btn-primary btn-lg">
               Join the team
             </Link>

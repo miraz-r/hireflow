@@ -65,8 +65,6 @@ export default function CareersPage() {
         <div className="container">
           <Reveal>
             <span className="careers-section-eyebrow">Open positions</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="careers-section-heading">Roles we're hiring for.</h2>
           </Reveal>
           <div className="careers-positions-list">
@@ -89,8 +87,6 @@ export default function CareersPage() {
         <div className="container">
           <Reveal>
             <span className="careers-section-eyebrow">What we offer</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="careers-section-heading">More than a job.</h2>
           </Reveal>
           <div className="careers-benefits-grid">
@@ -112,11 +108,7 @@ export default function CareersPage() {
         <div className="container careers-cta-inner">
           <Reveal>
             <h2 className="careers-cta-heading">Ready to join us?</h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="careers-cta-desc">Work on meaningful problems alongside people who care about craft.</p>
-          </Reveal>
-          <Reveal delay={160}>
             <Link to="/" className="btn btn-primary btn-lg">See open roles</Link>
           </Reveal>
         </div>

@@ -90,8 +90,6 @@ export default function PricingPage() {
         <div className="container">
           <Reveal>
             <span className="pricing-section-eyebrow">Plans</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="pricing-tiers-heading">Choose your plan</h2>
           </Reveal>
           <div className="pricing-tiers-grid">
@@ -160,13 +158,9 @@ export default function PricingPage() {
         <div className="container pricing-cta-inner">
           <Reveal>
             <h2 className="pricing-cta-heading">Start building your team today.</h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="pricing-cta-desc">
               Join thousands of companies already using HireFlow to find and hire great people.
             </p>
-          </Reveal>
-          <Reveal delay={160}>
             <Link to="/register" className="btn btn-primary btn-lg">
               Get started
             </Link>

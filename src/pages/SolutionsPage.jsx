@@ -89,8 +89,6 @@ export default function SolutionsPage() {
         <div className="container">
           <Reveal>
             <span className="sol-section-eyebrow">Built for every team</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="sol-segments-heading">Choose the solution that fits your stage.</h2>
           </Reveal>
 
@@ -125,14 +123,10 @@ export default function SolutionsPage() {
         <div className="container">
           <Reveal>
             <span className="sol-section-eyebrow">Why HireFlow</span>
-          </Reveal>
-          <div className="sol-why-layout">
-            <Reveal delay={80}>
+            <div className="sol-why-layout">
               <div className="sol-why-heading-area">
                 <h2 className="sol-why-heading">Why companies choose HireFlow</h2>
               </div>
-            </Reveal>
-            <Reveal delay={160}>
               <ol className="sol-why-list">
                 {REASONS.map((reason, i) => (
                   <li key={i} className="sol-why-item">
@@ -141,8 +135,8 @@ export default function SolutionsPage() {
                   </li>
                 ))}
               </ol>
-            </Reveal>
-          </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -152,13 +146,9 @@ export default function SolutionsPage() {
         <div className="container sol-cta-inner">
           <Reveal>
             <h2 className="sol-cta-heading">Get started today.</h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="sol-cta-desc">
               Join thousands of companies already using HireFlow to find and hire great people.
             </p>
-          </Reveal>
-          <Reveal delay={160}>
             <Link to="/register" className="btn btn-primary btn-lg">
               Get started today
             </Link>

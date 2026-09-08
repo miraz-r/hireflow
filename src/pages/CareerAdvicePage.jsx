@@ -121,8 +121,6 @@ export default function CareerAdvicePage() {
         <div className="container">
           <Reveal>
             <span className="ca-section-eyebrow">All guides</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="ca-articles-heading">Practical guidance for every stage.</h2>
           </Reveal>
           <div className="ca-articles-grid">
@@ -148,13 +146,9 @@ export default function CareerAdvicePage() {
         <div className="container ca-cta-inner">
           <Reveal>
             <h2 className="ca-cta-heading">Find your next role.</h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="ca-cta-desc">
               Start browsing open positions and put your new skills into action.
             </p>
-          </Reveal>
-          <Reveal delay={160}>
             <Link to="/" className="btn btn-primary btn-lg">
               Find your next opportunity
             </Link>

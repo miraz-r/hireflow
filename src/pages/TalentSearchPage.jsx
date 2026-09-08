@@ -94,8 +94,6 @@ export default function TalentSearchPage() {
         <div className="container">
           <Reveal>
             <span className="ts-section-eyebrow">Features</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="ts-features-heading">What you get</h2>
           </Reveal>
 
@@ -128,11 +126,7 @@ export default function TalentSearchPage() {
         <div className="container">
           <Reveal>
             <span className="ts-section-eyebrow">How it works</span>
-          </Reveal>
-          <Reveal delay={80}>
             <h2 className="ts-how-heading">How Talent Search works</h2>
-          </Reveal>
-          <Reveal delay={160}>
             <p className="ts-how-body">
               Post a job or search our candidate database directly. Our matching algorithm surfaces the most relevant profiles based on skills, experience, and preferences. Reach out to top candidates and manage your entire hiring pipeline in one place.
             </p>
@@ -146,13 +140,9 @@ export default function TalentSearchPage() {
         <div className="container ts-cta-inner">
           <Reveal>
             <h2 className="ts-cta-heading">Start building your team.</h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="ts-cta-desc">
               Post your first job and start connecting with qualified candidates today.
             </p>
-          </Reveal>
-          <Reveal delay={160}>
             <Link to="/profile?tab=post" className="btn btn-primary btn-lg">
               Post your first job
             </Link>

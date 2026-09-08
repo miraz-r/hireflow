@@ -88,8 +88,8 @@ export default function PressPage() {
         <div className="container">
           <Reveal>
             <span className="press-section-eyebrow">Recent coverage</span>
+            <h2 className="press-coverage-heading">What the press is saying about HireFlow</h2>
           </Reveal>
-          <h2 className="press-coverage-heading">What the press is saying about HireFlow</h2>
           <div className="press-coverage-grid">
             {COVERAGE.map((item, i) => (
               <Reveal key={item.source} delay={100 + i * 80}>
@@ -127,13 +127,9 @@ export default function PressPage() {
         <div className="container press-cta-inner">
           <Reveal>
             <h2 className="press-cta-heading">Learn more about HireFlow</h2>
-          </Reveal>
-          <Reveal delay={80}>
             <p className="press-cta-desc">
               Discover our mission, team, and the story behind the platform.
             </p>
-          </Reveal>
-          <Reveal delay={160}>
             <Link to="/about" className="btn btn-lg press-cta-btn">
               About HireFlow
             </Link>
