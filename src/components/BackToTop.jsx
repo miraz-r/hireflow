@@ -14,11 +14,16 @@ export default function BackToTop() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const scrollToTop = () => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, left: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+  };
+
   return (
     <button
       type="button"
       className={`back-to-top ${visible ? 'back-to-top--visible' : ''}`}
-      onClick={() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })}
+      onClick={scrollToTop}
       aria-label="Back to top"
     >
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

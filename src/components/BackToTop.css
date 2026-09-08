@@ -16,7 +16,7 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(12px);
-  transition: opacity 250ms ease, transform 250ms ease, background-color var(--transition-fast);
+  transition: opacity 250ms ease, transform 250ms ease, background-color var(--transition-fast), box-shadow var(--transition-fast);
   cursor: pointer;
 }
 

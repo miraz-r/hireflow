@@ -1,69 +1,80 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
+function getScrollBehavior() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ? 'auto'
+    : 'smooth';
+}
+
+function scrollToElement(id, behavior, maxRetries, retryDelay) {
+  let attempts = 0;
+  const tryScroll = () => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior, block: 'start' });
+      return;
+    }
+    if (attempts < maxRetries) {
+      attempts++;
+      setTimeout(tryScroll, retryDelay);
+    }
+  };
+  tryScroll();
+}
+
 export default function ScrollToTop() {
   const { pathname, hash, state } = useLocation();
-  const previousPathname = useRef(pathname);
-  const previousHash = useRef(hash);
+  const prevPathname = useRef(pathname);
+  const prevHash = useRef(hash);
 
   useEffect(() => {
-    // If navigating to a new pathname (cross-page), always scroll to top first.
-    // Then, if there's a hash, scroll to the target section after render.
-    if (pathname !== previousPathname.current) {
-      previousPathname.current = pathname;
-      previousHash.current = hash;
+    const behavior = getScrollBehavior();
 
-      // If state has scrollTo (from Navbar/Footer anchor links), skip auto-top
-      // because the target component will handle it.
-      if (state?.scrollTo) {
-        // Wait for render then scroll to target.
-        const id = state.scrollTo;
-        const attemptScroll = () => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          } else {
-            // If element not yet rendered, retry briefly.
-            setTimeout(attemptScroll, 100);
-          }
-        };
-        // Small delay to allow PageTransition render.
-        setTimeout(attemptScroll, 150);
-        return;
-      }
+    // CASE: State-based navigation (from Navbar/Footer anchor links)
+    if (state?.scrollTo && pathname === prevPathname.current) {
+      // Same-route state navigation — scroll to target directly
+      scrollToElement(state.scrollTo, behavior, 10, 100);
+      prevHash.current = hash;
+      return;
+    }
 
-      // Cross-page, no hash: scroll to top immediately.
-      if (!hash) {
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      } else {
-        // Cross-page with hash: scroll to top first, then target after render.
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-        const id = hash.replace('#', '');
-        const attemptScroll = () => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          } else {
-            setTimeout(attemptScroll, 100);
-          }
-        };
-        setTimeout(attemptScroll, 200);
+    if (state?.scrollTo && pathname !== prevPathname.current) {
+      // Cross-route state navigation — wait for render then scroll to target
+      prevPathname.current = pathname;
+      prevHash.current = hash;
+      scrollToElement(state.scrollTo, behavior, 10, 100);
+      return;
+    }
+
+    // CASE: Same pathname, hash changed (same-page anchor navigation)
+    if (pathname === prevPathname.current) {
+      if (hash !== prevHash.current) {
+        prevHash.current = hash;
+        if (hash) {
+          const id = hash.replace('#', '');
+          scrollToElement(id, behavior, 5, 100);
+        } else {
+          // Hash removed — scroll to top
+          window.scrollTo({ top: 0, left: 0, behavior });
+        }
       }
       return;
     }
 
-    // Same pathname, hash changed (same-page anchor navigation)
-    if (hash !== previousHash.current) {
-      previousHash.current = hash;
-      if (hash) {
-        const id = hash.replace('#', '');
-        const el = document.getElementById(id);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      } else {
-        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      }
+    // CASE: Cross-page navigation
+    prevPathname.current = pathname;
+    prevHash.current = hash;
+
+    if (hash) {
+      // Cross-page with hash — wait for destination to render, then scroll to target.
+      // Do NOT scroll to top first; let the new page render at top naturally,
+      // then smooth-scroll to the target section.
+      const id = hash.replace('#', '');
+      scrollToElement(id, behavior, 10, 100);
+    } else {
+      // Cross-page without hash — scroll to top
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
   }, [pathname, hash, state]);
 

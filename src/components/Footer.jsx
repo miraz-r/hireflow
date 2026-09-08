@@ -6,33 +6,75 @@ function FooterLink({ to, children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleAnchor = (e, hash) => {
+  // Same-page anchor: /#jobs, #companies
+  const handleSamePageAnchor = (e, hash) => {
+    e.preventDefault();
     const id = hash.replace('#', '');
     if (location.pathname === '/') {
-      e.preventDefault();
       const el = document.getElementById(id);
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
     }
-    e.preventDefault();
+    // Not on homepage or element missing — navigate to homepage with anchor intent
     navigate('/', { state: { scrollTo: id } });
   };
 
-  const handlePageLink = (e, path) => {
-    if (location.pathname === path) {
-      e.preventDefault();
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    }
+  // Cross-page anchor: /about#team
+  const handleCrossPageAnchor = (e, path, hash) => {
+    e.preventDefault();
+    const id = hash.replace('#', '');
+    navigate(`${path}${hash}`, { state: { scrollTo: id } });
   };
 
+  // Same-page root link: clicking /about while on /about
+  const handleSamePageRoot = (e, path) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  };
+
+  // Pure hash link: #jobs
   if (to.startsWith('#')) {
     return (
-      <a href={to} onClick={(e) => handleAnchor(e, to)}>{children}</a>
+      <a href={to} onClick={(e) => handleSamePageAnchor(e, to)}>{children}</a>
     );
   }
-  return <Link to={to} onClick={(e) => handlePageLink(e, to)}>{children}</Link>;
+
+  // Cross-page anchor: /about#team
+  const hashIndex = to.indexOf('#');
+  if (hashIndex !== -1) {
+    const path = to.slice(0, hashIndex);
+    const hash = to.slice(hashIndex);
+    return (
+      <Link
+        to={to}
+        onClick={(e) => {
+          if (location.pathname === path) {
+            // Same page, different hash — scroll to target
+            e.preventDefault();
+            const id = hash.replace('#', '');
+            const el = document.getElementById(id);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          } else {
+            // Cross-page — navigate with hash preserved
+            handleCrossPageAnchor(e, path, hash);
+          }
+        }}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  // Root page link: /about, /blog
+  return <Link to={to} onClick={(e) => {
+    if (location.pathname === to) {
+      handleSamePageRoot(e, to);
+    }
+  }}>{children}</Link>;
 }
 
 function FooterSocial({ label, url }) {
