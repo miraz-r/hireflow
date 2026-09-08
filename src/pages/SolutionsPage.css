@@ -113,7 +113,7 @@
    2. SEGMENTS — asymmetric hierarchy
    ========================================================= */
 .sol-segments {
-  padding: var(--space-20) 0 var(--space-16);
+  padding: var(--space-20) 0 var(--space-20);
   background-color: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border-default);
   border-bottom: 1px solid var(--color-border-default);
@@ -149,7 +149,7 @@
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .sol-segment-primary-icon {
@@ -261,7 +261,7 @@
 .sol-why-item {
   display: flex;
   gap: var(--space-5);
-  padding: var(--space-5) 0;
+  padding: var(--space-6) 0;
   border-bottom: 1px solid var(--color-border-default);
 }
 

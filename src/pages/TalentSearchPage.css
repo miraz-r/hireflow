@@ -113,7 +113,7 @@
    2. FEATURES — asymmetric composition
    ========================================================= */
 .ts-features {
-  padding: var(--space-20) 0 var(--space-16);
+  padding: var(--space-20) 0 var(--space-20);
   background-color: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border-default);
   border-bottom: 1px solid var(--color-border-default);
@@ -147,7 +147,7 @@
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .ts-feature-primary-icon {
@@ -222,7 +222,7 @@
    3. HOW IT WORKS — connected explanatory section
    ========================================================= */
 .ts-how {
-  padding: var(--space-20) 0 var(--space-24);
+  padding: var(--space-20) 0 var(--space-16);
 }
 
 .ts-how-heading {

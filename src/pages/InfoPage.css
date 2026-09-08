@@ -27,12 +27,12 @@
 
 /* --- Content container --- */
 .info-page-content {
-  padding: var(--space-16) 0 var(--space-24);
+  padding: var(--space-12) 0 var(--space-20);
 }
 
 /* --- Sections --- */
 .info-section {
-  margin-bottom: var(--space-16);
+  margin-bottom: var(--space-12);
 }
 
 .info-section:last-child {
