@@ -321,6 +321,16 @@
     gap: var(--space-8);
   }
 
+  .careers-hero-content {
+    text-align: center;
+  }
+
+  .careers-hero-title,
+  .careers-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .careers-hero-visual {
     max-width: 300px;
     margin: 0 auto;

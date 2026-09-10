@@ -273,8 +273,19 @@
     gap: var(--space-8);
   }
 
+  .about-hero-content {
+    text-align: center;
+  }
+
+  .about-hero-title,
+  .about-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .about-hero-visual {
     max-width: 400px;
+    margin: 0 auto;
   }
 }
 
@@ -293,6 +304,12 @@
 
   .about-mission-statement {
     font-size: var(--font-size-3xl);
+  }
+
+  .about-mission-body {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
   }
 
   .about-principles {

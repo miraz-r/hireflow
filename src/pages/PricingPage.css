@@ -329,8 +329,19 @@
     gap: var(--space-8);
   }
 
+  .pricing-hero-content {
+    text-align: center;
+  }
+
+  .pricing-hero-title,
+  .pricing-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .pricing-hero-visual {
     max-width: 400px;
+    margin: 0 auto;
   }
 
   .pricing-tiers-grid {

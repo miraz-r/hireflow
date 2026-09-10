@@ -308,8 +308,19 @@
     gap: var(--space-8);
   }
 
+  .ts-hero-content {
+    text-align: center;
+  }
+
+  .ts-hero-title,
+  .ts-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .ts-hero-visual {
     max-width: 400px;
+    margin: 0 auto;
   }
 
   .ts-features-grid {

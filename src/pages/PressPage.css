@@ -362,6 +362,16 @@
     gap: var(--space-8);
   }
 
+  .press-hero-content {
+    text-align: center;
+  }
+
+  .press-hero-title,
+  .press-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .press-hero-visual {
     max-width: 300px;
     margin: 0 auto;

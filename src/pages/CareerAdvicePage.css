@@ -367,8 +367,19 @@
     gap: var(--space-8);
   }
 
+  .ca-hero-content {
+    text-align: center;
+  }
+
+  .ca-hero-title,
+  .ca-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .ca-hero-visual {
     max-width: 400px;
+    margin: 0 auto;
   }
 
   .ca-featured-layout {

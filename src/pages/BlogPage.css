@@ -449,6 +449,16 @@
     gap: var(--space-8);
   }
 
+  .blog-hero-content {
+    text-align: center;
+  }
+
+  .blog-hero-title,
+  .blog-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .blog-hero-visual {
     max-width: 300px;
     margin: 0 auto;

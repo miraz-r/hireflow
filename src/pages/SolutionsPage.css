@@ -250,6 +250,10 @@
   margin: 0;
 }
 
+.sol-why-heading-area {
+  text-align: center;
+}
+
 .sol-why-list {
   list-style: none;
   padding: 0;
@@ -350,8 +354,19 @@
     gap: var(--space-8);
   }
 
+  .sol-hero-content {
+    text-align: center;
+  }
+
+  .sol-hero-title,
+  .sol-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .sol-hero-visual {
     max-width: 400px;
+    margin: 0 auto;
   }
 
   .sol-segments-grid {
