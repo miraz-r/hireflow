@@ -55,6 +55,54 @@ const REGISTER_SLIDES = [
  * - Prevents duplicate submissions while the request is in flight.
  * - Already-authenticated users are redirected to "/" on mount.
  */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[+0-9()\-\s]{6,32}$/;
+
+const REGISTER_FIELD_IDS = [
+  ['fullName', 'register-name'],
+  ['email', 'register-email'],
+  ['phone', 'register-phone'],
+  ['password', 'register-password'],
+];
+
+function validateRegister({ fullName, email, phone, password }) {
+  const errors = {};
+  const name = fullName.trim();
+  if (!name) {
+    errors.fullName = 'Full name is required.';
+  } else if (name.length > 120) {
+    errors.fullName = 'Full name must be 1-120 characters.';
+  }
+  const trimmedEmail = email.trim();
+  if (!trimmedEmail) {
+    errors.email = 'Email is required.';
+  } else if (!EMAIL_RE.test(trimmedEmail)) {
+    errors.email = 'Please enter a valid email address.';
+  }
+  if (!phone.trim()) {
+    errors.phone = 'Phone is required.';
+  } else if (!PHONE_RE.test(phone.trim())) {
+    errors.phone = 'Invalid phone format.';
+  }
+  if (!password) {
+    errors.password = 'Password is required.';
+  } else if (password.length < 8) {
+    errors.password = 'Password must be at least 8 characters.';
+  } else if (!/[A-Za-z]/.test(password)) {
+    errors.password = 'Password must contain at least one letter.';
+  } else if (!/\d/.test(password)) {
+    errors.password = 'Password must contain at least one number.';
+  }
+  return errors;
+}
+
+function focusFirstError(errors, fieldIds) {
+  const first = fieldIds.find(([name]) => Boolean(errors[name]));
+  if (!first) return;
+  const el = document.getElementById(first[1]);
+  if (el) el.focus();
+}
+
 export default function RegisterPage() {
   const { register, user } = useAuth();
   const navigate = useNavigate();
@@ -63,6 +111,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -86,6 +135,14 @@ export default function RegisterPage() {
     if (submitting) return; // guard against duplicate submits
 
     setError('');
+
+    const errors = validateRegister({ fullName, email, phone, password });
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      focusFirstError(errors, REGISTER_FIELD_IDS);
+      return; // block the API call until required fields are valid
+    }
+
     setSubmitting(true);
     try {
       await register(email.trim(), password, fullName.trim(), phone.trim());
@@ -99,6 +156,34 @@ export default function RegisterPage() {
       setError(err?.message || 'Unable to create your account. Please try again.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleFullNameChange = (e) => {
+    setFullName(e.target.value);
+    if (fieldErrors.fullName) {
+      setFieldErrors((prev) => ({ ...prev, fullName: '' }));
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (fieldErrors.email) {
+      setFieldErrors((prev) => ({ ...prev, email: '' }));
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    setPhone(e.target.value);
+    if (fieldErrors.phone) {
+      setFieldErrors((prev) => ({ ...prev, phone: '' }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (fieldErrors.password) {
+      setFieldErrors((prev) => ({ ...prev, password: '' }));
     }
   };
 
@@ -125,10 +210,7 @@ export default function RegisterPage() {
           <div className="auth-form-inner">
             <header className="auth-form-header">
               <h1 id="auth-form-title" className="auth-title">Create your account</h1>
-              <p className="auth-subtitle">
-                Join HireFlow to discover opportunities or find your next great hire. You can
-                switch between jobseeker and recruiter mode anytime.
-              </p>
+              <p className="auth-subtitle">Create your HireFlow account.</p>
             </header>
 
             <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -187,12 +269,19 @@ export default function RegisterPage() {
                     autoComplete="name"
                     required
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={handleFullNameChange}
                     placeholder="Jane Doe"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.fullName ? ' input-error' : ''}`}
+                    aria-invalid={fieldErrors.fullName ? true : undefined}
+                    aria-describedby={fieldErrors.fullName ? 'register-name-error' : undefined}
                     disabled={submitting}
                   />
                 </div>
+                {fieldErrors.fullName && (
+                  <span id="register-name-error" className="auth-field-error" role="alert">
+                    {fieldErrors.fullName}
+                  </span>
+                )}
               </div>
 
               {/* Email */}
@@ -224,12 +313,19 @@ export default function RegisterPage() {
                     inputMode="email"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     placeholder="you@company.com"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.email ? ' input-error' : ''}`}
+                    aria-invalid={fieldErrors.email ? true : undefined}
+                    aria-describedby={fieldErrors.email ? 'register-email-error' : undefined}
                     disabled={submitting}
                   />
                 </div>
+                {fieldErrors.email && (
+                  <span id="register-email-error" className="auth-field-error" role="alert">
+                    {fieldErrors.email}
+                  </span>
+                )}
               </div>
 
               {/* Phone */}
@@ -260,12 +356,19 @@ export default function RegisterPage() {
                     inputMode="tel"
                     required
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={handlePhoneChange}
                     placeholder="+1 555 123 4567"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.phone ? ' input-error' : ''}`}
+                    aria-invalid={fieldErrors.phone ? true : undefined}
+                    aria-describedby={fieldErrors.phone ? 'register-phone-error' : undefined}
                     disabled={submitting}
                   />
                 </div>
+                {fieldErrors.phone && (
+                  <span id="register-phone-error" className="auth-field-error" role="alert">
+                    {fieldErrors.phone}
+                  </span>
+                )}
               </div>
 
               {/* Password */}
@@ -297,15 +400,22 @@ export default function RegisterPage() {
                     required
                     minLength={8}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     placeholder="Create a strong password"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.password ? ' input-error' : ''}`}
+                    aria-invalid={fieldErrors.password ? true : undefined}
+                    aria-describedby={fieldErrors.password ? 'register-password-error' : undefined}
                     disabled={submitting}
                   />
                 </div>
-                {passwordHint && (
+                {!fieldErrors.password && passwordHint && (
                   <span className={`auth-hint auth-hint--${passwordHint.tone}`}>
                     {passwordHint.text}
+                  </span>
+                )}
+                {fieldErrors.password && (
+                  <span id="register-password-error" className="auth-field-error" role="alert">
+                    {fieldErrors.password}
                   </span>
                 )}
               </div>
@@ -350,9 +460,9 @@ export default function RegisterPage() {
           <p className="auth-footnote">
             <span>© {new Date().getFullYear()} HireFlow</span>
             <span aria-hidden="true">·</span>
-            <a href="#" className="auth-footnote-link">Terms</a>
+            <Link to="/terms" className="auth-footnote-link">Terms</Link>
             <span aria-hidden="true">·</span>
-            <a href="#" className="auth-footnote-link">Privacy</a>
+            <Link to="/privacy" className="auth-footnote-link">Privacy</Link>
           </p>
         </section>
 

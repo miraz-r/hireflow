@@ -55,12 +55,41 @@ const LOGIN_SLIDES = [
  * - Prevents duplicate submissions while the request is in flight.
  * - Already-authenticated users are redirected to "/" on mount.
  */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const LOGIN_FIELD_IDS = [
+  ['email', 'login-email'],
+  ['password', 'login-password'],
+];
+
+function validateLogin(emailRaw, password) {
+  const errors = {};
+  const email = emailRaw.trim();
+  if (!email) {
+    errors.email = 'Email is required.';
+  } else if (!EMAIL_RE.test(email)) {
+    errors.email = 'Please enter a valid email address.';
+  }
+  if (!password) {
+    errors.password = 'Password is required.';
+  }
+  return errors;
+}
+
+function focusFirstError(errors, fieldIds) {
+  const first = fieldIds.find(([name]) => Boolean(errors[name]));
+  if (!first) return;
+  const el = document.getElementById(first[1]);
+  if (el) el.focus();
+}
+
 export default function LoginPage() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -76,6 +105,14 @@ export default function LoginPage() {
     if (submitting) return; // guard against duplicate submits
 
     setError('');
+
+    const errors = validateLogin(email, password);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      focusFirstError(errors, LOGIN_FIELD_IDS);
+      return; // block the API call until required fields are valid
+    }
+
     setSubmitting(true);
     try {
       await login(email.trim(), password);
@@ -86,6 +123,20 @@ export default function LoginPage() {
       setError(err?.message || 'Unable to sign in. Please try again.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (fieldErrors.email) {
+      setFieldErrors((prev) => ({ ...prev, email: '' }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (fieldErrors.password) {
+      setFieldErrors((prev) => ({ ...prev, password: '' }));
     }
   };
 
@@ -112,9 +163,7 @@ export default function LoginPage() {
           <div className="auth-form-inner">
             <header className="auth-form-header">
               <h1 id="auth-form-title" className="auth-title">Welcome back</h1>
-              <p className="auth-subtitle">
-                Sign in to your HireFlow account to continue your job search or hiring workflow.
-              </p>
+              <p className="auth-subtitle">Sign in to continue.</p>
             </header>
 
             <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -173,12 +222,19 @@ export default function LoginPage() {
                     inputMode="email"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     placeholder="you@company.com"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.email ? ' input-error' : ''}`}
+                    aria-invalid={fieldErrors.email ? true : undefined}
+                    aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
                     disabled={submitting}
                   />
                 </div>
+                {fieldErrors.email && (
+                  <span id="login-email-error" className="auth-field-error" role="alert">
+                    {fieldErrors.email}
+                  </span>
+                )}
               </div>
 
               <div className="auth-field">
@@ -208,12 +264,19 @@ export default function LoginPage() {
                     autoComplete="current-password"
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     placeholder="Enter your password"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.password ? ' input-error' : ''}`}
+                    aria-invalid={fieldErrors.password ? true : undefined}
+                    aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
                     disabled={submitting}
                   />
                 </div>
+                {fieldErrors.password && (
+                  <span id="login-password-error" className="auth-field-error" role="alert">
+                    {fieldErrors.password}
+                  </span>
+                )}
               </div>
 
               <button
@@ -266,9 +329,9 @@ export default function LoginPage() {
           <p className="auth-footnote">
             <span>© {new Date().getFullYear()} HireFlow</span>
             <span aria-hidden="true">·</span>
-            <a href="#" className="auth-footnote-link">Terms</a>
+            <Link to="/terms" className="auth-footnote-link">Terms</Link>
             <span aria-hidden="true">·</span>
-            <a href="#" className="auth-footnote-link">Privacy</a>
+            <Link to="/privacy" className="auth-footnote-link">Privacy</Link>
           </p>
         </section>
 
