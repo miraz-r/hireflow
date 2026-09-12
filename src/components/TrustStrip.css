@@ -64,3 +64,25 @@
     padding: var(--space-2);
   }
 }
+
+/* Extra-small viewports: keep the two-column stats grid, but stop unbreakable
+   stat values ("12,400+", "Remote-first") from forcing the 1fr tracks wider
+   than the viewport. Let tracks shrink and let values wrap instead. */
+@media (max-width: 380px) {
+  .trust-grid {
+    gap: var(--space-3);
+  }
+
+  .trust-item {
+    min-width: 0;
+  }
+
+  .trust-value {
+    font-size: var(--font-size-xl);
+    overflow-wrap: anywhere;
+  }
+
+  .trust-label {
+    overflow-wrap: anywhere;
+  }
+}

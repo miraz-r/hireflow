@@ -243,3 +243,33 @@
     font-size: var(--font-size-base);
   }
 }
+
+/* Extra-small viewports: keep the card's design, but let rows/tags shrink or
+   wrap so long locations, salary ranges, and skills can't force the card (and
+   its 1fr grid track) wider than the viewport. */
+@media (max-width: 400px) {
+  .job-card {
+    min-width: 0;
+  }
+
+  .job-title {
+    overflow-wrap: anywhere;
+  }
+
+  .meta-row {
+    flex-wrap: wrap;
+    row-gap: var(--space-1);
+  }
+
+  .meta-item {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .skill-tag,
+  .experience-badge {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
