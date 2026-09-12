@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Avatar from './Avatar';
 import './Navbar.css';
 import { useTheme } from '../hooks/useTheme';
 
@@ -244,7 +245,6 @@ export default function Navbar() {
   const roleLabel = user?.role === 'recruiter' ? 'Recruiter' : 'Jobseeker';
   const switchLabel = user?.role === 'recruiter' ? 'Switch to Jobseeker' : 'Switch to Recruiter';
   const avatarSrc = user?.avatarUrl ? `${AVATAR_BASE}${user.avatarUrl}` : null;
-  const userInitial = ((user?.fullName || user?.email || 'U').charAt(0)).toUpperCase();
 
   return (
     <header className="navbar">
@@ -279,11 +279,12 @@ export default function Navbar() {
                 aria-haspopup="true"
                 aria-label="Account menu"
               >
-                {avatarSrc ? (
-                  <img src={avatarSrc} alt="" className="account-avatar-img" />
-                ) : (
-                  <span className="account-avatar-placeholder">{userInitial}</span>
-                )}
+                <Avatar
+                  src={avatarSrc}
+                  imgClassName="account-avatar-img"
+                  placeholderClassName="account-avatar-placeholder"
+                  iconSize={20}
+                />
               </button>
 
               {menuOpen && (
@@ -434,11 +435,12 @@ export default function Navbar() {
             <div className="mobile-drawer-header">
               {user ? (
                 <div className="mobile-drawer-account mobile-drawer-header-account">
-                  {avatarSrc ? (
-                    <img src={avatarSrc} alt="" className="mobile-drawer-avatar" />
-                  ) : (
-                    <span className="mobile-drawer-avatar-placeholder">{userInitial}</span>
-                  )}
+                  <Avatar
+                    src={avatarSrc}
+                    imgClassName="mobile-drawer-avatar"
+                    placeholderClassName="mobile-drawer-avatar-placeholder"
+                    iconSize={20}
+                  />
                   <div className="mobile-drawer-account-text">
                     <span className="mobile-drawer-account-name">{user.fullName || user.email}</span>
                     <span className="mobile-drawer-account-role">{roleLabel}</span>

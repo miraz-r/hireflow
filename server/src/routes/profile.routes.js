@@ -12,6 +12,7 @@ const {
   uploadAvatar,
   uploadResume,
   deleteMyProfile,
+  removeAvatar,
 } = require('../controllers/profile.controller');
 const { avatarUpload, resumeUpload } = require('../config/uploads');
 
@@ -61,6 +62,11 @@ router.patch('/', buildChain('patch'), patchMyProfile);
 // ---------------------------------------------------------------------------
 router.post('/upload/avatar', hookMulterError(avatarUpload), uploadAvatar);
 router.post('/upload/resume', hookMulterError(resumeUpload), uploadResume);
+
+// ---------------------------------------------------------------------------
+// DELETE /api/profile/avatar — remove the profile picture
+// ---------------------------------------------------------------------------
+router.delete('/avatar', removeAvatar);
 
 // ---------------------------------------------------------------------------
 // DELETE /api/profile — account deletion

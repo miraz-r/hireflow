@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from '../utils/api';
 import { categories, workTypes, employmentTypes, experienceLevels } from '../data/mockData';
 import Toast from '../components/Toast';
+import Avatar from '../components/Avatar';
+import ConfirmModal from '../components/ConfirmModal';
 import './ProfilePage.css';
 
 const AVATAR_BASE = 'http://localhost:5000';
@@ -139,6 +141,9 @@ function ProfileTab({ user }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [showRemoveAvatarConfirm, setShowRemoveAvatarConfirm] = useState(false);
+  const [removingAvatar, setRemovingAvatar] = useState(false);
+  const [removeAvatarError, setRemoveAvatarError] = useState('');
 
   const showToast = useCallback((message) => {
     setToast(message);
@@ -251,6 +256,31 @@ function ProfileTab({ user }) {
       setError(err?.message || 'Unable to upload your profile picture.');
     } finally {
       setUploadingAvatar(false);
+    }
+  };
+
+  // Remove the stored profile picture. The UI (avatar + remove option) is only
+  // updated after the backend confirms success, so a failed request never
+  // falsely clears the avatar.
+  const handleRemoveAvatar = async () => {
+    setRemovingAvatar(true);
+    setRemoveAvatarError('');
+    try {
+      const res = await apiDelete('/profile/avatar');
+      const updated = res.data;
+      setProfile(updated);
+      setForm(updated);
+      if (updated.avatarUrl) {
+        setUserAvatarUrl(updated.avatarUrl);
+      } else {
+        setUserAvatarUrl('');
+      }
+      setShowRemoveAvatarConfirm(false);
+      showToast('Profile picture removed');
+    } catch (err) {
+      setRemoveAvatarError(err?.message || 'Unable to remove your profile picture.');
+    } finally {
+      setRemovingAvatar(false);
     }
   };
 
@@ -401,30 +431,44 @@ function ProfileTab({ user }) {
   return (
     <>
       <div className="profile-header">
-        <div className="profile-avatar-wrap">
-          {avatarSrc ? (
-            <img src={avatarSrc} alt="Profile" className="profile-avatar" />
-          ) : (
-            <div className="profile-avatar profile-avatar--placeholder">
-              {(form.fullName || user.email || 'U').charAt(0).toUpperCase()}
-            </div>
-          )}
-          <label className="profile-avatar-upload" title="Change profile picture">
-            {uploadingAvatar ? (
-              '…'
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
-            )}
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif"
-              onChange={handleAvatarUpload}
-              disabled={uploadingAvatar}
+        <div className="profile-avatar-col">
+          <div className="profile-avatar-wrap">
+            <Avatar
+              src={avatarSrc}
+              imgAlt="Profile"
+              imgClassName="profile-avatar"
+              placeholderClassName="profile-avatar profile-avatar--placeholder"
+              iconSize={44}
             />
-          </label>
+            <label className="profile-avatar-upload" title="Change profile picture">
+              {uploadingAvatar ? (
+                '…'
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+              )}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                onChange={handleAvatarUpload}
+                disabled={uploadingAvatar}
+              />
+            </label>
+          </div>
+          {avatarSrc && (
+            <button
+              type="button"
+              className="profile-avatar-remove"
+              onClick={() => {
+                setRemoveAvatarError('');
+                setShowRemoveAvatarConfirm(true);
+              }}
+            >
+              Remove picture
+            </button>
+          )}
         </div>
         <div className="profile-header-text">
           <h1 className="profile-title">{form.fullName || user.email || 'Your profile'}</h1>
@@ -482,9 +526,7 @@ function ProfileTab({ user }) {
                 value={user.email || ''}
                 readOnly
                 disabled
-                aria-describedby="account-email-hint"
               />
-              <span className="profile-field-hint" id="account-email-hint">Your account email — managed in your login details.</span>
             </div>
             <div className="profile-field">
               <label className="profile-label" htmlFor="phone">Phone <span aria-hidden="true">*</span></label>
@@ -740,23 +782,41 @@ function ProfileTab({ user }) {
         </div>
       )}
 
-      {showDeleteConfirm && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
-          <div className="modal-content">
-            <h3 id="delete-dialog-title" className="modal-title">Delete profile?</h3>
-            <p className="modal-desc">
-              This will permanently delete your account and all associated data. This action cannot be undone.
-            </p>
-            {deleteError && <div className="auth-alert auth-alert-error" role="alert"><span>{deleteError}</span></div>}
-            <div className="modal-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => { setShowDeleteConfirm(false); setDeleteError(''); }}>Cancel</button>
-              <button type="button" className="btn btn-danger" disabled={deleting} onClick={handleDeleteProfile}>
-                {deleting ? 'Deleting…' : 'Delete profile'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        open={showRemoveAvatarConfirm}
+        title="Remove profile picture?"
+        confirmLabel="Remove picture"
+        busyLabel="Removing…"
+        busy={removingAvatar}
+        onClose={() => {
+          setShowRemoveAvatarConfirm(false);
+          setRemoveAvatarError('');
+        }}
+        onConfirm={handleRemoveAvatar}
+      >
+        <p className="modal-desc">
+          Your profile picture will be removed and your default avatar will be shown instead. You can upload a new picture anytime.
+        </p>
+        {removeAvatarError && <div className="auth-alert auth-alert-error" role="alert"><span>{removeAvatarError}</span></div>}
+      </ConfirmModal>
+
+      <ConfirmModal
+        open={showDeleteConfirm}
+        title="Delete profile?"
+        confirmLabel="Delete profile"
+        busyLabel="Deleting…"
+        busy={deleting}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setDeleteError('');
+        }}
+        onConfirm={handleDeleteProfile}
+      >
+        <p className="modal-desc">
+          This will permanently delete your account and all associated data. This action cannot be undone.
+        </p>
+        {deleteError && <div className="auth-alert auth-alert-error" role="alert"><span>{deleteError}</span></div>}
+      </ConfirmModal>
 
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </>

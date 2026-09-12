@@ -1,0 +1,117 @@
+/* =========================================================
+   ConfirmModal — fixed-to-viewport confirmation dialog
+   Rendered through a portal to <body> (see ConfirmModal.jsx)
+   so the overlay is always rooted at the viewport. Mounting
+   it inside a route layer would otherwise trap `position:
+   fixed` in that layer's containing block (the PageTransition
+   layers carry `will-change: transform`/animating transforms).
+   ========================================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background-color: var(--color-bg-overlay);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  animation: modalOverlayIn 160ms ease;
+}
+
+@keyframes modalOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - var(--space-8));
+  max-height: calc(100dvh - var(--space-8));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overflow-wrap: break-word;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-8);
+  animation: modalContentIn 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The container is focusable (tabIndex={-1}) for focus target only — never
+   show a ring around the whole dialog. */
+.modal-content:focus {
+  outline: none;
+}
+
+@keyframes modalContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-title {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-snug);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-3);
+}
+
+.modal-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--space-6);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-default);
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: var(--space-6);
+  }
+}
+
+/* Very narrow screens: stack actions full-width so buttons never overflow
+   horizontally (down to ~220px), and keep a taller max-height for the now
+   more vertical layout. */
+@media (max-width: 360px) {
+  .modal-content {
+    padding: var(--space-5);
+    max-height: calc(100vh - var(--space-5));
+    max-height: calc(100dvh - var(--space-5));
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-content {
+    animation: none;
+  }
+}

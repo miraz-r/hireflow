@@ -1,8 +1,10 @@
+const path = require('path');
+const fs = require('fs');
 const Profile = require('../models/Profile');
 const User = require('../models/User');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
-const { publicPathFor } = require('../config/uploads');
+const { publicPathFor, UPLOAD_ROOT } = require('../config/uploads');
 
 /**
  * Profile controller.
@@ -283,6 +285,41 @@ const uploadResume = async (req, res, next) => {
 };
 
 // ---------------------------------------------------------------------------
+// DELETE /api/profile/avatar — remove the profile picture
+// ---------------------------------------------------------------------------
+const removeAvatar = async (req, res, next) => {
+  try {
+    const profile = await Profile.findOne({ userId: req.user.id });
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    const prevUrl = profile.avatarUrl;
+    profile.avatarUrl = '';
+    await profile.save();
+
+    // Best-effort cleanup of the stored image file. Avatars live on the local
+    // filesystem (see config/uploads.js); clearing the DB reference is the
+    // outcome that matters, so a cleanup failure must never fail the request.
+    if (prevUrl && prevUrl.startsWith('/uploads/')) {
+      try {
+        const rel = prevUrl.slice('/uploads/'.length);
+        const absPath = path.join(UPLOAD_ROOT, rel);
+        if (fs.existsSync(absPath)) {
+          fs.unlinkSync(absPath);
+        }
+      } catch {
+        // ignore file cleanup errors
+      }
+    }
+
+    return res.status(200).json(formatProfile(profile));
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
 // DELETE /api/profile — delete the current user's account and all data
 // ---------------------------------------------------------------------------
 const deleteMyProfile = async (req, res, next) => {
@@ -320,4 +357,5 @@ module.exports = {
   uploadAvatar,
   uploadResume,
   deleteMyProfile,
+  removeAvatar,
 };
