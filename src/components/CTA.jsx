@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './CTA.css';
 
 export default function CTA() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleBrowse = () => {
     const el = document.getElementById('jobs');
@@ -10,18 +12,40 @@ export default function CTA() {
     else navigate('/');
   };
 
+  const isRecruiter = user?.role === 'recruiter';
+
   return (
     <section className="cta-section" id="cta">
       <div className="container">
         <div className="cta-card">
           <div className="cta-content">
-            <h2 className="cta-title">Ready to find your next opportunity?</h2>
+            <h2 className="cta-title">
+              {isRecruiter ? 'Ready to find your next great hire?' : 'Ready to find your next opportunity?'}
+            </h2>
             <p className="cta-description">
-              Join thousands of professionals who have discovered better career paths through HireFlow.
+              {isRecruiter
+                ? 'Connect with qualified professionals and build your next great team on HireFlow.'
+                : user
+                  ? 'Explore thousands of opportunities and discover your next career move on HireFlow.'
+                  : 'Join thousands of professionals who have discovered better career paths through HireFlow.'}
             </p>
             <div className="cta-actions">
-              <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>Create free account</button>
-              <button className="btn btn-secondary btn-lg" onClick={handleBrowse}>Browse jobs</button>
+              {!user ? (
+                <>
+                  <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>Create free account</button>
+                  <button className="btn btn-secondary btn-lg" onClick={handleBrowse}>Browse jobs</button>
+                </>
+              ) : isRecruiter ? (
+                <>
+                  <button className="btn btn-primary btn-lg" onClick={() => navigate('/profile?tab=post')}>Post a job</button>
+                  <button className="btn btn-secondary btn-lg" onClick={() => navigate('/talent-search')}>Talent Search</button>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-primary btn-lg" onClick={handleBrowse}>Find jobs</button>
+                  <button className="btn btn-secondary btn-lg" onClick={() => navigate('/saved-jobs')}>Saved Jobs</button>
+                </>
+              )}
             </div>
           </div>
           <div className="cta-decoration" aria-hidden="true">
