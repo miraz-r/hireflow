@@ -61,10 +61,12 @@ export default function AboutPage() {
       <section className="about-mission">
         <div className="container">
           <Reveal>
-            <span className="about-section-eyebrow">Our mission</span>
-            <blockquote className="about-mission-statement">
-              Job searching should not feel like a second job.
-            </blockquote>
+            <div className="section-intro">
+              <span className="about-section-eyebrow">Our mission</span>
+              <blockquote className="about-mission-statement">
+                Job searching should not feel like a second job.
+              </blockquote>
+            </div>
             <p className="about-mission-body">
               We started HireFlow because we believed the hiring process could be
               better. More transparent for candidates, more efficient for employers,
@@ -78,14 +80,16 @@ export default function AboutPage() {
       {/* ── PRINCIPLES ── */}
       <section className="about-principles">
         <div className="container">
-          <Reveal>
-            <span className="about-section-eyebrow">What we believe</span>
-          </Reveal>
-          <Reveal delay={80}>
-            <h2 className="about-principles-heading">
-              The ideas that guide every decision.
-            </h2>
-          </Reveal>
+          <div className="section-intro">
+            <Reveal>
+              <span className="about-section-eyebrow">What we believe</span>
+            </Reveal>
+            <Reveal delay={80}>
+              <h2 className="about-principles-heading">
+                The ideas that guide every decision.
+              </h2>
+            </Reveal>
+          </div>
           <div className="about-principles-grid">
             {PRINCIPLES.map((p, i) => (
               <Reveal key={p.number} delay={100 + i * 80}>

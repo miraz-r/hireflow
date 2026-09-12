@@ -244,12 +244,21 @@ export default function TermsPage() {
     };
   }, []);
 
-  // Active TOC indicator scroll alignment within the sticky TOC
+  // Keep the active TOC indicator aligned inside the TOC's own scroll region.
+  // Never call scrollIntoView here: it also scrolls ancestor viewports (the
+  // document), which yanked the page on mobile every time the active section
+  // changed. Adjusting the TOC container's scrollTop only moves its own scroll
+  // region, so the document scroll position is untouched on every layout.
   useEffect(() => {
     const toc = document.querySelector('.privacy-toc');
     const activeLink = document.querySelector('.privacy-toc-link--active');
-    if (toc && activeLink) {
-      activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (!toc || !activeLink) return;
+    const tocRect = toc.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    if (linkRect.top < tocRect.top) {
+      toc.scrollTop += linkRect.top - tocRect.top;
+    } else if (linkRect.bottom > tocRect.bottom) {
+      toc.scrollTop += linkRect.bottom - tocRect.bottom;
     }
   }, [activeId]);
 
