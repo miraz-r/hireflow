@@ -207,8 +207,15 @@
   .privacy-toc {
     width: 100%;
     position: static;
-    max-height: none;
-    overflow-y: visible;
+    max-height: min(320px, 45vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .privacy-toc::-webkit-scrollbar {
+    display: block;
+    width: 4px;
   }
 
   .privacy-toc-inner {
@@ -224,21 +231,22 @@
 
   .privacy-toc-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
+    flex-direction: column;
+    gap: var(--space-1);
   }
 
   .privacy-toc-link {
     border-left: none;
-    border-bottom: 2px solid transparent;
+    border-bottom: none;
     padding: var(--space-2) var(--space-3);
-    font-size: var(--font-size-xs);
-    white-space: nowrap;
+    font-size: var(--font-size-sm);
+    white-space: normal;
+    line-height: var(--line-height-snug);
   }
 
   .privacy-toc-link--active {
-    border-bottom-color: var(--color-brand-primary);
-    border-left-color: transparent;
+    color: var(--color-brand-primary);
+    background-color: var(--color-brand-primary-light);
   }
 
   .privacy-content {
@@ -289,6 +297,10 @@
 
   .privacy-date {
     font-size: var(--font-size-xs);
+  }
+
+  .privacy-toc {
+    max-height: min(280px, 40vh);
   }
 
   .privacy-toc-inner {

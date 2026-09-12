@@ -287,6 +287,21 @@
     max-width: 400px;
     margin: 0 auto;
   }
+
+  .about-mission .section-intro {
+    text-align: center;
+  }
+
+  .about-mission-statement {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .about-mission-body {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
 }
 
 @media (max-width: 768px) {
@@ -304,12 +319,6 @@
 
   .about-mission-statement {
     font-size: var(--font-size-3xl);
-  }
-
-  .about-mission-body {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
   }
 
   .about-principles {

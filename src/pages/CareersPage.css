@@ -336,6 +336,11 @@
     margin: 0 auto;
   }
 
+  .careers-positions .section-intro,
+  .careers-benefits .section-intro {
+    text-align: center;
+  }
+
   .careers-benefits-grid {
     grid-template-columns: 1fr;
     gap: var(--space-4);

@@ -758,6 +758,10 @@
     gap: var(--space-8);
   }
 
+  .res-recent-section .res-section-label {
+    text-align: center;
+  }
+
   .res-popular-sidebar {
     max-width: 100%;
   }
@@ -842,6 +846,11 @@
   .res-expertise-grid {
     grid-template-columns: 1fr;
     gap: var(--space-4);
+  }
+
+  .res-expertise-section .res-section-label,
+  .res-expertise-title {
+    text-align: center;
   }
 
   .res-newsletter {

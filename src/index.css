@@ -697,6 +697,17 @@ video {
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+/* Section intro — centered eyebrow + heading composition (mobile only) */
+.section-intro {
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .section-intro {
+    text-align: center;
+  }
+}
+
 /* ---------- Dark Theme: form element overrides ---------- */
 [data-theme="dark"] .input,
 [data-theme="dark"] input,

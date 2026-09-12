@@ -464,6 +464,13 @@
     margin: 0 auto;
   }
 
+  .blog-featured .blog-section-eyebrow {
+    display: block;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .blog-featured-card {
     grid-template-columns: 1fr;
     gap: var(--space-6);
@@ -498,6 +505,10 @@
   .blog-grid-layout {
     grid-template-columns: 1fr;
     gap: var(--space-6);
+  }
+
+  .blog-section-heading {
+    text-align: center;
   }
 
   .blog-recent {

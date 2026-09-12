@@ -344,9 +344,15 @@
     margin: 0 auto;
   }
 
+  .pricing-tiers .section-intro {
+    text-align: center;
+  }
+
   .pricing-tiers-grid {
     grid-template-columns: 1fr;
-    max-width: 480px;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
     gap: var(--space-8);
   }
 }
@@ -370,6 +376,7 @@
 
   .pricing-tiers-heading {
     font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-10);
   }
 
   .pricing-cta {

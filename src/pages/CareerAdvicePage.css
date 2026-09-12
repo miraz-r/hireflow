@@ -382,6 +382,13 @@
     margin: 0 auto;
   }
 
+  .ca-featured .ca-section-eyebrow {
+    display: block;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .ca-featured-layout {
     grid-template-columns: 1fr;
     gap: var(--space-8);
@@ -412,6 +419,19 @@
   .ca-articles-grid {
     grid-template-columns: 1fr;
     gap: var(--space-5);
+  }
+
+  .ca-articles .ca-section-eyebrow {
+    display: block;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ca-articles-heading {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .ca-cta {

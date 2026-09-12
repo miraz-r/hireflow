@@ -369,6 +369,11 @@
     margin: 0 auto;
   }
 
+  .sol-segments .section-intro,
+  .sol-why .section-intro {
+    text-align: center;
+  }
+
   .sol-segments-grid {
     grid-template-columns: 1fr;
   }

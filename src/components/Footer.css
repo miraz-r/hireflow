@@ -202,6 +202,25 @@
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Reserve the fixed BackToTop safe-zone (bottom-right corner) on viewports
+   where the social links would otherwise sit beneath it. BackToTop is fixed
+   at `right/bottom: 24px` with a 44px footprint, so it occupies the rightmost
+   ~68px of the viewport. Above 480px the footer-bottom stays on one row with
+   the social icons right-aligned, which collides with that zone on the same
+   row. Reserving space here keeps the GitHub link fully clear and clickable.
+   Below 480px the footer-bottom is already stacked, so no reservation is
+   needed there. */
+@media (max-width: 1366px) and (min-width: 481px) {
+  .footer-bottom {
+    padding-right: 68px;
+  }
 }
 
 /* Very narrow viewports (down to 220px): footer becomes a vertical

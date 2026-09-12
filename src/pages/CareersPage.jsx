@@ -64,8 +64,10 @@ export default function CareersPage() {
       <section className="careers-positions">
         <div className="container">
           <Reveal>
-            <span className="careers-section-eyebrow">Open positions</span>
-            <h2 className="careers-section-heading">Roles we're hiring for.</h2>
+            <div className="section-intro">
+              <span className="careers-section-eyebrow">Open positions</span>
+              <h2 className="careers-section-heading">Roles we're hiring for.</h2>
+            </div>
           </Reveal>
           <div className="careers-positions-list">
             {POSITIONS.map((pos, i) => (
@@ -86,8 +88,10 @@ export default function CareersPage() {
       <section className="careers-benefits">
         <div className="container">
           <Reveal>
-            <span className="careers-section-eyebrow">What we offer</span>
-            <h2 className="careers-section-heading">More than a job.</h2>
+            <div className="section-intro">
+              <span className="careers-section-eyebrow">What we offer</span>
+              <h2 className="careers-section-heading">More than a job.</h2>
+            </div>
           </Reveal>
           <div className="careers-benefits-grid">
             {BENEFITS.map((benefit, i) => (

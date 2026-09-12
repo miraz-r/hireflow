@@ -89,8 +89,10 @@ export default function PricingPage() {
       <section className="pricing-tiers">
         <div className="container">
           <Reveal>
-            <span className="pricing-section-eyebrow">Plans</span>
-            <h2 className="pricing-tiers-heading">Choose your plan</h2>
+            <div className="section-intro">
+              <span className="pricing-section-eyebrow">Plans</span>
+              <h2 className="pricing-tiers-heading">Choose your plan</h2>
+            </div>
           </Reveal>
           <div className="pricing-tiers-grid">
             {TIERS.map((tier, i) => (

@@ -377,6 +377,20 @@
     margin: 0 auto;
   }
 
+  .press-inquiries .press-section-eyebrow,
+  .press-coverage .press-section-eyebrow {
+    display: block;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .press-inquiries-heading {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .press-inquiries-layout {
     grid-template-columns: 1fr;
     gap: var(--space-8);

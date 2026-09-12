@@ -323,6 +323,10 @@
     margin: 0 auto;
   }
 
+  .ts-features .section-intro {
+    text-align: center;
+  }
+
   .ts-features-grid {
     grid-template-columns: 1fr;
   }
