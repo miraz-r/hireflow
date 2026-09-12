@@ -28,7 +28,6 @@ export default function ValueSection() {
     <section className="value-section" id="value">
       <div className="container">
         <div className="value-header">
-          <span className="section-eyebrow section-eyebrow--on-dark">Why HireFlow</span>
           <h2 className="value-title">Why professionals choose HireFlow</h2>
           <p className="value-subtitle">Tools designed around how you actually search for work</p>
         </div>

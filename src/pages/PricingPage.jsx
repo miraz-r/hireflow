@@ -90,7 +90,6 @@ export default function PricingPage() {
         <div className="container">
           <Reveal>
             <div className="section-intro">
-              <span className="pricing-section-eyebrow">Plans</span>
               <h2 className="pricing-tiers-heading">Choose your plan</h2>
             </div>
           </Reveal>

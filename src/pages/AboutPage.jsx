@@ -81,9 +81,6 @@ export default function AboutPage() {
       <section className="about-principles">
         <div className="container">
           <div className="section-intro">
-            <Reveal>
-              <span className="about-section-eyebrow">What we believe</span>
-            </Reveal>
             <Reveal delay={80}>
               <h2 className="about-principles-heading">
                 The ideas that guide every decision.

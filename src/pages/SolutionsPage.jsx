@@ -124,9 +124,6 @@ export default function SolutionsPage() {
       <section className="sol-why">
         <div className="container">
           <Reveal>
-            <div className="section-intro">
-              <span className="sol-section-eyebrow">Why HireFlow</span>
-            </div>
             <div className="sol-why-layout">
               <div className="sol-why-heading-area">
                 <h2 className="sol-why-heading">Why companies choose HireFlow</h2>

@@ -94,7 +94,6 @@ export default function TalentSearchPage() {
         <div className="container">
           <Reveal>
             <div className="section-intro">
-              <span className="ts-section-eyebrow">Features</span>
               <h2 className="ts-features-heading">What you get</h2>
             </div>
           </Reveal>
@@ -128,7 +127,6 @@ export default function TalentSearchPage() {
         <div className="container">
           <Reveal>
             <div className="section-intro">
-              <span className="ts-section-eyebrow">How it works</span>
               <h2 className="ts-how-heading">How Talent Search works</h2>
               <p className="ts-how-body">
                 Post a job or search our candidate database directly. Our matching algorithm surfaces the most relevant profiles based on skills, experience, and preferences. Reach out to top candidates and manage your entire hiring pipeline in one place.

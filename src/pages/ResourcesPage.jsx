@@ -269,7 +269,6 @@ export default function ResourcesPage() {
       <Reveal>
       <section className="res-expertise-section" aria-label="Resource expertise areas">
         <div className="container">
-          <span className="res-section-label">RESOURCE FOCUS AREAS</span>
           <h2 className="res-expertise-title">What our resources cover</h2>
           <div className="res-expertise-grid">
             {EXPERTISE.map((item) => (

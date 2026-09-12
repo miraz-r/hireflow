@@ -65,7 +65,6 @@ export default function CareersPage() {
         <div className="container">
           <Reveal>
             <div className="section-intro">
-              <span className="careers-section-eyebrow">Open positions</span>
               <h2 className="careers-section-heading">Roles we're hiring for.</h2>
             </div>
           </Reveal>

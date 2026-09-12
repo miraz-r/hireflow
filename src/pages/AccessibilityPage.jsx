@@ -76,7 +76,6 @@ export default function AccessibilityPage() {
       <section className="accessibility-practices">
         <div className="container">
           <Reveal>
-            <span className="accessibility-section-eyebrow">What we do</span>
             <h2 className="accessibility-practices-heading">Practices that guide our work.</h2>
           </Reveal>
           <div className="accessibility-practices-grid">

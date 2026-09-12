@@ -32,7 +32,6 @@ export default function PressPage() {
         <div className="press-hero-glow press-hero-glow--secondary" aria-hidden="true" />
         <div className="container press-hero-layout">
           <div className="press-hero-content">
-            <span className="press-hero-eyebrow">Newsroom</span>
             <h1 className="press-hero-title">Press</h1>
             <p className="press-hero-desc">
               Press releases, media kits, and contact information for journalists covering HireFlow.
@@ -87,7 +86,6 @@ export default function PressPage() {
       <section className="press-coverage">
         <div className="container">
           <Reveal>
-            <span className="press-section-eyebrow">Recent coverage</span>
             <h2 className="press-coverage-heading">What the press is saying about HireFlow</h2>
           </Reveal>
           <div className="press-coverage-grid">

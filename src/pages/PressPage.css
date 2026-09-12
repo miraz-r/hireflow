@@ -51,16 +51,6 @@
   align-items: center;
 }
 
-.press-hero-eyebrow {
-  display: inline-block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: var(--space-4);
-}
-
 .press-hero-title {
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-bold);
@@ -506,12 +496,6 @@
 
   .press-hero-desc {
     font-size: var(--font-size-sm);
-  }
-
-  .press-hero-eyebrow {
-    font-size: var(--font-size-xs);
-    padding: 4px 10px;
-    margin-bottom: var(--space-3);
   }
 
   .press-inquiries {
