@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchJobById } from '../utils/jobsApi';
+import { getJobsScroll } from '../utils/jobsScrollState';
 import api from '../utils/api';
 import './JobDetailPage.css';
 
@@ -27,6 +29,10 @@ export default function JobDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const handleBack = () => {
+    const bookmark = getJobsScroll();
+    navigate('/', { state: { restoreJobsScroll: bookmark?.scrollY ?? null } });
+  };
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applied, setApplied] = useState(false);
@@ -165,12 +171,16 @@ export default function JobDetailPage() {
   return (
     <div className="job-detail-page">
       <div className="container">
-        <Link to="/" className="job-detail-back-link">
+        <button
+          type="button"
+          className="job-detail-back-link"
+          onClick={handleBack}
+        >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           Back to all jobs
-        </Link>
+        </button>
 
         <div className="job-detail-layout">
           <div className="job-detail-main">

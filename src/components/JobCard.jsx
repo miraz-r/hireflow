@@ -1,7 +1,15 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './JobCard.css';
+import { saveJobsScroll } from '../utils/jobsScrollState';
 
 export default function JobCard({ job, isSaved, onSave }) {
+  const location = useLocation();
+  const handleSave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSave && onSave(job.id);
+  };
+
   const formatSalary = (salary) => {
     if (salary.period === 'hourly') {
       return `$${salary.min}–$${salary.max}/hr`;
@@ -17,7 +25,12 @@ export default function JobCard({ job, isSaved, onSave }) {
 
   return (
     <article className="job-card">
-      <Link className="job-card-link" to={`/jobs/${job.id}`} aria-label={`View details for ${job.title} at ${job.company}`}>
+      <Link
+        className="job-card-link"
+        to={`/jobs/${job.id}`}
+        aria-label={`View details for ${job.title} at ${job.company}`}
+        onClick={() => saveJobsScroll({ jobsLocationKey: location.key, scrollY: window.scrollY })}
+      >
         <div className="job-header">
           <div className="job-company">
             <div className="company-avatar" aria-hidden="true">
@@ -30,11 +43,7 @@ export default function JobCard({ job, isSaved, onSave }) {
           </div>
           <button
             className={`save-btn ${isSaved ? 'saved' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onSave && onSave(job.id);
-            }}
+            onClick={handleSave}
             aria-label={isSaved ? 'Remove from saved' : 'Save job'}
             aria-pressed={isSaved}
           >
