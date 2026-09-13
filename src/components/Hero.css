@@ -137,16 +137,19 @@
   padding: 10px 14px;
   min-width: 0;
   border-radius: 10px;
-  transition: background-color var(--transition-fast);
+  transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .search-field:hover {
   background-color: transparent;
 }
 
+/* Focus lives on the field container, not a separate box on the input:
+   a soft brand tint plus a hairline inset ring that follows the field radius. */
 .search-field:focus-within {
-  outline: 1.5px solid var(--color-border-default);
-  outline-offset: -1.5px;
+  outline: none;
+  background-color: var(--color-brand-primary-light);
+  box-shadow: 0 0 0 1px var(--color-focus-ring) inset;
 }
 
 .search-icon {
@@ -187,14 +190,17 @@
   line-height: 1.3;
 }
 
-/* Search inputs must show no visible focus treatment */
-.search-input:focus,
-.search-input:focus-visible,
-.search-input:hover,
-.search-input:active {
+/* Search inputs must show no focus treatment of their own; focus signaling
+   lives on .search-field. Scoped to .search-form so it also beats the global
+   dark-mode "input:focus" rule in index.css (which adds a 3px ring + bg). */
+.search-form .search-input:focus,
+.search-form .search-input:focus-visible,
+.search-form .search-input:hover,
+.search-form .search-input:active {
   outline: none;
   border: none;
   box-shadow: none;
+  background-color: transparent;
 }
 
 .search-input::placeholder {
