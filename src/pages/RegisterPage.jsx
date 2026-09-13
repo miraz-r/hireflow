@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AuthCarousel from '../components/AuthCarousel';
+import CountryPhoneInput from '../components/CountryPhoneInput';
+import { isValidNationalNumber, toE164 } from '../utils/phone';
 import { PEOPLE_ICON, TRACK_ICON, SHIELD_ICON, ZAP_ICON } from '../constants/authIcons';
 import './RegisterPage.css';
 
@@ -56,7 +58,9 @@ const REGISTER_SLIDES = [
  * - Already-authenticated users are redirected to "/" on mount.
  */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^[+0-9()\-\s]{6,32}$/;
+
+// HireFlow is centered around Bangladesh, so +880 is the sensible default.
+const DEFAULT_DIAL_COUNTRY = 'BD';
 
 const REGISTER_FIELD_IDS = [
   ['fullName', 'register-name'],
@@ -65,7 +69,17 @@ const REGISTER_FIELD_IDS = [
   ['password', 'register-password'],
 ];
 
-function validateRegister({ fullName, email, phone, password }) {
+function validatePhone(phone, phoneCountry) {
+  if (!phone.trim()) {
+    return 'Phone number is required.';
+  }
+  if (!isValidNationalNumber(phone, phoneCountry)) {
+    return 'Please enter a valid phone number.';
+  }
+  return '';
+}
+
+function validateRegister({ fullName, email, phone, phoneCountry, password }) {
   const errors = {};
   const name = fullName.trim();
   if (!name) {
@@ -79,10 +93,9 @@ function validateRegister({ fullName, email, phone, password }) {
   } else if (!EMAIL_RE.test(trimmedEmail)) {
     errors.email = 'Please enter a valid email address.';
   }
-  if (!phone.trim()) {
-    errors.phone = 'Phone is required.';
-  } else if (!PHONE_RE.test(phone.trim())) {
-    errors.phone = 'Invalid phone format.';
+  const phoneError = validatePhone(phone, phoneCountry);
+  if (phoneError) {
+    errors.phone = phoneError;
   }
   if (!password) {
     errors.password = 'Password is required.';
@@ -110,6 +123,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneCountry, setPhoneCountry] = useState(DEFAULT_DIAL_COUNTRY);
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -136,7 +150,7 @@ export default function RegisterPage() {
 
     setError('');
 
-    const errors = validateRegister({ fullName, email, phone, password });
+    const errors = validateRegister({ fullName, email, phone, phoneCountry, password });
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
       focusFirstError(errors, REGISTER_FIELD_IDS);
@@ -145,7 +159,10 @@ export default function RegisterPage() {
 
     setSubmitting(true);
     try {
-      await register(email.trim(), password, fullName.trim(), phone.trim());
+      // The UI separates the calling code (country selector) from the local
+      // number, and submits one unambiguous international (E.164) value.
+      const normalizedPhone = toE164(phone, phoneCountry);
+      await register(email.trim(), password, fullName.trim(), normalizedPhone);
       // Registration succeeded — direct the user to sign in.
       navigate('/login', { replace: true });
     } catch (err) {
@@ -173,11 +190,21 @@ export default function RegisterPage() {
     }
   };
 
-  const handlePhoneChange = (e) => {
-    setPhone(e.target.value);
+  const handlePhoneChange = (value) => {
+    setPhone(value);
     if (fieldErrors.phone) {
       setFieldErrors((prev) => ({ ...prev, phone: '' }));
     }
+  };
+
+  const handlePhoneCountryChange = (nextCountry) => {
+    setPhoneCountry(nextCountry);
+    // Re-evaluate the entered number against the newly selected country so the
+    // field-level error updates instantly (and clears if it's now valid).
+    setFieldErrors((prev) => {
+      if (!phone.trim()) return prev;
+      return { ...prev, phone: validatePhone(phone, nextCountry) };
+    });
   };
 
   const handlePasswordChange = (e) => {
@@ -334,33 +361,16 @@ export default function RegisterPage() {
                   Phone <span className="auth-required" aria-hidden="true">*</span>
                 </label>
                 <div className="auth-input-wrap">
-                  <svg
-                    className="auth-input-icon"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                  <input
+                  <CountryPhoneInput
                     id="register-phone"
                     name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    inputMode="tel"
-                    required
+                    country={phoneCountry}
+                    onCountryChange={handlePhoneCountryChange}
                     value={phone}
-                    onChange={handlePhoneChange}
-                    placeholder="+1 555 123 4567"
-                    className={`auth-input${fieldErrors.phone ? ' input-error' : ''}`}
-                    aria-invalid={fieldErrors.phone ? true : undefined}
-                    aria-describedby={fieldErrors.phone ? 'register-phone-error' : undefined}
+                    onValueChange={handlePhoneChange}
+                    error={Boolean(fieldErrors.phone)}
+                    ariaInvalid={fieldErrors.phone ? true : undefined}
+                    ariaDescribedBy={fieldErrors.phone ? 'register-phone-error' : undefined}
                     disabled={submitting}
                   />
                 </div>

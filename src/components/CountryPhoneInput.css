@@ -1,0 +1,353 @@
+/* =========================================================
+   CountryPhoneInput — country-aware phone field
+   Mirrors the .auth-input styling (border, radius, focus
+   ring, error state, typography, responsive paddings) so it
+   looks native to the HireFlow auth form. The dropdown is
+   portaled to <body> and uses fixed positioning, so it is
+   never clipped by the auth page's overflow-hidden panes.
+   ========================================================= */
+
+.phone-country-input {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.phone-country-control {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+/* Match .auth-input:hover */
+.phone-country-control:hover:not([data-disabled]) {
+  border-color: var(--color-border-strong);
+}
+
+/* Match .auth-input:focus ring on the composite control */
+.phone-country-input:focus-within .phone-country-control {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+/* Error state mirrors .auth-input.input-error */
+.phone-country-input.has-error .phone-country-control {
+  border-color: var(--color-error) !important;
+}
+
+/* Disabled state mirrors .auth-input:disabled */
+.phone-country-input[data-disabled] .phone-country-control {
+  background-color: var(--color-bg-tertiary);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.phone-country-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.phone-country-trigger:not(:disabled):hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+.phone-country-trigger:disabled {
+  cursor: not-allowed;
+}
+
+.phone-country-trigger:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: -2px;
+}
+
+.phone-country-flag {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.phone-country-flag svg {
+  display: block;
+  border-radius: 2px;
+}
+
+.phone-country-code {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.phone-country-caret {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.phone-country-input.is-open .phone-country-caret {
+  transform: rotate(180deg);
+}
+
+.phone-country-divider {
+  width: 1px;
+  flex-shrink: 0;
+  align-self: center;
+  height: calc(100% - var(--space-4) * 2);
+  margin: 0 var(--space-1);
+  background-color: var(--color-border-default);
+  transition: background-color var(--transition-fast);
+  pointer-events: none;
+}
+
+.phone-country-input:focus-within .phone-country-divider {
+  background-color: var(--color-border-focus);
+}
+
+.phone-country-number {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.phone-country-number::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.phone-country-number:disabled {
+  background: transparent;
+  cursor: not-allowed;
+}
+
+/* ---------- Dropdown (portaled to <body>) ---------- */
+.phone-country-pop {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Pre-JS bounds; the positioning effect writes an exact inline max-height. */
+  max-height: min(60vh, 340px);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overscroll-behavior: contain;
+  animation: phone-pop-in var(--transition-fast) ease-out;
+}
+
+@keyframes phone-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.phone-country-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: var(--space-2);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.phone-country-search-icon {
+  position: absolute;
+  left: calc(var(--space-2) * 2);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.phone-country-search input {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3) var(--space-2)
+    calc(var(--space-4) * 2);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.phone-country-search input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.phone-country-search input:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.phone-country-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1);
+  /* The list is the ONLY scrollable element: it flexes to fill whatever height
+     the pop is clamped to and scrolls internally, so the whole menu never
+     overflows the viewport and wheel/touch scrolling stays inside the list. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.phone-country-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.phone-country-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.phone-country-list::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.phone-country-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  transition: background-color var(--transition-fast);
+}
+
+.phone-country-option:hover,
+.phone-country-option[data-active="true"] {
+  background-color: var(--color-brand-primary-light);
+}
+
+.phone-country-option.is-selected {
+  background-color: var(--color-brand-primary-light);
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.phone-country-option-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 24px;
+  line-height: 0;
+}
+
+.phone-country-option-flag svg {
+  display: block;
+  border-radius: 2px;
+}
+
+.phone-country-option-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phone-country-option-code {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.phone-country-empty {
+  padding: var(--space-4) var(--space-3);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* ---------- Responsive: match .auth-input at ≤360px ---------- */
+@media (max-width: 360px) {
+  .phone-country-trigger {
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+    gap: var(--space-1);
+    font-size: var(--font-size-xs);
+  }
+
+  .phone-country-number {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .phone-country-divider {
+    height: calc(100% - var(--space-2) * 2);
+  }
+
+  .phone-country-option {
+    min-height: 38px;
+    padding-inline: var(--space-2);
+  }
+
+  .phone-country-option-flag {
+    flex-basis: 22px;
+  }
+
+  .phone-country-option-code {
+    font-size: var(--font-size-xs);
+  }
+
+  .phone-country-search {
+    padding: var(--space-1) var(--space-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-country-pop {
+    animation: none;
+  }
+}

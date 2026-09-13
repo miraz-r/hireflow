@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+const { parsePhoneNumber } = require('libphonenumber-js');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
 const env = require('../config/env');
@@ -29,8 +30,22 @@ const registerValidators = [
     .isString()
     .withMessage('Phone is required')
     .trim()
-    .matches(/^[+0-9()\-\s]{6,32}$/)
-    .withMessage('Invalid phone format'),
+    .notEmpty()
+    .withMessage('Phone is required')
+    // The client submits a complete international number (e.g. +8801712345678).
+    // This is the authoritative safety layer: keep any clearly-invalid phone
+    // structure out of the database even when the client-side check is bypassed.
+    .custom((value) => {
+      try {
+        const parsed = parsePhoneNumber(value);
+        return Boolean(parsed && parsed.isValid());
+      } catch {
+        return false;
+      }
+    })
+    .withMessage('Invalid phone number')
+    .isLength({ max: 32 })
+    .withMessage('Phone number must be at most 32 characters'),
 ];
 
 const register = async (req, res, next) => {
