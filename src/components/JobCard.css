@@ -20,6 +20,10 @@
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
 }
 
 /* Header */
