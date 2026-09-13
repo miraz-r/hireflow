@@ -4,6 +4,8 @@
 
 .sg-page {
   background-color: var(--color-bg-primary);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* =========================================================
@@ -32,6 +34,10 @@
   grid-template-columns: 1fr 380px;
   gap: var(--space-12);
   align-items: center;
+}
+
+.sg-hero-text {
+  max-width: 600px;
 }
 
 .sg-hero-eyebrow {
@@ -159,6 +165,13 @@
   color: var(--color-text-secondary);
   line-height: var(--line-height-relaxed);
   max-width: 560px;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Salary data section intro — balanced rhythm before the table */
+.sg-salary-section .sg-section-header {
+  margin-bottom: var(--space-6);
 }
 
 /* =========================================================
@@ -319,6 +332,12 @@
   gap: var(--space-12);
   align-items: start;
   margin-bottom: var(--space-8);
+}
+
+.sg-context-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sg-context-items {
@@ -508,13 +527,37 @@
     gap: var(--space-8);
   }
 
+  .sg-hero-text {
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .sg-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .sg-hero-visual {
     max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .sg-section-header {
+    text-align: center;
+  }
+
+  .sg-section-sub {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .sg-context-layout {
     grid-template-columns: 1fr;
     gap: var(--space-8);
+  }
+
+  .sg-context-text {
+    text-align: center;
   }
 
   .sg-context-items {
@@ -533,8 +576,8 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Mobile (<=640px)
-   ========================================================= */
+    RESPONSIVE — Mobile (<=640px)
+    ========================================================= */
 @media (max-width: 640px) {
   .sg-hero {
     padding: var(--space-12) 0 var(--space-8);
@@ -557,11 +600,12 @@
   }
 
   .sg-table-wrap {
-    margin-left: calc(-1 * var(--container-padding));
-    margin-right: calc(-1 * var(--container-padding));
     border-radius: 0;
     border-left: none;
     border-right: none;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
   }
 
   .sg-context-items {
@@ -589,6 +633,16 @@
 
   .sg-cta-title {
     font-size: var(--font-size-xl);
+  }
+}
+
+/* =========================================================
+    RESPONSIVE — Tablet/Mobile safety net (<=768px)
+    ========================================================= */
+@media (max-width: 768px) {
+  .sg-context-items {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
   }
 }
 

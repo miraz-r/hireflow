@@ -83,10 +83,9 @@ export default function SalaryGuidePage() {
       <section className="sg-section sg-salary-section" aria-label="Salary data">
         <div className="container">
           <div className="sg-section-header">
-            <span className="sg-section-label">Salary Data</span>
             <h2 className="sg-section-heading">Popular role salaries</h2>
             <p className="sg-section-sub">
-              Ranges shown include base salary, bonuses, and equity where applicable.
+              Explore typical compensation ranges for popular roles, including base salary, bonuses, and equity where applicable. These ranges provide a practical view of how total compensation can vary by role and level.
             </p>
           </div>
 
@@ -148,7 +147,6 @@ export default function SalaryGuidePage() {
         <div className="container">
           <div className="sg-context-layout">
             <div className="sg-context-text">
-              <span className="sg-section-label">Understanding the data</span>
               <h2 className="sg-section-heading">What these numbers represent</h2>
             </div>
             <div className="sg-context-items">

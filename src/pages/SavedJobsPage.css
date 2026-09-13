@@ -6,7 +6,9 @@
 }
 
 .saved-jobs-header {
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .saved-jobs-title {
@@ -35,8 +37,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: var(--space-3);
-  padding: var(--space-10) var(--space-6);
+  gap: var(--space-4);
+  padding: var(--space-16) var(--space-6);
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
@@ -49,7 +51,7 @@
   width: 80px;
   height: 80px;
   border-radius: var(--radius-2xl);
-  background-color: var(--color-brand-primary-light);
+  background: linear-gradient(135deg, var(--color-brand-primary-light), #C7D2FE);
   color: var(--color-brand-primary);
   margin-bottom: var(--space-2);
 }
@@ -57,6 +59,7 @@
 .saved-jobs-empty-title {
   font-size: var(--font-size-xl);
   color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
   margin: 0;
 }
 
@@ -65,6 +68,7 @@
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-2);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
 }
 
 .saved-jobs-list {
@@ -81,12 +85,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .saved-jobs-card:hover {
   border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .saved-jobs-card-main {
