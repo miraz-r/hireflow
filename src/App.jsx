@@ -41,6 +41,7 @@ import AccessibilityPage from './pages/AccessibilityPage';
 import PrivacyPage from './pages/PrivacyPage';
 import CookiePolicyPage from './pages/CookiePolicyPage';
 import TermsPage from './pages/TermsPage';
+import AdminPage from './pages/AdminPage';
 import './App.css';
 
 export default function App() {
@@ -294,6 +295,7 @@ export default function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
           <Route path="/accessibility" element={<AccessibilityPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
         </PageTransition>
       </main>
