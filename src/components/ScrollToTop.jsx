@@ -27,9 +27,22 @@ export default function ScrollToTop() {
   const prevPathname = useRef(pathname);
   const prevHash = useRef(hash);
   const jobsScrollRestored = useRef(false);
+  const prevRestoreKey = useRef(key);
 
   useLayoutEffect(() => {
+    // `key` changes on every real router navigation (push/replace/pop), but is
+    // identical across the initial mount — and across React StrictMode's
+    // doubled mount effects. So a same-key run means the document just loaded:
+    // the browser is restoring the scroll position natively and the Jobs
+    // restoration state (state.restoreJobsScroll or the sessionStorage
+    // bookmark) must NOT override it. Otherwise a hard refresh of "/" snaps
+    // back to the saved Jobs position instead of keeping the browser-restored
+    // position.
+    const isRouterNavigation = key !== prevRestoreKey.current;
+    prevRestoreKey.current = key;
+
     if (pathname !== '/') return;
+    if (!isRouterNavigation) return;
 
     if (state?.restoreJobsScroll != null) {
       jobsScrollRestored.current = true;
