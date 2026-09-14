@@ -1,5 +1,9 @@
 const { body, param, validationResult } = require('express-validator');
 
+// The existing Application.status enum values. Kept here so route validation
+// and the model never drift apart accidentally.
+const APPLICATION_STATUSES = ['applied', 'under-review', 'interview', 'offer', 'hired', 'rejected'];
+
 const runValidation = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -53,8 +57,32 @@ const jobIdParamValidators = [
   runValidation,
 ];
 
+// GET /api/applications/:id — the application id is a URL param.
+const applicationIdValidators = [
+  param('id')
+    .isMongoId()
+    .withMessage('Invalid application id'),
+  runValidation,
+];
+
+// PATCH /api/applications/:id/status — the application id is a URL param and
+// the status must be one of the existing Application enum values.
+const statusUpdateValidators = [
+  param('id')
+    .isMongoId()
+    .withMessage('Invalid application id'),
+  body('status')
+    .isString()
+    .trim()
+    .isIn(APPLICATION_STATUSES)
+    .withMessage('Status must be one of: applied, under-review, interview, offer, hired, rejected'),
+  runValidation,
+];
+
 module.exports = {
   createValidators,
   jobIdParamValidators,
+  applicationIdValidators,
+  statusUpdateValidators,
   runValidation,
 };

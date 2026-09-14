@@ -1,0 +1,14 @@
+/* The Admin Dashboard reuses the existing recruiter dashboard design
+   system (rc-* classes) defined with the ProfilePage recruiter workspace. */
+@import './ProfilePage.css';
+
+.admin-page {
+  min-height: 60vh;
+  padding: var(--space-8) 0 var(--space-12);
+}
+
+@media (max-width: 768px) {
+  .admin-page {
+    padding: var(--space-5) 0 var(--space-8);
+  }
+}

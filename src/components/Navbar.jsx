@@ -334,19 +334,35 @@ export default function Navbar() {
                     </>
                   )}
                   {user.role === 'recruiter' && (
-                    <Link
-                      to="/profile?tab=post"
-                      className="account-menu-item"
-                      role="menuitem"
-                      onClick={handleProfileNavigate}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="16"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                      </svg>
-                      Post a Job
-                    </Link>
+                    <>
+                      <Link
+                        to="/admin"
+                        className="account-menu-item"
+                        role="menuitem"
+                        onClick={handleProfileNavigate}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <rect x="3" y="3" width="7" height="9" rx="1" />
+                          <rect x="14" y="3" width="7" height="5" rx="1" />
+                          <rect x="14" y="12" width="7" height="9" rx="1" />
+                          <rect x="3" y="16" width="7" height="5" rx="1" />
+                        </svg>
+                        Admin Dashboard
+                      </Link>
+                      <Link
+                        to="/profile?tab=post"
+                        className="account-menu-item"
+                        role="menuitem"
+                        onClick={handleProfileNavigate}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="12" y1="8" x2="12" y2="16"/>
+                          <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        Post a Job
+                      </Link>
+                    </>
                   )}
                   <div className="account-menu-divider" />
                   <button
@@ -549,18 +565,33 @@ export default function Navbar() {
                     </>
                   )}
                   {user.role === 'recruiter' && (
-                    <Link
-                      to="/profile?tab=post"
-                      className="mobile-drawer-link"
-                      onClick={handleDrawerRouteNav}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="16"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                      </svg>
-                      <span className="mobile-drawer-label">Post a Job</span>
-                    </Link>
+                    <>
+                      <Link
+                        to="/admin"
+                        className="mobile-drawer-link"
+                        onClick={handleDrawerRouteNav}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <rect x="3" y="3" width="7" height="9" rx="1" />
+                          <rect x="14" y="3" width="7" height="5" rx="1" />
+                          <rect x="14" y="12" width="7" height="9" rx="1" />
+                          <rect x="3" y="16" width="7" height="5" rx="1" />
+                        </svg>
+                        <span className="mobile-drawer-label">Admin Dashboard</span>
+                      </Link>
+                      <Link
+                        to="/profile?tab=post"
+                        className="mobile-drawer-link"
+                        onClick={handleDrawerRouteNav}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="12" y1="8" x2="12" y2="16"/>
+                          <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        <span className="mobile-drawer-label">Post a Job</span>
+                      </Link>
+                    </>
                   )}
                   <button
                     type="button"

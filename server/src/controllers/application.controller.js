@@ -1,6 +1,7 @@
 const Job = require('../models/Job');
 const Profile = require('../models/Profile');
 const Application = require('../models/Application');
+const User = require('../models/User');
 
 // ---------------------------------------------------------------------------
 // POST /api/applications  — jobseeker applies to a job
@@ -161,10 +162,134 @@ const listJobseekerApplications = async (req, res, next) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// PATCH /api/applications/:id/status  — recruiter advances an application
+// Only the recruiter who posted the application's job may update it. The job
+// is resolved from the application's server-side jobId — never from the
+// client. Sensitive applicant fields (phone, resume URL, cover letter) are not
+// included in the response.
+// ---------------------------------------------------------------------------
+const updateApplicationStatus = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id);
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    // Ownership is derived from the application's own jobId, so a client can
+    // never point us at a job the recruiter does not own.
+    const job = await Job.findById(application.jobId);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+    if (String(job.postedBy) !== String(req.user.id)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const updated = await Application.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true, runValidators: true, context: 'query' }
+    );
+
+    return res.status(200).json({
+      id: updated.id,
+      jobId: updated.jobId,
+      status: updated.status,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid application id' });
+    }
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// GET /api/applications/:id  — recruiter views a single application detail
+// Recruiter-only. The application must belong to a job posted by this
+// recruiter; ownership is resolved through the application's server-side
+// jobId — never from anything the client sends. Returns the applicant's
+// contact/personal data because this is an authorized recruiter detail view.
+// ---------------------------------------------------------------------------
+const getApplicationDetail = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id);
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    // Ownership is derived from the application's own jobId, so a recruiter
+    // can never view a job — and therefore an applicant — they do not own.
+    const job = await Job.findById(application.jobId);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+    if (String(job.postedBy) !== String(req.user.id)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Only the applicant's email from User (passwordHash is excluded by the
+    // model). Profile contributes name/headline/avatar + phone/resume as a
+    // fallback when the application record has no value.
+    const [user, profile] = await Promise.all([
+      User.findById(application.userId).select('email').lean(),
+      Profile.findOne({ userId: application.userId })
+        .select('userId fullName headline avatarUrl phone resumeUrl')
+        .lean(),
+    ]);
+
+    return res.status(200).json({
+      id: application.id,
+      status: application.status,
+      createdAt: application.createdAt,
+      updatedAt: application.updatedAt,
+      job: {
+        id: job.id,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        workType: job.workType,
+        employmentType: job.employmentType,
+        experienceLevel: job.experienceLevel,
+        category: job.category,
+        salary: job.salary,
+        skills: job.skills,
+        description: job.description,
+        accent: job.accent,
+      },
+      applicant: {
+        id: application.userId,
+        fullName: profile ? profile.fullName : 'Applicant',
+        headline: profile ? profile.headline || '' : '',
+        avatarUrl: profile ? profile.avatarUrl || '' : '',
+        email: user ? user.email : null,
+        // Prefer the phone the applicant submitted with this application;
+        // fall back to the profile phone when it is missing.
+        phone: application.phone || (profile ? profile.phone : '') || '',
+        resumeUrl: application.resumeUrl || (profile ? profile.resumeUrl : '') || '',
+      },
+      coverLetter: application.coverLetter,
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid application id' });
+    }
+    return next(err);
+  }
+};
+
 module.exports = {
   createApplication,
   getMyApplication,
   listMyApplications,
   listJobseekerApplications,
+  updateApplicationStatus,
+  getApplicationDetail,
 };
 

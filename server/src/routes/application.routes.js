@@ -5,10 +5,14 @@ const {
   getMyApplication,
   listMyApplications,
   listJobseekerApplications,
+  updateApplicationStatus,
+  getApplicationDetail,
 } = require('../controllers/application.controller');
 const {
   createValidators,
   jobIdParamValidators,
+  applicationIdValidators,
+  statusUpdateValidators,
 } = require('../validators/application.validators');
 
 const router = express.Router();
@@ -21,8 +25,17 @@ router.use(authenticate);
 // Defined before the :jobId routes to keep the URL shape unambiguous.
 router.get('/mine', authorize('recruiter'), listMyApplications);
 
+// Recruiter-only: update an application's status. Ownership is enforced in the
+// controller against the application's own job.
+router.patch('/:id/status', authorize('recruiter'), statusUpdateValidators, updateApplicationStatus);
+
 // Jobseeker-only: list the current user's own applications
 router.get('/my-applications', authorize('jobseeker'), listJobseekerApplications);
+
+// Recruiter-only: single application detail (ownership enforced in the
+// controller against the application's own job). Defined after the literal
+// /mine and /my-applications paths so it never shadows them.
+router.get('/:id', authorize('recruiter'), applicationIdValidators, getApplicationDetail);
 
 // Jobseeker-only: apply to a job
 router.post('/', authorize('jobseeker'), createValidators, createApplication);
