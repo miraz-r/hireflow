@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { apiGet } from '../utils/api';
+import { apiGet, apiPatch } from '../utils/api';
 
 const AVATAR_BASE = 'http://localhost:5000';
 
@@ -23,6 +23,8 @@ export default function RecruiterDashboard({ adminMode = false }) {
   const [applications, setApplications] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [updatingId, setUpdatingId] = useState(null);
   const [jobFilter, setJobFilter] = useState('all');
 
   useEffect(() => {
@@ -45,6 +47,20 @@ export default function RecruiterDashboard({ adminMode = false }) {
     load();
     return () => { cancelled = true; };
   }, []);
+
+  const handleStatusChange = async (app, newStatus) => {
+    if (updatingId === app.id || newStatus === app.status) return;
+    setActionError('');
+    setUpdatingId(app.id);
+    try {
+      await apiPatch(`/applications/${app.id}/status`, { status: newStatus });
+      setApplications((prev) => prev.map((a) => (a.id === app.id ? { ...a, status: newStatus } : a)));
+    } catch (err) {
+      setActionError(err?.message || 'Unable to update status. Please try again.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   if (loading) return <div className="app-loading" aria-busy="true" />;
 
@@ -200,6 +216,7 @@ export default function RecruiterDashboard({ adminMode = false }) {
       </div>
 
       {error && <div className="auth-alert auth-alert-error" role="alert"><span>{error}</span></div>}
+      {actionError && <div className="auth-alert auth-alert-error" role="alert"><span>{actionError}</span></div>}
 
       {/* ── Metric Cards ─────────────────────────────────────── */}
       <div className="rc-metrics">
@@ -421,9 +438,21 @@ export default function RecruiterDashboard({ adminMode = false }) {
               </div>
               <span className="rc-td rc-td--date">{fmtDate(app.createdAt)}</span>
               <div className="rc-td rc-td--status">
-                <span className={`badge application-status application-status--${app.status}`}>
-                  {STATUS_LABELS[app.status] || app.status}
-                </span>
+                <label className="sr-only" htmlFor={`app-status-${app.id}`}>
+                  Status for {app.applicant?.fullName || 'applicant'}
+                </label>
+                <select
+                  id={`app-status-${app.id}`}
+                  className={`rc-status-select rc-status-select--${app.status}`}
+                  value={app.status}
+                  disabled={updatingId === app.id}
+                  onChange={(e) => handleStatusChange(app, e.target.value)}
+                >
+                  {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+                {updatingId === app.id && <span className="rc-status-spinner" aria-hidden="true" />}
               </div>
             </div>
           ))}

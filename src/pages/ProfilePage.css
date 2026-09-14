@@ -1401,7 +1401,60 @@ label.btn.disabled {
 /* Status cell */
 .rc-td--status {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* Recruiter dashboard status control (Admin Dashboard + profile tab) */
+.rc-status-select {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  min-width: 150px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+.rc-status-select:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+.rc-status-select:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.rc-status-select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.rc-status-select--applied { background-color: var(--color-brand-primary-light); color: var(--color-brand-primary); }
+.rc-status-select--under-review { background-color: var(--color-bg-tertiary); color: var(--color-text-primary); }
+.rc-status-select--interview { background-color: var(--color-brand-secondary-light); color: var(--color-brand-secondary); }
+.rc-status-select--offer { background-color: var(--color-success-bg, #ecfdf5); color: #065f46; }
+.rc-status-select--hired { background-color: var(--color-brand-secondary); color: #fff; }
+.rc-status-select--rejected { background-color: var(--color-error-bg); color: #991b1b; }
+
+[data-theme="dark"] .rc-status-select--offer { color: #6ee7b7; }
+[data-theme="dark"] .rc-status-select--rejected { color: #fca5a5; }
+
+.rc-status-spinner {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border-strong);
+  border-top-color: var(--color-brand-primary);
+  border-radius: 50%;
+  animation: rc-status-spin 0.6s linear infinite;
+}
+
+@keyframes rc-status-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ── Shared Application Status Badges ──────────────────────────── */
@@ -1818,6 +1871,11 @@ label.btn.disabled {
 
   .rc-td--status {
     justify-content: flex-start;
+  }
+
+  .rc-td--status .rc-status-select {
+    width: 100%;
+    min-width: 0;
   }
 
   .rc-candidate-name {
