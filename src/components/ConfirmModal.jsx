@@ -76,7 +76,7 @@ export default function ConfirmModal({
       document.body.style.top = '';
       document.body.style.width = '';
       // Restore the pre-open scroll offset now the lock is released.
-      window.scrollTo(0, scrollY);
+      window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
       if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
         previouslyFocused.focus();
       }

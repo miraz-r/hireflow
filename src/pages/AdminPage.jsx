@@ -32,7 +32,7 @@ export default function AdminPage() {
   return (
     <div className="admin-page">
       <div className="container">
-        <RecruiterDashboard adminMode />
+        <RecruiterDashboard />
       </div>
     </div>
   );

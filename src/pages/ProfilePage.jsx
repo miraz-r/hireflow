@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from '../utils/api';
 import { categories, workTypes, employmentTypes, experienceLevels } from '../data/mockData';
-import RecruiterDashboard, { STATUS_LABELS } from '../components/RecruiterDashboard';
+import { STATUS_LABELS } from '../components/RecruiterDashboard';
 import Toast from '../components/Toast';
 import Avatar from '../components/Avatar';
 import ConfirmModal from '../components/ConfirmModal';
@@ -28,8 +28,15 @@ export default function ProfilePage() {
   // the URL may still carry a tab param that the new role cannot access (e.g.
   // "post" or "applications" after switching to jobseeker). Force-redirect to
   // the profile tab so the user never sees a forbidden state.
-  const RECRUITER_ONLY_TABS = ['post', 'recruiter-applications'];
+  const RECRUITER_ONLY_TABS = ['post'];
   const JOBSEEKER_ONLY_TABS = ['my-applications', 'saved-jobs'];
+
+  useEffect(() => {
+    if (user?.role === 'recruiter' && tab === 'recruiter-applications') {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, tab, navigate]);
+
   useEffect(() => {
     if (user && RECRUITER_ONLY_TABS.includes(tab) && user.role !== 'recruiter') {
       setSearchParams({}, { replace: true });
@@ -43,6 +50,10 @@ export default function ProfilePage() {
     return <div className="app-loading" aria-busy="true" />;
   }
   if (!user) return null;
+
+  if (user.role === 'recruiter' && tab === 'recruiter-applications') {
+    return null;
+  }
 
   const setTab = (next) => setSearchParams(next === 'profile' ? {} : { tab: next });
 
@@ -92,23 +103,12 @@ export default function ProfilePage() {
               >
                 Post a job
               </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === 'recruiter-applications'}
-                className={`profile-tab ${tab === 'recruiter-applications' ? 'active' : ''}`}
-                onClick={() => setTab('recruiter-applications')}
-              >
-                Applications
-              </button>
             </>
           )}
         </div>
 
         {tab === 'post' ? (
           <PostJobTab />
-        ) : tab === 'recruiter-applications' ? (
-          <RecruiterDashboard />
         ) : tab === 'my-applications' ? (
           <JobseekerApplicationsTab />
         ) : tab === 'saved-jobs' ? (

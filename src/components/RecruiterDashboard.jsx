@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect, useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { apiGet, apiPatch } from '../utils/api';
 
 const AVATAR_BASE = 'http://localhost:5000';
@@ -14,18 +14,21 @@ export const STATUS_LABELS = {
 };
 
 /* ======================================================================= */
-/* Recruiter dashboard — applications for the recruiter's own jobs.         */
-/* Shared by the Profile "Applications" tab and the Admin Dashboard.        */
-/* `adminMode` brands the header as "Admin Dashboard" instead of a greeting. */
+/* Recruiter dashboard: applications for the recruiter's own jobs.          */
+/* Rendered by the Admin Dashboard (/admin) as the single dashboard view.   */
 /* ======================================================================= */
-export default function RecruiterDashboard({ adminMode = false }) {
-  const { user } = useAuth();
+export default function RecruiterDashboard() {
   const [applications, setApplications] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
   const [jobFilter, setJobFilter] = useState('all');
+  const [detailAppId, setDetailAppId] = useState(null);
+  const [detailData, setDetailData] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState('');
+  const detailIdRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +63,31 @@ export default function RecruiterDashboard({ adminMode = false }) {
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const openDetail = async (app) => {
+    detailIdRef.current = app.id;
+    setDetailAppId(app.id);
+    setDetailData(null);
+    setDetailError('');
+    setDetailLoading(true);
+    try {
+      const res = await apiGet(`/applications/${app.id}`);
+      if (detailIdRef.current !== app.id) return;
+      setDetailData(res.data);
+    } catch (err) {
+      if (detailIdRef.current !== app.id) return;
+      setDetailError(err?.message || 'Unable to load applicant details.');
+    } finally {
+      if (detailIdRef.current === app.id) setDetailLoading(false);
+    }
+  };
+
+  const closeDetail = () => {
+    detailIdRef.current = null;
+    setDetailAppId(null);
+    setDetailData(null);
+    setDetailError('');
   };
 
   if (loading) return <div className="app-loading" aria-busy="true" />;
@@ -133,15 +161,6 @@ export default function RecruiterDashboard({ adminMode = false }) {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
-  const recruiterName = (user?.fullName || '').split(' ')[0] || '';
-
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
-    return 'Good evening';
-  })();
-
   const stageColors = {
     applied: '#4F46E5',
     'under-review': '#6B7280',
@@ -150,16 +169,10 @@ export default function RecruiterDashboard({ adminMode = false }) {
     hired: '#10B981',
   };
 
-  const header = adminMode ? (
+  const header = (
     <>
-      <span className="section-eyebrow">Recruiter</span>
       <h1 className="rc-header-title">Admin Dashboard</h1>
-      <p className="rc-header-sub">Your hiring workspace — manage your pipeline and applicants.</p>
-    </>
-  ) : (
-    <>
-      <h1 className="rc-header-title">{greeting}{recruiterName ? `, ${recruiterName}` : ''}</h1>
-      <p className="rc-header-sub">Your hiring workspace — track candidates and manage your pipeline.</p>
+      <p className="rc-header-sub">Your hiring workspace. Manage your pipeline and applicants.</p>
     </>
   );
 
@@ -410,6 +423,7 @@ export default function RecruiterDashboard({ adminMode = false }) {
           <span className="rc-th rc-th--job">Job</span>
           <span className="rc-th rc-th--date">Applied</span>
           <span className="rc-th rc-th--status">Status</span>
+          <span className="rc-th rc-th--actions"><span className="sr-only">Details</span></span>
         </div>
         <div className="rc-table-body">
           {filtered.map((app) => (
@@ -454,10 +468,235 @@ export default function RecruiterDashboard({ adminMode = false }) {
                 </select>
                 {updatingId === app.id && <span className="rc-status-spinner" aria-hidden="true" />}
               </div>
+              <div className="rc-td rc-td--actions">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-secondary rc-view-btn"
+                  onClick={() => openDetail(app)}
+                >
+                  View
+                </button>
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      <ApplicantDetailModal
+        open={Boolean(detailAppId)}
+        loading={detailLoading}
+        error={detailError}
+        data={detailData}
+        onClose={closeDetail}
+        onRetry={() => openDetail({ id: detailAppId })}
+      />
     </div>
+  );
+}
+
+/* ======================================================================= */
+/* Applicant detail modal — fetches GET /applications/:id only when opened. */
+/* Portal-backed like ConfirmModal so the overlay roots at the viewport.    */
+/* Displays ONLY what the authorized detail endpoint returns; missing data  */
+/* hides the corresponding section/action.                                 */
+/* ======================================================================= */
+function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) {
+  const titleId = useId();
+  const dialogRef = useRef(null);
+
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const previouslyFocused = document.activeElement;
+    const scrollY = window.scrollY;
+
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onCloseRef.current();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    const raf = window.requestAnimationFrame(() => {
+      if (dialogRef.current) {
+        dialogRef.current.focus();
+      }
+    });
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+        previouslyFocused.focus();
+      }
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  const resolveMediaUrl = (url) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `${AVATAR_BASE}${url}`;
+  };
+
+  const fmtDate = (dateStr) => {
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const applicant = data?.applicant;
+  const job = data?.job;
+  const status = data?.status;
+  const email = applicant?.email;
+  const phone = applicant?.phone;
+  const resumeUrl = applicant?.resumeUrl;
+  const coverLetter = data?.coverLetter;
+
+  return createPortal(
+    <div className="rc-detail-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="rc-detail" ref={dialogRef} tabIndex={-1}>
+        <div className="rc-detail-top">
+          <h3 id={titleId} className="rc-detail-title">Applicant details</h3>
+          <button
+            type="button"
+            className="rc-detail-close"
+            onClick={onClose}
+            aria-label="Close applicant details"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {loading && (
+          <div className="rc-detail-state" role="status" aria-live="polite">
+            <span className="rc-detail-spinner" aria-hidden="true" />
+            <p className="rc-detail-state-text">Loading applicant details…</p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="rc-detail-state">
+            <div className="auth-alert auth-alert-error" role="alert">
+              <span>{error}</span>
+            </div>
+            <p className="rc-detail-state-text">We could not load this applicant's details. Please try again.</p>
+            <div className="rc-detail-state-actions">
+              <button type="button" className="btn btn-secondary" onClick={onRetry}>Try again</button>
+              <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && data && (
+          <div className="rc-detail-body">
+            <div className="rc-detail-identity">
+              <div className="rc-detail-avatar" aria-hidden="true">
+                {applicant?.avatarUrl ? (
+                  <img src={resolveMediaUrl(applicant.avatarUrl)} alt="" />
+                ) : (
+                  (applicant?.fullName || 'A').charAt(0).toUpperCase()
+                )}
+              </div>
+              <div className="rc-detail-identity-text">
+                <span className="rc-detail-name">{applicant?.fullName || 'Applicant'}</span>
+                {applicant?.headline && <span className="rc-detail-headline">{applicant.headline}</span>}
+              </div>
+            </div>
+
+            {(email || phone) && (
+              <div className="rc-detail-section">
+                <h4 className="rc-detail-section-title">Contact</h4>
+                <div className="rc-detail-contact">
+                  {email && (
+                    <a className="btn btn-sm btn-secondary rc-contact-btn" href={`mailto:${email}`}>
+                      Email
+                    </a>
+                  )}
+                  {phone && (
+                    <a className="btn btn-sm btn-secondary rc-contact-btn" href={`tel:${phone}`}>
+                      Call
+                    </a>
+                  )}
+                  {phone && (
+                    <a className="btn btn-sm btn-secondary rc-contact-btn" href={`sms:${phone}`}>
+                      Text
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="rc-detail-section">
+              <h4 className="rc-detail-section-title">Application</h4>
+              <dl className="rc-detail-rows">
+                <div className="rc-detail-row">
+                  <dt>Job</dt>
+                  <dd>{job?.title || '—'}</dd>
+                </div>
+                {job?.company && (
+                  <div className="rc-detail-row">
+                    <dt>Company</dt>
+                    <dd>{job.company}{job?.location ? ` · ${job.location}` : ''}</dd>
+                  </div>
+                )}
+                <div className="rc-detail-row">
+                  <dt>Applied</dt>
+                  <dd>{fmtDate(data.createdAt) || '—'}</dd>
+                </div>
+                <div className="rc-detail-row">
+                  <dt>Status</dt>
+                  <dd>
+                    <span className={`rc-status-badge rc-status-badge--${status}`}>
+                      {STATUS_LABELS[status] || status || 'Unknown'}
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            {resumeUrl && (
+              <div className="rc-detail-section">
+                <h4 className="rc-detail-section-title">Resume</h4>
+                <a
+                  className="btn btn-sm btn-secondary"
+                  href={resolveMediaUrl(resumeUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View resume
+                </a>
+              </div>
+            )}
+
+            <div className="rc-detail-section">
+              <h4 className="rc-detail-section-title">Cover letter</h4>
+              {coverLetter ? (
+                <p className="rc-detail-letter">{coverLetter}</p>
+              ) : (
+                <p className="rc-detail-letter rc-detail-letter--empty">No cover letter provided.</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
   );
 }

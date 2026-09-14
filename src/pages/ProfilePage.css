@@ -1273,7 +1273,7 @@ label.btn.disabled {
 
 .rc-table-header {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1fr;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr auto;
   gap: var(--space-4);
   padding: var(--space-3) var(--space-6);
   margin-top: var(--space-4);
@@ -1296,7 +1296,7 @@ label.btn.disabled {
 
 .rc-table-row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1fr;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr auto;
   gap: var(--space-4);
   align-items: center;
   padding: var(--space-4) var(--space-6);
@@ -1406,25 +1406,28 @@ label.btn.disabled {
   gap: var(--space-2);
 }
 
-/* Recruiter dashboard status control (Admin Dashboard + profile tab) */
+/* Recruiter dashboard status control (Admin Dashboard) */
 .rc-status-select {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   min-width: 150px;
   padding: var(--space-1) var(--space-3);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   border: 1px solid var(--color-border-default);
+  border-left-width: 3px;
+  border-left-color: var(--color-text-tertiary);
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
 }
 
 .rc-status-select:hover:not(:disabled) {
-  border-color: var(--color-border-strong);
+  box-shadow: 0 0 0 1px var(--color-border-strong);
 }
 
 .rc-status-select:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
@@ -1433,15 +1436,12 @@ label.btn.disabled {
   cursor: not-allowed;
 }
 
-.rc-status-select--applied { background-color: var(--color-brand-primary-light); color: var(--color-brand-primary); }
-.rc-status-select--under-review { background-color: var(--color-bg-tertiary); color: var(--color-text-primary); }
-.rc-status-select--interview { background-color: var(--color-brand-secondary-light); color: var(--color-brand-secondary); }
-.rc-status-select--offer { background-color: var(--color-success-bg, #ecfdf5); color: #065f46; }
-.rc-status-select--hired { background-color: var(--color-brand-secondary); color: #fff; }
-.rc-status-select--rejected { background-color: var(--color-error-bg); color: #991b1b; }
-
-[data-theme="dark"] .rc-status-select--offer { color: #6ee7b7; }
-[data-theme="dark"] .rc-status-select--rejected { color: #fca5a5; }
+.rc-status-select--applied { border-left-color: var(--color-brand-primary); }
+.rc-status-select--under-review { border-left-color: var(--color-text-tertiary); }
+.rc-status-select--interview { border-left-color: var(--color-brand-accent); }
+.rc-status-select--offer { border-left-color: var(--color-success); }
+.rc-status-select--hired { border-left-color: var(--color-brand-secondary); }
+.rc-status-select--rejected { border-left-color: var(--color-error); }
 
 .rc-status-spinner {
   flex-shrink: 0;
@@ -1455,6 +1455,21 @@ label.btn.disabled {
 
 @keyframes rc-status-spin {
   to { transform: rotate(360deg); }
+}
+
+/* Actions cell — "View" trigger for applicant details */
+.rc-th--actions {
+  text-align: right;
+}
+
+.rc-td--actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.rc-view-btn {
+  flex-shrink: 0;
 }
 
 /* ── Shared Application Status Badges ──────────────────────────── */
@@ -1873,6 +1888,10 @@ label.btn.disabled {
     justify-content: flex-start;
   }
 
+  .rc-td--actions {
+    justify-content: flex-start;
+  }
+
   .rc-td--status .rc-status-select {
     width: 100%;
     min-width: 0;
@@ -2144,5 +2163,295 @@ label.btn.disabled {
   .rc-empty-icon svg {
     width: 32px;
     height: 32px;
+  }
+}
+
+/* ── Applicant Detail Modal ──────────────────────────────────────────
+   Portal-backed (see RecruiterDashboard.jsx) so the overlay is rooted
+   at the viewport. Displays only what the authorized GET
+   /applications/:id endpoint returns. */
+.rc-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background-color: var(--color-bg-overlay);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  animation: rcDetailOverlayIn 160ms ease;
+}
+
+@keyframes rcDetailOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.rc-detail {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - var(--space-8));
+  max-height: calc(100dvh - var(--space-8));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overflow-wrap: break-word;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-8);
+  animation: rcDetailIn 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Focus target only — never paint a ring around the whole dialog. */
+.rc-detail:focus {
+  outline: none;
+}
+
+@keyframes rcDetailIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.rc-detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.rc-detail-title {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-snug);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.rc-detail-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.rc-detail-close:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.rc-detail-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.rc-detail-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8) 0;
+  text-align: center;
+}
+
+.rc-detail-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--color-border-strong);
+  border-top-color: var(--color-brand-primary);
+  border-radius: 50%;
+  animation: rc-status-spin 0.6s linear infinite;
+}
+
+.rc-detail-state-text {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.rc-detail-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.rc-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.rc-detail-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.rc-detail-avatar {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+  overflow: hidden;
+}
+
+.rc-detail-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rc-detail-identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rc-detail-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.rc-detail-headline {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.rc-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.rc-detail-section-title {
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.rc-detail-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.rc-detail-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.rc-detail-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--space-3);
+  align-items: baseline;
+}
+
+.rc-detail-row dt {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.rc-detail-row dd {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.rc-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  user-select: none;
+}
+
+.rc-status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--color-text-tertiary);
+}
+
+.rc-status-badge--applied::before { background-color: var(--color-brand-primary); }
+.rc-status-badge--under-review::before { background-color: var(--color-text-tertiary); }
+.rc-status-badge--interview::before { background-color: var(--color-brand-accent); }
+.rc-status-badge--offer::before { background-color: var(--color-success); }
+.rc-status-badge--hired::before { background-color: var(--color-brand-secondary); }
+.rc-status-badge--rejected::before { background-color: var(--color-error); }
+
+.rc-detail-letter {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+}
+
+.rc-detail-letter--empty {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .rc-detail {
+    padding: var(--space-6);
+  }
+
+  .rc-detail-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rc-detail-overlay,
+  .rc-detail {
+    animation: none;
   }
 }
