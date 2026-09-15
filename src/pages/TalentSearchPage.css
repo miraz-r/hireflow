@@ -39,9 +39,8 @@
 
 .ts-hero-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr;
   gap: var(--space-12);
-  align-items: center;
 }
 
 .ts-hero-eyebrow {
@@ -69,44 +68,6 @@
   color: rgba(221, 230, 255, 0.85);
   line-height: var(--line-height-relaxed);
   max-width: 480px;
-}
-
-/* Hero visual — tool count */
-.ts-hero-visual {
-  display: flex;
-}
-
-.ts-hero-visual-card {
-  width: 100%;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(8px);
-}
-
-.ts-hero-visual-label {
-  display: block;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: var(--space-4);
-}
-
-.ts-hero-visual-count {
-  font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-bold);
-  color: #ffffff;
-  letter-spacing: var(--letter-spacing-tighter);
-  line-height: 1;
-  margin-bottom: var(--space-2);
-}
-
-.ts-hero-visual-desc {
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.5);
 }
 
 /* =========================================================
@@ -303,11 +264,6 @@
   .ts-hero-desc {
     margin-left: auto;
     margin-right: auto;
-  }
-
-  .ts-hero-visual {
-    max-width: 400px;
-    margin: 0 auto;
   }
 
   .ts-features .section-intro {

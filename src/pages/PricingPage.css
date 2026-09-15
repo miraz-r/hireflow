@@ -39,9 +39,8 @@
 
 .pricing-hero-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr;
   gap: var(--space-12);
-  align-items: center;
 }
 
 .pricing-hero-eyebrow {
@@ -64,72 +63,8 @@
   margin-bottom: var(--space-5);
 }
 
-.pricing-hero-desc {
-  font-size: var(--font-size-lg);
-  color: rgba(221, 230, 255, 0.85);
-  line-height: var(--line-height-relaxed);
-  max-width: 480px;
-}
-
-/* Hero visual — pricing preview */
-.pricing-hero-visual {
-  display: flex;
-}
-
-.pricing-hero-visual-card {
-  width: 100%;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(8px);
-}
-
-.pricing-hero-visual-label {
-  display: block;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: var(--space-4);
-}
-
-.pricing-hero-visual-price {
-  font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-bold);
-  color: #ffffff;
-  letter-spacing: var(--letter-spacing-tighter);
-  line-height: 1;
-  margin-bottom: var(--space-2);
-}
-
-.pricing-hero-visual-desc {
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.5);
-}
-
 /* =========================================================
-   2. CONTEXT — connecting text
-   ========================================================= */
-.pricing-context {
-  padding: var(--space-16) 0;
-  background-color: var(--color-bg-secondary);
-  border-top: 1px solid var(--color-border-default);
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.pricing-context-text {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
-  max-width: 640px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-/* =========================================================
-   3. PRICING TIERS — integrated hierarchy
+   2. PRICING TIERS — integrated hierarchy
    ========================================================= */
 .pricing-tiers {
   padding: var(--space-20) 0 var(--space-16);
@@ -320,15 +255,9 @@
     text-align: center;
   }
 
-  .pricing-hero-title,
-  .pricing-hero-desc {
+  .pricing-hero-title {
     margin-left: auto;
     margin-right: auto;
-  }
-
-  .pricing-hero-visual {
-    max-width: 400px;
-    margin: 0 auto;
   }
 
   .pricing-tiers .section-intro {
@@ -351,10 +280,6 @@
 
   .pricing-hero-title {
     font-size: var(--font-size-4xl);
-  }
-
-  .pricing-context {
-    padding: var(--space-10) 0;
   }
 
   .pricing-tiers {
@@ -382,10 +307,6 @@
     font-size: var(--font-size-3xl);
   }
 
-  .pricing-hero-desc {
-    font-size: var(--font-size-base);
-  }
-
   .pricing-card {
     padding: var(--space-6);
   }
@@ -401,11 +322,6 @@
 
   .pricing-cta-heading {
     font-size: var(--font-size-2xl);
-  }
-
-  .pricing-cta-desc {
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--space-5);
   }
 }
 

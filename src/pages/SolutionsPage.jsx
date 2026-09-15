@@ -40,8 +40,6 @@ const SEGMENTS = [
 const REASONS = [
   'Qualified candidate pool across engineering, design, product, marketing, and operations.',
   'Transparent pricing with no hidden fees or long-term contracts.',
-  'Built-in applicant tracking so you never lose track of a promising candidate.',
-  'Company profile pages that showcase your culture and attract the right fit.',
   'Analytics to understand what is working and optimize your hiring process.',
 ];
 
@@ -74,13 +72,6 @@ export default function SolutionsPage() {
               Learn how HireFlow powers hiring for companies of every size — from first job posting to building an entire team.
             </p>
           </div>
-          <div className="sol-hero-visual">
-            <div className="sol-hero-visual-card">
-              <span className="sol-hero-visual-label">Solutions</span>
-              <div className="sol-hero-visual-count">{SEGMENTS.length}</div>
-              <span className="sol-hero-visual-desc">Solutions for growing teams</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -89,7 +80,6 @@ export default function SolutionsPage() {
         <div className="container">
           <Reveal>
             <div className="section-intro">
-              <span className="sol-section-eyebrow">Built for every team</span>
               <h2 className="sol-segments-heading">Choose the solution that fits your stage.</h2>
             </div>
           </Reveal>

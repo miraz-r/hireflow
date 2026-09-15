@@ -60,28 +60,7 @@ export default function PricingPage() {
           <div className="pricing-hero-content">
             <span className="pricing-hero-eyebrow">For every team</span>
             <h1 className="pricing-hero-title">Simple, transparent pricing</h1>
-            <p className="pricing-hero-desc">
-              Simple, transparent pricing for jobseekers and employers. Posting a job and applying are free to get started.
-            </p>
           </div>
-          <div className="pricing-hero-visual">
-            <div className="pricing-hero-visual-card">
-              <span className="pricing-hero-visual-label">Get started</span>
-              <div className="pricing-hero-visual-price">$0</div>
-              <span className="pricing-hero-visual-desc">Free to begin</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CONTEXT ── */}
-      <section className="pricing-context">
-        <div className="container">
-          <Reveal>
-            <p className="pricing-context-text">
-              Whether you are exploring your first role or hiring for your entire team, HireFlow has a plan that fits. Start with our free tier and upgrade when you need more.
-            </p>
-          </Reveal>
         </div>
       </section>
 

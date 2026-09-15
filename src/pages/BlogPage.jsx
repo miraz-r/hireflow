@@ -48,11 +48,10 @@ const POSTS = [
   },
 ];
 
-const CATEGORIES = ['All', 'Career Advice', 'Hiring', 'Workplace', 'Compensation', 'Job Market'];
+const CATEGORIES = ['All', 'Career Advice', 'Hiring', 'Compensation', 'Job Market'];
 
 const FEATURED = POSTS[0];
-const GRID_POSTS = POSTS.slice(1, 3);
-const RECENT_POSTS = POSTS.slice(3);
+const GRID_POSTS = POSTS.slice(1);
 
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState('All');
@@ -60,10 +59,6 @@ export default function BlogPage() {
   const filteredGrid = activeCategory === 'All'
     ? GRID_POSTS
     : GRID_POSTS.filter(p => p.category === activeCategory);
-
-  const filteredRecent = activeCategory === 'All'
-    ? RECENT_POSTS
-    : RECENT_POSTS.filter(p => p.category === activeCategory);
 
   return (
     <div className="blog-page">
@@ -77,13 +72,6 @@ export default function BlogPage() {
             <h1 className="blog-hero-title">Ideas for your next career move.</h1>
             <p className="blog-hero-desc">Stories, guides, and hiring insights from the HireFlow team.</p>
           </div>
-          <div className="blog-hero-visual">
-            <div className="blog-hero-visual-card">
-              <span className="blog-hero-visual-label">Published</span>
-              <div className="blog-hero-visual-count">{POSTS.length}</div>
-              <span className="blog-hero-visual-desc">articles</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -91,14 +79,12 @@ export default function BlogPage() {
       <section className="blog-featured">
         <div className="container">
           <Reveal>
-            <span className="blog-section-eyebrow">Featured</span>
             <div className="blog-featured-card">
               <div className="blog-featured-image" style={{ backgroundImage: `url(${FEATURED.image})` }} role="img" aria-label={FEATURED.title} />
               <div className="blog-featured-content">
                 <span className="blog-card-category">{FEATURED.category}</span>
                 <h2 className="blog-featured-title">{FEATURED.title}</h2>
                 <p className="blog-featured-desc">{FEATURED.description}</p>
-                <Link to={FEATURED.link} className="blog-card-link">Read more →</Link>
               </div>
             </div>
           </Reveal>
@@ -138,33 +124,8 @@ export default function BlogPage() {
                       <span className="blog-card-category">{post.category}</span>
                       <h3 className="blog-card-title">{post.title}</h3>
                       <p className="blog-card-desc">{post.description}</p>
-                      <Link to={post.link} className="blog-card-link">Read more →</Link>
                     </div>
                   </article>
-                </Reveal>
-              ))}
-            </div>
-          ) : (
-            <p className="blog-empty-state">No articles in this category yet.</p>
-          )}
-        </div>
-      </section>
-
-      {/* ── RECENT ── */}
-      <section className="blog-recent">
-        <div className="container">
-          <Reveal>
-            <h2 className="blog-section-heading">Recent posts</h2>
-          </Reveal>
-          {filteredRecent.length > 0 ? (
-            <div className="blog-recent-list">
-              {filteredRecent.map((post, i) => (
-                <Reveal key={post.title} delay={60 + i * 60}>
-                  <Link to={post.link} className="blog-recent-item">
-                    <span className="blog-recent-category">{post.category}</span>
-                    <span className="blog-recent-title">{post.title}</span>
-                    <span className="blog-recent-arrow" aria-hidden="true">→</span>
-                  </Link>
                 </Reveal>
               ))}
             </div>

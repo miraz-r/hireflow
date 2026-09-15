@@ -46,9 +46,8 @@
 
 .press-hero-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr;
   gap: var(--space-12);
-  align-items: center;
 }
 
 .press-hero-title {
@@ -68,52 +67,6 @@
   max-width: 480px;
 }
 
-/* Hero visual — publications stat card */
-.press-hero-visual {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.press-hero-visual-stat {
-  width: 100%;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(8px);
-}
-
-.press-hero-visual-label {
-  display: block;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: var(--space-6);
-  text-align: center;
-}
-
-.press-hero-visual-count {
-  font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-bold);
-  color: #ffffff;
-  letter-spacing: var(--letter-spacing-tighter);
-  line-height: 1;
-  margin-bottom: var(--space-8);
-  text-align: center;
-}
-
-.press-hero-visual-desc {
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-top: var(--space-4);
-  text-align: center;
-}
-
 /* =========================================================
    2. PRESS INQUIRIES — two-column composition with section eyebrow
    ========================================================= */
@@ -122,19 +75,6 @@
   background-color: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border-default);
   border-bottom: 1px solid var(--color-border-default);
-}
-
-.press-section-eyebrow {
-  display: inline-block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-brand-primary);
-  background-color: var(--color-brand-primary-light);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  margin-bottom: var(--space-6);
 }
 
 .press-inquiries-layout {
@@ -358,19 +298,6 @@
 
   .press-hero-title,
   .press-hero-desc {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .press-hero-visual {
-    max-width: 300px;
-    margin: 0 auto;
-  }
-
-  .press-inquiries .press-section-eyebrow,
-  .press-coverage .press-section-eyebrow {
-    display: block;
-    width: max-content;
     margin-left: auto;
     margin-right: auto;
   }

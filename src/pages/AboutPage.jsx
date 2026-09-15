@@ -106,9 +106,6 @@ export default function AboutPage() {
         <div className="about-cta-glow" aria-hidden="true" />
         <div className="container about-cta-inner">
           <Reveal>
-            <h2 className="about-cta-heading">
-              Help us build a better way to work.
-            </h2>
             <p className="about-cta-desc">
               We are a small team working on something that matters. If you care
               about craft and want to do meaningful work, we would like to hear

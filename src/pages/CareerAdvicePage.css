@@ -39,9 +39,8 @@
 
 .ca-hero-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr;
   gap: var(--space-12);
-  align-items: center;
 }
 
 .ca-hero-eyebrow {
@@ -64,51 +63,6 @@
   margin-bottom: var(--space-5);
 }
 
-.ca-hero-desc {
-  font-size: var(--font-size-lg);
-  color: rgba(221, 230, 255, 0.85);
-  line-height: var(--line-height-relaxed);
-  max-width: 480px;
-}
-
-/* Hero visual — guide count */
-.ca-hero-visual {
-  display: flex;
-}
-
-.ca-hero-visual-card {
-  width: 100%;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(8px);
-}
-
-.ca-hero-visual-label {
-  display: block;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: var(--space-4);
-}
-
-.ca-hero-visual-count {
-  font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-bold);
-  color: #ffffff;
-  letter-spacing: var(--letter-spacing-tighter);
-  line-height: 1;
-  margin-bottom: var(--space-2);
-}
-
-.ca-hero-visual-desc {
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.5);
-}
-
 /* =========================================================
    2. FEATURED — asymmetric composition
    ========================================================= */
@@ -119,22 +73,9 @@
   border-bottom: 1px solid var(--color-border-default);
 }
 
-.ca-section-eyebrow {
-  display: inline-block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-brand-primary);
-  background-color: var(--color-brand-primary-light);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  margin-bottom: var(--space-6);
-}
-
 .ca-featured-layout {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: 1fr;
   gap: var(--space-10);
   align-items: start;
 }
@@ -194,35 +135,6 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-brand-primary);
   align-self: flex-start;
-}
-
-.ca-featured-sidebar {
-  display: flex;
-  flex-direction: column;
-}
-
-.ca-featured-preview {
-  padding: var(--space-6);
-  background-color: var(--color-bg-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-xl);
-}
-
-.ca-featured-preview-label {
-  display: block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-brand-primary);
-  margin-bottom: var(--space-4);
-}
-
-.ca-featured-preview-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
-  margin: 0;
 }
 
 /* =========================================================
@@ -371,20 +283,7 @@
     text-align: center;
   }
 
-  .ca-hero-title,
-  .ca-hero-desc {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .ca-hero-visual {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-
-  .ca-featured .ca-section-eyebrow {
-    display: block;
-    width: max-content;
+  .ca-hero-title {
     margin-left: auto;
     margin-right: auto;
   }
@@ -392,10 +291,6 @@
   .ca-featured-layout {
     grid-template-columns: 1fr;
     gap: var(--space-8);
-  }
-
-  .ca-featured-sidebar {
-    max-width: 400px;
   }
 }
 
@@ -421,13 +316,6 @@
     gap: var(--space-5);
   }
 
-  .ca-articles .ca-section-eyebrow {
-    display: block;
-    width: max-content;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
   .ca-articles-heading {
     text-align: center;
     margin-left: auto;
@@ -448,10 +336,6 @@
 @media (max-width: 480px) {
   .ca-hero-title {
     font-size: var(--font-size-3xl);
-  }
-
-  .ca-hero-desc {
-    font-size: var(--font-size-base);
   }
 
   .ca-featured-card {

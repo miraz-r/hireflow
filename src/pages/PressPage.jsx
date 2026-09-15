@@ -37,22 +37,12 @@ export default function PressPage() {
               Press releases, media kits, and contact information for journalists covering HireFlow.
             </p>
           </div>
-          <div className="press-hero-visual">
-            <div className="press-hero-visual-stat">
-              <div className="press-hero-visual-label">Publications</div>
-              <div className="press-hero-visual-count">3</div>
-              <div className="press-hero-visual-desc">In major outlets</div>
-            </div>
-          </div>
         </div>
       </section>
 
       {/* ── PRESS INQUIRIES ── */}
       <section className="press-inquiries">
         <div className="container">
-          <Reveal>
-            <span className="press-section-eyebrow">Press inquiries</span>
-          </Reveal>
           <div className="press-inquiries-layout">
             <Reveal delay={80}>
               <div className="press-inquiries-text">

@@ -79,13 +79,6 @@ export default function TalentSearchPage() {
               Find and connect with qualified candidates across engineering, design, product, and more.
             </p>
           </div>
-          <div className="ts-hero-visual">
-            <div className="ts-hero-visual-card">
-              <span className="ts-hero-visual-label">Talent Search</span>
-              <div className="ts-hero-visual-count">{FEATURES.length}</div>
-              <span className="ts-hero-visual-desc">Tools for finding candidates</span>
-            </div>
-          </div>
         </div>
       </section>
 

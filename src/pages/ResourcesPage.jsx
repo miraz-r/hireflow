@@ -23,33 +23,6 @@ const ARTICLE_RESOURCES = [
   RESOURCES.find((r) => r.slug === 'in-demand-skills'),
 ];
 
-const RECENT_RESOURCES = [
-  RESOURCES.find((r) => r.slug === 'questions-before-accepting-an-offer'),
-  RESOURCES.find((r) => r.slug === 'preparing-for-technical-interviews'),
-  RESOURCES.find((r) => r.slug === 'researching-company-culture'),
-  RESOURCES.find((r) => r.slug === 'negotiating-your-first-offer'),
-];
-
-const POPULAR_RESOURCES = [
-  RESOURCES.find((r) => r.slug === 'building-your-personal-brand'),
-  RESOURCES.find((r) => r.slug === 'when-to-make-a-career-pivot'),
-  RESOURCES.find((r) => r.slug === 'rise-of-skills-based-hiring'),
-  RESOURCES.find((r) => r.slug === 'understanding-total-compensation'),
-];
-
-const EXPERTISE = [
-  { title: 'Career Strategy', desc: 'Long-term planning, transitions, and growth.' },
-  { title: 'Interview Coaching', desc: 'Preparation, storytelling, and confidence.' },
-  { title: 'Compensation', desc: 'Negotiation, benchmarks, and total package evaluation.' },
-  { title: 'Job Market Analysis', desc: 'Trends, in-demand skills, and hiring patterns.' },
-];
-
-const ArrowIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M7 17L17 7" /><path d="M7 7h10v10" />
-  </svg>
-);
-
 const ChevronIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M9 18l6-6-6-6" />
@@ -110,9 +83,8 @@ function FeaturedCard({ item }) {
 export default function ResourcesPage() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterState, setNewsletterState] = useState('idle'); // idle | error | success
+  const [newsletterState, setNewsletterState] = useState('idle'); // idle | error
   const [newsletterError, setNewsletterError] = useState('');
-  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
 
   const filteredArticles = getResourcesByCategory(activeCategory).filter(
     (r) => !FEATURED_GRID.some((f) => f.slug === r.slug)
@@ -136,14 +108,7 @@ export default function ResourcesPage() {
       if (err) {
         setNewsletterState('error');
         setNewsletterError(err);
-        return;
       }
-      setNewsletterSubmitting(true);
-      // Simulate submission
-      setTimeout(() => {
-        setNewsletterState('success');
-        setNewsletterSubmitting(false);
-      }, 800);
     },
     [newsletterEmail]
   );
@@ -230,59 +195,7 @@ export default function ResourcesPage() {
       </section>
       </Reveal>
 
-      {/* 5. Recent + Popular */}
-      <Reveal>
-      <section className="res-recent-section" aria-label="Recent and popular resources">
-        <div className="container">
-          <div className="res-recent-layout">
-            <div className="res-recent-list">
-              <span className="res-section-label">RECENT RESOURCES</span>
-              {RECENT_RESOURCES.map((item) => (
-                <Link key={item.slug} to={`/resources/${item.slug}`} className="res-recent-item">
-                  <div className="res-recent-content">
-                    <h3 className="res-recent-title">{item.title}</h3>
-                    <p className="res-recent-desc">{item.description}</p>
-                  </div>
-                  <span className="res-recent-arrow"><ArrowIcon /></span>
-                </Link>
-              ))}
-            </div>
-            <aside className="res-popular-sidebar">
-              <span className="res-section-label">POPULAR</span>
-              <ol className="res-popular-list">
-                {POPULAR_RESOURCES.map((item, i) => (
-                  <li key={item.slug} className="res-popular-item">
-                    <span className="res-popular-num">{String(i + 1).padStart(2, '0')}</span>
-                    <Link to={`/resources/${item.slug}`} className="res-popular-link">
-                      <span className="res-popular-text">{item.title}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ol>
-            </aside>
-          </div>
-        </div>
-      </section>
-      </Reveal>
-
-      {/* 6. Expertise Areas */}
-      <Reveal>
-      <section className="res-expertise-section" aria-label="Resource expertise areas">
-        <div className="container">
-          <h2 className="res-expertise-title">What our resources cover</h2>
-          <div className="res-expertise-grid">
-            {EXPERTISE.map((item) => (
-              <div key={item.title} className="res-expertise-card">
-                <h3 className="res-expertise-name">{item.title}</h3>
-                <p className="res-expertise-desc">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      </Reveal>
-
-      {/* 7. Newsletter / CTA */}
+      {/* 5. Newsletter / CTA */}
       <Reveal>
       <section className="res-newsletter" aria-label="Newsletter subscription">
         <div className="container">
@@ -295,49 +208,34 @@ export default function ResourcesPage() {
                 Get useful career guidance, job-search insights, and market updates from HireFlow.
               </p>
             </div>
-            {newsletterState === 'success' ? (
-              <div className="res-newsletter-success" role="status">
-                <div className="res-newsletter-success-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                </div>
-                <p className="res-newsletter-success-text">
-                  You are subscribed. We will keep you posted.
-                </p>
+            <form className="res-newsletter-form" onSubmit={handleNewsletterSubmit} noValidate>
+              <div className="res-newsletter-field">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className={`res-newsletter-input${newsletterState === 'error' ? ' res-newsletter-input--error' : ''}`}
+                  aria-label="Email address"
+                  aria-invalid={newsletterState === 'error'}
+                  aria-describedby={newsletterState === 'error' ? 'newsletter-error' : undefined}
+                  value={newsletterEmail}
+                  onChange={(e) => {
+                    setNewsletterEmail(e.target.value);
+                    if (newsletterState === 'error') setNewsletterState('idle');
+                  }}
+                />
+                {newsletterState === 'error' && (
+                  <span className="res-newsletter-error" id="newsletter-error" role="alert">
+                    {newsletterError}
+                  </span>
+                )}
               </div>
-            ) : (
-              <form className="res-newsletter-form" onSubmit={handleNewsletterSubmit} noValidate>
-                <div className="res-newsletter-field">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className={`res-newsletter-input${newsletterState === 'error' ? ' res-newsletter-input--error' : ''}`}
-                    aria-label="Email address"
-                    aria-invalid={newsletterState === 'error'}
-                    aria-describedby={newsletterState === 'error' ? 'newsletter-error' : undefined}
-                    value={newsletterEmail}
-                    onChange={(e) => {
-                      setNewsletterEmail(e.target.value);
-                      if (newsletterState === 'error') setNewsletterState('idle');
-                    }}
-                    disabled={newsletterSubmitting}
-                  />
-                  {newsletterState === 'error' && (
-                    <span className="res-newsletter-error" id="newsletter-error" role="alert">
-                      {newsletterError}
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="submit"
-                  className="res-newsletter-btn btn btn-primary"
-                  disabled={newsletterSubmitting}
-                >
-                  {newsletterSubmitting ? 'Subscribing...' : 'Subscribe'}
-                </button>
-              </form>
-            )}
+              <button
+                type="submit"
+                className="res-newsletter-btn btn btn-primary"
+              >
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
       </section>

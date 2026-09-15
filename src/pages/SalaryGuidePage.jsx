@@ -48,7 +48,7 @@ export default function SalaryGuidePage() {
               <span className="sg-hero-eyebrow">For job seekers</span>
               <h1 className="sg-hero-title">Salary Guide</h1>
               <p className="sg-hero-desc">
-                Transparent salary benchmarks across roles, experience levels, and locations to help you negotiate with confidence.
+                Transparent salary benchmarks across roles and experience levels to help you negotiate with confidence.
               </p>
             </div>
             <div className="sg-hero-visual" aria-hidden="true">

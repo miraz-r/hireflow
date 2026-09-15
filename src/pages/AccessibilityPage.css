@@ -13,7 +13,6 @@
   padding: var(--space-20) 0 var(--space-16);
   position: relative;
   overflow: hidden;
-  text-align: center;
 }
 
 .accessibility-hero-glow {
@@ -38,11 +37,9 @@
 
 .accessibility-hero-layout {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-8);
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-12);
   align-items: center;
-  max-width: 900px;
-  margin: 0 auto;
   position: relative;
   z-index: 1;
 }
@@ -63,16 +60,15 @@
   color: #ffffff;
   letter-spacing: var(--letter-spacing-tighter);
   line-height: var(--line-height-tight);
-  max-width: 720px;
-  margin: 0 auto var(--space-5);
+  max-width: 580px;
+  margin-bottom: var(--space-5);
 }
 
 .accessibility-hero-desc {
   font-size: var(--font-size-lg);
   color: rgba(221, 230, 255, 0.85);
   line-height: var(--line-height-relaxed);
-  max-width: 560px;
-  margin: 0 auto;
+  max-width: 480px;
 }
 
 .accessibility-hero-visual {
@@ -126,19 +122,6 @@
   background-color: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border-default);
   border-bottom: 1px solid var(--color-border-default);
-}
-
-.accessibility-section-eyebrow {
-  display: inline-block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-brand-primary);
-  background-color: var(--color-brand-primary-light);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  margin-bottom: var(--space-6);
 }
 
 .accessibility-commitment-heading,
@@ -242,18 +225,25 @@
   margin-bottom: var(--space-8);
 }
 
-.accessibility-feedback-btn,
-.accessibility-return-btn {
-  display: inline-flex;
-}
-.accessibility-return-btn {
-  margin-top: var(--space-6);
+.accessibility-feedback-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 /* Responsive */
 @media (max-width: 960px) {
   .accessibility-hero-layout {
     grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .accessibility-hero-content {
+    text-align: center;
+  }
+  .accessibility-hero-title,
+  .accessibility-hero-desc {
+    margin-left: auto;
+    margin-right: auto;
   }
   .accessibility-hero-visual {
     max-width: 260px;
@@ -279,6 +269,13 @@
 @media (max-width: 480px) {
   .accessibility-hero-title {
     font-size: var(--font-size-3xl);
+  }
+  .accessibility-feedback-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .accessibility-feedback-actions .btn {
+    width: 100%;
   }
   .accessibility-commitment-heading,
   .accessibility-practices-heading,

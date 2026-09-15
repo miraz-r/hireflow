@@ -73,16 +73,6 @@ export default function CareerAdvicePage() {
           <div className="ca-hero-content">
             <span className="ca-hero-eyebrow">For job seekers</span>
             <h1 className="ca-hero-title">Career Advice</h1>
-            <p className="ca-hero-desc">
-              Practical advice on resumes, interviews, and navigating your next career move from the HireFlow team.
-            </p>
-          </div>
-          <div className="ca-hero-visual">
-            <div className="ca-hero-visual-card">
-              <span className="ca-hero-visual-label">Career guides</span>
-              <div className="ca-hero-visual-count">{ARTICLES.length}</div>
-              <span className="ca-hero-visual-desc">Practical guides for your next move</span>
-            </div>
           </div>
         </div>
       </section>
@@ -90,9 +80,6 @@ export default function CareerAdvicePage() {
       {/* ── FEATURED ARTICLE ── */}
       <section className="ca-featured">
         <div className="container">
-          <Reveal>
-            <span className="ca-section-eyebrow">Featured</span>
-          </Reveal>
           <div className="ca-featured-layout">
             <Reveal delay={80}>
               <Link to={`/resources/${FEATURED.slug}`} className="ca-featured-card">
@@ -104,14 +91,6 @@ export default function CareerAdvicePage() {
                 </span>
               </Link>
             </Reveal>
-            <Reveal delay={160} className="ca-featured-sidebar">
-              <div className="ca-featured-preview">
-                <span className="ca-featured-preview-label">From the team</span>
-                <p className="ca-featured-preview-text">
-                  Every guide is written by people who have been through the same hiring processes you are navigating.
-                </p>
-              </div>
-            </Reveal>
           </div>
         </div>
       </section>
@@ -120,7 +99,6 @@ export default function CareerAdvicePage() {
       <section className="ca-articles">
         <div className="container">
           <Reveal>
-            <span className="ca-section-eyebrow">All guides</span>
             <h2 className="ca-articles-heading">Practical guidance for every stage.</h2>
           </Reveal>
           <div className="ca-articles-grid">

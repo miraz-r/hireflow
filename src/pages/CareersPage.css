@@ -39,9 +39,8 @@
 
 .careers-hero-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr;
   gap: var(--space-12);
-  align-items: center;
 }
 
 .careers-hero-eyebrow {
@@ -64,54 +63,6 @@
   margin-bottom: var(--space-5);
 }
 
-.careers-hero-desc {
-  font-size: var(--font-size-lg);
-  color: rgba(221, 230, 255, 0.85);
-  line-height: var(--line-height-relaxed);
-  max-width: 480px;
-}
-
-/* Hero visual — open roles count */
-.careers-hero-visual {
-  display: flex;
-}
-
-.careers-hero-visual-card {
-  width: 100%;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(8px);
-  text-align: center;
-}
-
-.careers-hero-visual-label {
-  display: block;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: var(--space-3);
-}
-
-.careers-hero-visual-count {
-  font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-bold);
-  color: #ffffff;
-  letter-spacing: var(--letter-spacing-tighter);
-  line-height: 1;
-  margin-bottom: var(--space-2);
-}
-
-.careers-hero-visual-desc {
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
 /* =========================================================
    2. OPEN POSITIONS — role cards (scroll target for nav)
    ========================================================= */
@@ -121,19 +72,6 @@
 
 .careers-positions {
   padding: var(--space-20) 0 var(--space-24);
-}
-
-.careers-section-eyebrow {
-  display: inline-block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-brand-primary);
-  background-color: var(--color-brand-primary-light);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  margin-bottom: var(--space-6);
 }
 
 .careers-section-heading {
@@ -314,14 +252,6 @@
   margin-bottom: var(--space-4);
 }
 
-.careers-cta-desc {
-  font-size: var(--font-size-lg);
-  color: rgba(221, 230, 255, 0.8);
-  line-height: var(--line-height-relaxed);
-  max-width: 480px;
-  margin: 0 auto var(--space-8);
-}
-
 .careers-cta .careers-cta-btn,
 .careers-cta .careers-cta-btn:hover,
 .careers-cta .careers-cta-btn:active,
@@ -365,15 +295,9 @@
     text-align: center;
   }
 
-  .careers-hero-title,
-  .careers-hero-desc {
+  .careers-hero-title {
     margin-left: auto;
     margin-right: auto;
-  }
-
-  .careers-hero-visual {
-    max-width: 300px;
-    margin: 0 auto;
   }
 
   .careers-positions .section-intro,
@@ -433,14 +357,6 @@
     font-size: var(--font-size-3xl);
   }
 
-  .careers-hero-desc {
-    font-size: var(--font-size-base);
-  }
-
-  .careers-hero-visual-count {
-    font-size: var(--font-size-4xl);
-  }
-
   .careers-section-heading {
     font-size: var(--font-size-xl);
   }
@@ -498,10 +414,6 @@
     font-size: var(--font-size-xl);
   }
 
-  .careers-hero-desc {
-    font-size: var(--font-size-xs);
-  }
-
   .careers-positions {
     padding: var(--space-10) 0 var(--space-12);
   }
@@ -537,10 +449,6 @@
 
   .careers-cta-heading {
     font-size: var(--font-size-lg);
-  }
-
-  .careers-cta-desc {
-    font-size: var(--font-size-sm);
   }
 
   .careers-cta .careers-cta-btn {

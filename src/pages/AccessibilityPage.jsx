@@ -62,12 +62,11 @@ export default function AccessibilityPage() {
       <section className="accessibility-commitment">
         <div className="container">
           <Reveal>
-            <span className="accessibility-section-eyebrow">Our commitment</span>
             <h2 className="accessibility-commitment-heading">
               Accessibility is not an afterthought.
             </h2>
             <p className="accessibility-commitment-body">
-              HireFlow is committed to ensuring digital accessibility for people with disabilities. We continually improve the user experience for everyone and apply relevant accessibility standards at every stage of design and development. If you experience any difficulty using HireFlow or have suggestions for improving accessibility, please contact us at <a href="mailto:accessibility@hireflow.com">accessibility@hireflow.com</a>. We take all feedback seriously and respond within two business days.
+              HireFlow is committed to ensuring digital accessibility for people with disabilities. We continually improve the user experience for everyone and apply relevant accessibility standards at every stage of design and development. If you experience any difficulty using HireFlow or have suggestions for improving accessibility, please contact us at <a href="mailto:accessibility@hireflow.com">accessibility@hireflow.com</a>.
             </p>
           </Reveal>
         </div>
@@ -95,7 +94,6 @@ export default function AccessibilityPage() {
       <section className="accessibility-known">
         <div className="container">
           <Reveal>
-            <span className="accessibility-section-eyebrow">Transparency</span>
             <h2 className="accessibility-known-heading">Known limitations.</h2>
             <div className="accessibility-known-card">
               <p className="accessibility-known-body">
@@ -113,10 +111,12 @@ export default function AccessibilityPage() {
             <p className="accessibility-feedback-desc">
               Your experience matters. If you have suggestions for improving accessibility on HireFlow, contact our team at <a href="mailto:accessibility@hireflow.com">accessibility@hireflow.com</a>. We respond within two business days and use every message to guide our priorities.
             </p>
-            <a href="mailto:accessibility@hireflow.com" className="btn btn-primary btn-lg accessibility-feedback-btn">
-              Send accessibility feedback
-            </a>
-            <Link to="/" className="btn btn-secondary btn-lg accessibility-return-btn">Return to homepage</Link>
+            <div className="accessibility-feedback-actions">
+              <a href="mailto:accessibility@hireflow.com" className="btn btn-primary btn-lg accessibility-feedback-btn">
+                Send accessibility feedback
+              </a>
+              <Link to="/" className="btn btn-secondary btn-lg accessibility-return-btn">Return to homepage</Link>
+            </div>
           </Reveal>
         </div>
       </section>

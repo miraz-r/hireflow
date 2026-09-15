@@ -39,9 +39,8 @@
 
 .blog-hero-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr;
   gap: var(--space-12);
-  align-items: center;
 }
 
 .blog-hero-eyebrow {
@@ -71,47 +70,6 @@
   max-width: 480px;
 }
 
-/* Hero visual — article count */
-.blog-hero-visual {
-  display: flex;
-}
-
-.blog-hero-visual-card {
-  width: 100%;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(8px);
-  text-align: center;
-}
-
-.blog-hero-visual-label {
-  display: block;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: var(--space-3);
-}
-
-.blog-hero-visual-count {
-  font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-bold);
-  color: #ffffff;
-  letter-spacing: var(--letter-spacing-tighter);
-  line-height: 1;
-  margin-bottom: var(--space-2);
-}
-
-.blog-hero-visual-desc {
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
 /* =========================================================
    2. FEATURED — large editorial feature
    ========================================================= */
@@ -120,19 +78,6 @@
   background-color: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border-default);
   border-bottom: 1px solid var(--color-border-default);
-}
-
-.blog-section-eyebrow {
-  display: inline-block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-brand-primary);
-  background-color: var(--color-brand-primary-light);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  margin-bottom: var(--space-6);
 }
 
 .blog-featured-card {
@@ -295,85 +240,8 @@
   margin: 0;
 }
 
-.blog-card-link {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-brand-primary);
-  text-decoration: none;
-  margin-top: var(--space-1);
-  transition: color var(--transition-fast);
-}
-
-.blog-card-link:hover {
-  color: var(--color-brand-primary-hover);
-  text-decoration: underline;
-}
-
 /* =========================================================
-   5. RECENT — list-based layout
-   ========================================================= */
-.blog-recent {
-  padding: var(--space-16) 0 var(--space-20);
-  border-top: 1px solid var(--color-border-default);
-}
-
-.blog-recent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.blog-recent-item {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-4);
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--color-border-default);
-  text-decoration: none;
-  color: inherit;
-  transition: background-color var(--transition-fast);
-}
-
-.blog-recent-item:hover {
-  background-color: var(--color-bg-tertiary);
-}
-
-.blog-recent-item:last-child {
-  border-bottom: none;
-}
-
-.blog-recent-category {
-  flex-shrink: 0;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-brand-primary);
-  min-width: 90px;
-}
-
-.blog-recent-title {
-  flex: 1;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-normal);
-}
-
-.blog-recent-arrow {
-  flex-shrink: 0;
-  font-size: var(--font-size-base);
-  color: var(--color-text-tertiary);
-  transition: color var(--transition-fast), transform var(--transition-fast);
-}
-
-.blog-recent-item:hover .blog-recent-arrow {
-  color: var(--color-brand-primary);
-  transform: translateX(3px);
-}
-
-/* =========================================================
-   6. CTA — deep indigo closing section
+   5. CTA — deep indigo closing section
    ========================================================= */
 .blog-cta {
   background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);
@@ -459,18 +327,6 @@
     margin-right: auto;
   }
 
-  .blog-hero-visual {
-    max-width: 300px;
-    margin: 0 auto;
-  }
-
-  .blog-featured .blog-section-eyebrow {
-    display: block;
-    width: max-content;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
   .blog-featured-card {
     grid-template-columns: 1fr;
     gap: var(--space-6);
@@ -511,10 +367,6 @@
     text-align: center;
   }
 
-  .blog-recent {
-    padding: var(--space-12) 0 var(--space-16);
-  }
-
   .blog-cta {
     margin: 0 var(--space-4) var(--space-12);
     padding: var(--space-12) 0;
@@ -544,10 +396,6 @@
     font-size: var(--font-size-base);
   }
 
-  .blog-hero-visual-count {
-    font-size: var(--font-size-4xl);
-  }
-
   .blog-featured-title {
     font-size: var(--font-size-xl);
   }
@@ -558,15 +406,6 @@
 
   .blog-card-title {
     font-size: var(--font-size-base);
-  }
-
-  .blog-recent-item {
-    flex-wrap: wrap;
-    gap: var(--space-1);
-  }
-
-  .blog-recent-category {
-    min-width: auto;
   }
 }
 
@@ -584,10 +423,6 @@
   }
 
   .blog-grid {
-    padding: var(--space-10) 0 var(--space-12);
-  }
-
-  .blog-recent {
     padding: var(--space-10) 0 var(--space-12);
   }
 

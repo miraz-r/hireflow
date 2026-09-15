@@ -58,14 +58,6 @@ export default function CareersPage() {
           <div className="careers-hero-content">
             <span className="careers-hero-eyebrow">Join the team</span>
             <h1 className="careers-hero-title">Build the future of work with us.</h1>
-            <p className="careers-hero-desc">We are always looking for passionate people to join our team.</p>
-          </div>
-          <div className="careers-hero-visual">
-            <div className="careers-hero-visual-card">
-              <span className="careers-hero-visual-label">Open roles</span>
-              <div className="careers-hero-visual-count">{POSITIONS.length}</div>
-              <span className="careers-hero-visual-desc">positions</span>
-            </div>
           </div>
         </div>
       </section>
@@ -75,7 +67,6 @@ export default function CareersPage() {
         <div className="container">
           <Reveal>
             <div className="section-intro">
-              <span className="careers-section-eyebrow">Open positions</span>
               <h2 className="careers-section-heading">Roles we're hiring for.</h2>
             </div>
           </Reveal>
@@ -100,12 +91,6 @@ export default function CareersPage() {
       {/* ── WHAT WE OFFER ── */}
       <section className="careers-benefits">
         <div className="container">
-          <Reveal>
-            <div className="section-intro">
-              <span className="careers-section-eyebrow">What we offer</span>
-              <h2 className="careers-section-heading">More than a job.</h2>
-            </div>
-          </Reveal>
           <div className="careers-benefits-list">
             {BENEFITS.map((benefit, i) => (
               <Reveal key={i} delay={100 + i * 60}>
@@ -125,7 +110,6 @@ export default function CareersPage() {
         <div className="container careers-cta-inner">
           <Reveal>
             <h2 className="careers-cta-heading">Ready to join us?</h2>
-            <p className="careers-cta-desc">Work on meaningful problems alongside people who care about craft.</p>
             <button type="button" className="btn btn-lg careers-cta-btn" onClick={scrollToOpenRoles}>See open roles</button>
           </Reveal>
         </div>
