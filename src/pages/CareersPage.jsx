@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal';
 import './CareersPage.css';
@@ -38,6 +39,15 @@ const BENEFITS = [
 ];
 
 export default function CareersPage() {
+  const openRolesRef = useRef(null);
+
+  const scrollToOpenRoles = () => {
+    const el = openRolesRef.current;
+    if (!el) return;
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    el.scrollIntoView({ behavior, block: 'start' });
+  };
+
   return (
     <div className="careers-page">
       {/* ── HERO ── */}
@@ -61,21 +71,25 @@ export default function CareersPage() {
       </section>
 
       {/* ── OPEN POSITIONS ── */}
-      <section className="careers-positions">
+      <section id="open-roles" ref={openRolesRef} className="careers-positions">
         <div className="container">
           <Reveal>
             <div className="section-intro">
+              <span className="careers-section-eyebrow">Open positions</span>
               <h2 className="careers-section-heading">Roles we're hiring for.</h2>
             </div>
           </Reveal>
-          <div className="careers-positions-list">
+          <div className="careers-positions-grid">
             {POSITIONS.map((pos, i) => (
               <Reveal key={pos.title} delay={100 + i * 80}>
-                <Link to={pos.link} className="careers-position-item">
+                <Link to={pos.link} className="careers-position-card">
                   <span className="careers-position-category">{pos.category}</span>
                   <h3 className="careers-position-title">{pos.title}</h3>
                   <p className="careers-position-desc">{pos.description}</p>
-                  <span className="careers-position-link">Apply →</span>
+                  <span className="careers-position-link">
+                    Apply
+                    <span className="careers-position-arrow" aria-hidden="true">→</span>
+                  </span>
                 </Link>
               </Reveal>
             ))}
@@ -92,10 +106,10 @@ export default function CareersPage() {
               <h2 className="careers-section-heading">More than a job.</h2>
             </div>
           </Reveal>
-          <div className="careers-benefits-grid">
+          <div className="careers-benefits-list">
             {BENEFITS.map((benefit, i) => (
               <Reveal key={i} delay={100 + i * 60}>
-                <div className="careers-benefit-card">
+                <div className="careers-benefit-item">
                   <span className="careers-benefit-dot" aria-hidden="true" />
                   <p className="careers-benefit-text">{benefit}</p>
                 </div>
@@ -112,7 +126,7 @@ export default function CareersPage() {
           <Reveal>
             <h2 className="careers-cta-heading">Ready to join us?</h2>
             <p className="careers-cta-desc">Work on meaningful problems alongside people who care about craft.</p>
-            <Link to="/" className="btn btn-primary btn-lg">See open roles</Link>
+            <button type="button" className="btn btn-lg careers-cta-btn" onClick={scrollToOpenRoles}>See open roles</button>
           </Reveal>
         </div>
       </section>
