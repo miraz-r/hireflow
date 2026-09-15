@@ -1486,24 +1486,7 @@ label.btn.disabled {
   flex-shrink: 0;
 }
 
-/* ── Shared Application Status Badges ──────────────────────────── */
-.application-status {
-  text-transform: capitalize;
-}
-
-.js-application-info .application-status {
-  align-self: flex-start;
-}
-
-.application-status--applied { background-color: var(--color-brand-primary-light); color: var(--color-brand-primary); }
-.application-status--under-review { background-color: var(--color-bg-tertiary); color: var(--color-text-primary); }
-.application-status--interview { background-color: var(--color-brand-secondary-light); color: var(--color-brand-secondary); }
-.application-status--offer { background-color: var(--color-success-bg, #ecfdf5); color: #065f46; }
-.application-status--hired { background-color: var(--color-brand-secondary); color: #fff; }
-.application-status--rejected { background-color: var(--color-error-bg); color: #991b1b; }
-
-[data-theme="dark"] .application-status--offer { color: #6ee7b7; }
-[data-theme="dark"] .application-status--rejected { color: #fca5a5; }
+/* (application-status classes removed — see app-status system below) */
 
 /* ── Legacy Application Card (jobseeker views) ─────────────────── */
 .application-card {
@@ -1636,20 +1619,22 @@ label.btn.disabled {
   line-height: var(--line-height-relaxed);
 }
 
-.js-application-list,
+/* ── Jobseeker Applications — "My Applications" workspace ─────────
+   Card composition:
+   · Row 1 — avatar, job title (strongest) + company/location,
+             status pill aligned to the right.
+   · Row 2 — hairline divider, applied date on the left and the
+             "View job" action on the right. */
+.app-list,
 .js-saved-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
 
-/* Two-sided hierarchy:
-   LEFT  — job title, company · location, status badge underneath.
-   RIGHT — "Applied on" + date, with View job underneath. */
-.js-application-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
+.app-card {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-5);
   border: 1px solid var(--color-border-default);
@@ -1659,19 +1644,73 @@ label.btn.disabled {
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.js-application-card:hover {
+.app-card:hover {
   border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
 }
 
-.js-application-main {
+.app-card-main {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
   min-width: 0;
 }
 
-.js-application-avatar,
+.app-card-avatar {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  text-transform: uppercase;
+}
+
+.app-card-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.app-card-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-tight);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.app-card-company {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  overflow-wrap: anywhere;
+}
+
+.app-card-sep {
+  color: var(--color-text-tertiary);
+}
+
 .js-saved-avatar {
   width: 44px;
   height: 44px;
@@ -1687,7 +1726,6 @@ label.btn.disabled {
   text-transform: uppercase;
 }
 
-.js-application-info,
 .js-saved-info {
   display: flex;
   flex-direction: column;
@@ -1695,15 +1733,6 @@ label.btn.disabled {
   gap: var(--space-1);
 }
 
-.js-application-title {
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.js-application-company,
 .js-saved-company {
   color: var(--color-text-tertiary);
   font-size: var(--font-size-xs);
@@ -1712,41 +1741,133 @@ label.btn.disabled {
   text-overflow: ellipsis;
 }
 
-/* RIGHT side: date + View job underneath. */
-.js-application-side {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+/* ── Status — restrained, scannable pill with a state dot ───────
+   Every status shares the same pill + dot shape; only the tone
+   shifts. Most states use a soft tinted fill. Only the terminal,
+   best outcome (hired) uses a solid brand fill so the list stays
+   calm and readable. */
+.app-status {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
+  border-radius: var(--radius-full);
+  text-transform: capitalize;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.app-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.app-status--applied {
+  background-color: var(--color-brand-primary-light);
+  color: var(--color-brand-primary);
+}
+
+.app-status--under-review {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.app-status--interview {
+  background-color: rgba(124, 58, 237, 0.12);
+  color: var(--color-brand-accent);
+}
+
+.app-status--offer {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.app-status--hired {
+  background-color: var(--color-brand-secondary);
+  color: var(--color-text-inverse);
+}
+
+.app-status--rejected {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+[data-theme="dark"] .app-status--interview {
+  color: #a78bfa;
+}
+
+[data-theme="dark"] .app-status--hired {
+  color: #04100b;
+}
+
+.app-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+  flex-wrap: wrap;
   min-width: 0;
 }
 
-.js-application-date {
+.app-card-date {
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
+  color: var(--color-text-tertiary);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
-.js-application-meta-row {
+.app-card-link {
+  flex-shrink: 0;
+}
+
+/* ── Empty state — intentional, calm, on the card surface ─────── */
+.app-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-16) var(--space-6);
+  border: 1px dashed var(--color-border-default);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-primary);
+}
+
+.app-empty-icon {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  white-space: nowrap;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-brand-primary-light);
+  color: var(--color-brand-primary);
+  margin-bottom: var(--space-2);
 }
 
-.js-application-meta-sep {
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-xs);
+.app-empty-title {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  margin: 0;
 }
 
-.js-application-meta-value {
-  font-size: var(--font-size-xs);
+.app-empty-desc {
+  max-width: 420px;
   color: var(--color-text-secondary);
-}
-
-.js-application-open {
-  flex-shrink: 0;
-  justify-self: end;
+  margin: 0 auto var(--space-4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
 }
 
 .js-saved-card {
@@ -1875,6 +1996,15 @@ label.btn.disabled {
     flex-wrap: wrap;
   }
 
+  .app-card {
+    padding: var(--space-4);
+  }
+
+  .app-card-main {
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
   /* Recruiter dashboard — tablet */
   .rc-metrics {
     grid-template-columns: 1fr 1fr;
@@ -1922,20 +2052,6 @@ label.btn.disabled {
 
   .rc-candidate-name {
     font-size: var(--font-size-base);
-  }
-
-  .js-application-card {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
-  }
-
-  /* Stack the date/action side below the job info on narrow screens. */
-  .js-application-side {
-    align-items: flex-start;
-  }
-
-  .js-application-meta-row {
-    flex-wrap: wrap;
   }
 
   .js-saved-top {
@@ -2002,12 +2118,12 @@ label.btn.disabled {
     flex-basis: 100%;
   }
 
-  .js-application-card {
+  .app-card {
     padding: var(--space-4);
     gap: var(--space-3);
   }
 
-  .js-application-avatar,
+  .app-card-avatar,
   .js-saved-avatar {
     width: 36px;
     height: 36px;

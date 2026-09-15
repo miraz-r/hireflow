@@ -1048,7 +1048,7 @@ function JobseekerApplicationsTab() {
     <div className="card profile-form js-application-tab">
       <div className="profile-header">
         <div className="profile-header-text">
-          <h1 className="profile-title">Your applications</h1>
+          <h1 className="profile-title">My Applications</h1>
           <p className="profile-subtitle">Track the jobs you've applied to and their current status.</p>
         </div>
       </div>
@@ -1056,15 +1056,15 @@ function JobseekerApplicationsTab() {
       {error && <div className="auth-alert auth-alert-error" role="alert"><span>{error}</span></div>}
 
       {!error && applications.length === 0 && (
-        <div className="js-empty-state">
-          <div className="js-empty-icon" aria-hidden="true">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="app-empty-state">
+          <div className="app-empty-icon" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
               <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
             </svg>
           </div>
-          <h3 className="js-empty-title">No applications yet</h3>
-          <p className="js-empty-desc">
+          <h3 className="app-empty-title">No applications yet</h3>
+          <p className="app-empty-desc">
             When you apply to a job, it will show up here so you can track its status. Start exploring roles on Find Jobs.
           </p>
           <Link to="/" className="btn btn-primary">Browse jobs</Link>
@@ -1072,33 +1072,41 @@ function JobseekerApplicationsTab() {
       )}
 
       {applications.length > 0 && (
-        <div className="js-application-list">
+        <div className="app-list">
           {applications.map((app) => (
-            <div className="js-application-card" key={app.id}>
-              <div className="js-application-main">
-                <div className="js-application-avatar" aria-hidden="true">
+            <article className="app-card" key={app.id}>
+              <div className="app-card-main">
+                <div className="app-card-avatar" aria-hidden="true">
                   {(app.job?.company || 'C').charAt(0)}
                 </div>
-                <div className="js-application-info">
-                  <strong className="js-application-title">{app.job?.title || 'Job'}</strong>
-                  <span className="js-application-company">
+                <div className="app-card-info">
+                  <h3 className="app-card-title">{app.job?.title || 'Job'}</h3>
+                  <p className="app-card-company">
                     {app.job?.company || '—'}
-                    {app.job?.location ? ` · ${app.job.location}` : ''}
-                  </span>
-                  <span className={`badge application-status application-status--${app.status}`}>
-                    {STATUS_LABELS[app.status] || app.status}
-                  </span>
+                    {app.job?.location ? <span className="app-card-sep" aria-hidden="true">·</span> : null}
+                    {app.job?.location || ''}
+                  </p>
                 </div>
+                <span className={`app-status app-status--${app.status}`}>
+                  <span className="app-status-dot" aria-hidden="true" />
+                  {STATUS_LABELS[app.status] || app.status}
+                </span>
               </div>
-              <div className="js-application-side">
-                <span className="js-application-date">Applied on · {fmtDate(app.createdAt)}</span>
+              <div className="app-card-footer">
+                <time className="app-card-date" dateTime={app.createdAt}>
+                  Applied {fmtDate(app.createdAt)}
+                </time>
                 {app.job?.id && (
-                  <Link to={`/jobs/${app.job.id}`} className="btn btn-sm btn-secondary js-application-open">
+                  <Link to={`/jobs/${app.job.id}`} className="btn btn-sm btn-secondary app-card-link">
                     View job
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12h14"/>
+                      <path d="M12 5l7 7-7 7"/>
+                    </svg>
                   </Link>
                 )}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
