@@ -9,42 +9,36 @@ const POSTS = [
     title: 'The state of remote hiring in 2026',
     description: 'Remote work continues to reshape how companies hire — from fully distributed teams to flexible hybrid schedules.',
     image: '/resources/remote-work.jpg',
-    link: '/blog',
   },
   {
     category: 'Career Advice',
     title: '5 skills every product manager needs',
     description: 'From data literacy to stakeholder management, these are the competencies hiring managers look for most.',
     image: '/resources/in-demand-skills.jpg',
-    link: '/blog',
   },
   {
     category: 'Hiring',
     title: 'Building inclusive job descriptions',
     description: 'Small changes in language can significantly increase the diversity of your applicant pool. Here is what works.',
     image: '/resources/personal-brand.jpg',
-    link: '/blog',
   },
   {
     category: 'Compensation',
     title: 'Salary negotiation myths debunked',
     description: 'Compensation conversations are full of myths. Here is how to separate fact from fiction and negotiate with confidence.',
     image: '/resources/salary-negotiate.jpg',
-    link: '/blog',
   },
   {
     category: 'Hiring',
     title: 'How to evaluate a startup offer',
     description: 'Beyond salary: equity, growth potential, culture, and the questions you should ask before signing.',
     image: '/resources/career-pivot.jpg',
-    link: '/blog',
   },
   {
     category: 'Job Market',
     title: 'The rise of skills-based hiring',
     description: 'Why more companies are dropping degree requirements and how it changes the talent landscape.',
     image: '/resources/job-market-skills.jpg',
-    link: '/blog',
   },
 ];
 
@@ -116,7 +110,7 @@ export default function BlogPage() {
           </Reveal>
           {filteredGrid.length > 0 ? (
             <div className="blog-grid-layout">
-              {filteredGrid.map((post, i) => (
+{filteredGrid.map((post, i) => (
                 <Reveal key={post.title} delay={100 + i * 80}>
                   <article className="blog-card">
                     <div className="blog-card-image" style={{ backgroundImage: `url(${post.image})` }} role="img" aria-label={post.title} />

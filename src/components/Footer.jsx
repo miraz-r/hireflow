@@ -112,7 +112,8 @@ const publicLinks = {
     { label: 'About Us', to: '/about' },
     { label: 'Blog', to: '/blog' },
     { label: 'Careers', to: '/careers' },
-    { label: 'Press', to: '/press' }
+    { label: 'Press', to: '/press' },
+    { label: 'Contact', to: '/contact' }
   ],
   legal: [
     { label: 'Privacy Policy', to: '/privacy' },

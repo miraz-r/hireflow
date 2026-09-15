@@ -32,6 +32,7 @@ import AboutPage from './pages/AboutPage';
 import BlogPage from './pages/BlogPage';
 import CareersPage from './pages/CareersPage';
 import PressPage from './pages/PressPage';
+import ContactPage from './pages/ContactPage';
 import CareerAdvicePage from './pages/CareerAdvicePage';
 import PricingPage from './pages/PricingPage';
 import TalentSearchPage from './pages/TalentSearchPage';
@@ -290,6 +291,7 @@ export default function App() {
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/careers" element={<CareersPage />} />
           <Route path="/press" element={<PressPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />

@@ -110,6 +110,11 @@ export default function CareersPage() {
         <div className="container careers-cta-inner">
           <Reveal>
             <h2 className="careers-cta-heading">Ready to join us?</h2>
+            <p className="careers-cta-desc">
+              We are a small team working on meaningful problems. If you care
+              about craft and want to do meaningful work, we would like to hear
+              from you.
+            </p>
             <button type="button" className="btn btn-lg careers-cta-btn" onClick={scrollToOpenRoles}>See open roles</button>
           </Reveal>
         </div>

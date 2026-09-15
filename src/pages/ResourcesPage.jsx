@@ -83,7 +83,7 @@ function FeaturedCard({ item }) {
 export default function ResourcesPage() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterState, setNewsletterState] = useState('idle'); // idle | error
+  const [newsletterState, setNewsletterState] = useState('idle'); // idle | error | success
   const [newsletterError, setNewsletterError] = useState('');
 
   const filteredArticles = getResourcesByCategory(activeCategory).filter(
@@ -108,6 +108,9 @@ export default function ResourcesPage() {
       if (err) {
         setNewsletterState('error');
         setNewsletterError(err);
+      } else {
+        setNewsletterState('success');
+        setNewsletterError('');
       }
     },
     [newsletterEmail]
@@ -226,6 +229,11 @@ export default function ResourcesPage() {
                 {newsletterState === 'error' && (
                   <span className="res-newsletter-error" id="newsletter-error" role="alert">
                     {newsletterError}
+                  </span>
+                )}
+                {newsletterState === 'success' && (
+                  <span className="res-newsletter-success" id="newsletter-success" role="status">
+                    Thanks for subscribing! (Demo — no email was sent)
                   </span>
                 )}
               </div>

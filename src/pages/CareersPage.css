@@ -244,12 +244,20 @@
 }
 
 .careers-cta-heading {
-  font-size: var(--font-size-3xl);
+  font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
   color: #ffffff;
-  letter-spacing: var(--letter-spacing-tight);
+  letter-spacing: var(--letter-spacing-tighter);
   line-height: var(--line-height-tight);
-  margin-bottom: var(--space-4);
+  margin: 0 0 var(--space-4);
+}
+
+.careers-cta-desc {
+  font-size: var(--font-size-lg);
+  color: rgba(221, 230, 255, 0.8);
+  line-height: var(--line-height-relaxed);
+  max-width: 480px;
+  margin: 0 auto var(--space-8);
 }
 
 .careers-cta .careers-cta-btn,
@@ -348,7 +356,16 @@
   }
 
   .careers-cta-heading {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-3xl);
+  }
+
+  .careers-cta-desc {
+    font-size: var(--font-size-base);
+  }
+
+  .careers-cta .careers-cta-btn {
+    width: 100%;
+    max-width: 320px;
   }
 }
 
@@ -375,6 +392,14 @@
 
   .careers-benefits-list {
     row-gap: var(--space-3);
+  }
+
+  .careers-cta-heading {
+    font-size: var(--font-size-2xl);
+  }
+
+  .careers-cta-desc {
+    font-size: var(--font-size-sm);
   }
 }
 
@@ -449,6 +474,10 @@
 
   .careers-cta-heading {
     font-size: var(--font-size-lg);
+  }
+
+  .careers-cta-desc {
+    font-size: var(--font-size-sm);
   }
 
   .careers-cta .careers-cta-btn {

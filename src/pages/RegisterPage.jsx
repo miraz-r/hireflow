@@ -31,7 +31,7 @@ const REGISTER_SLIDES = [
     badgeIcon: SHIELD_ICON,
     title: 'Your data stays yours',
     subtitle:
-      "We only share what you choose to share. Your profile, resume, and communications are encrypted and under your control.",
+      "We only share what you choose to share. Your profile, resume, and documents are encrypted and under your control.",
   },
   {
     id: 'fast',

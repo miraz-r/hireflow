@@ -48,7 +48,6 @@ export default function AboutPage() {
               <span className="about-hero-visual-label">Built around</span>
               <div className="about-hero-visual-items">
                 <span className="about-hero-visual-pill">Transparency</span>
-                <span className="about-hero-visual-pill">Better matching</span>
                 <span className="about-hero-visual-pill">Human judgment</span>
                 <span className="about-hero-visual-pill">Respect for people's time</span>
               </div>
@@ -106,12 +105,13 @@ export default function AboutPage() {
         <div className="about-cta-glow" aria-hidden="true" />
         <div className="container about-cta-inner">
           <Reveal>
+            <h2 className="about-cta-heading">Help us build a better way to work.</h2>
             <p className="about-cta-desc">
               We are a small team working on something that matters. If you care
               about craft and want to do meaningful work, we would like to hear
               from you.
             </p>
-            <Link to="/careers" className="btn btn-primary btn-lg">
+            <Link to="/careers" className="btn btn-primary btn-lg about-cta-btn">
               Join the team
             </Link>
           </Reveal>

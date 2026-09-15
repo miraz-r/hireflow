@@ -7,8 +7,8 @@ import './TalentSearchPage.css';
 const FEATURES = [
   {
     id: 1,
-    title: 'Advanced filters',
-    description: 'Search by skills, experience level, work type, salary expectations, and location to find your ideal candidate.',
+    title: 'Applicant review',
+    description: 'Review applicant profiles, resumes, and cover letters for your posted jobs — all in one place.',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
@@ -18,7 +18,7 @@ const FEATURES = [
   {
     id: 2,
     title: 'Candidate insights',
-    description: 'Review detailed profiles, work history, and skill assessments before reaching out.',
+    description: 'View detailed applicant profiles, work history, and submitted materials after they apply.',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
@@ -38,7 +38,7 @@ const FEATURES = [
   {
     id: 4,
     title: 'Hiring analytics',
-    description: 'Track pipeline metrics, time-to-hire, and source effectiveness from your dashboard.',
+    description: 'Track pipeline metrics and application progress from your dashboard.',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
@@ -122,9 +122,8 @@ export default function TalentSearchPage() {
             <div className="section-intro">
               <h2 className="ts-how-heading">How Talent Search works</h2>
               <p className="ts-how-body">
-                Post a job and start receiving applications right away. Filter by skills and
-                experience level, review applicant profiles, and manage everyone through your
-                hiring pipeline from one dashboard.
+                Post a job and start receiving applications right away. Review applicant profiles,
+                and manage everyone through your hiring pipeline from one dashboard.
               </p>
             </div>
           </Reveal>
