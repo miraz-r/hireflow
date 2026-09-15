@@ -103,7 +103,7 @@ export default function SavedJobsPage() {
             <p className="saved-jobs-empty-desc">
               Hit the bookmark on any job you find interesting and it will be saved here for easy access later.
             </p>
-            <Link to="/" className="btn btn-primary">Find jobs</Link>
+            <Link to="/" className="btn btn-primary btn-lg">Find jobs</Link>
           </div>
         )}
 
@@ -128,7 +128,15 @@ export default function SavedJobsPage() {
                       </span>
                     )}
                   </div>
-                  <span className="saved-jobs-card-salary">{formatSalary(job.salary)}</span>
+                  <div className="saved-jobs-card-aside">
+                    <span className="saved-jobs-card-salary">{formatSalary(job.salary)}</span>
+                    <span className="saved-jobs-card-saved" title="This job is saved">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                      </svg>
+                      Saved
+                    </span>
+                  </div>
                 </div>
 
                 <div className="saved-jobs-card-meta">
