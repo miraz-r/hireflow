@@ -27,11 +27,11 @@ const FEATURES = [
   },
   {
     id: 3,
-    title: 'Direct messaging',
-    description: 'Connect with candidates through our built-in messaging system. No need to share personal contact info.',
+    title: 'Applicant pipelines',
+    description: 'Move candidates through review, interview, and offer stages — all from your recruiting dashboard.',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        <path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3 6h.01" /><path d="M3 12h.01" /><path d="M3 18h.01" />
       </svg>
     ),
   },
@@ -122,7 +122,9 @@ export default function TalentSearchPage() {
             <div className="section-intro">
               <h2 className="ts-how-heading">How Talent Search works</h2>
               <p className="ts-how-body">
-                Post a job or search our candidate database directly. Our matching algorithm surfaces the most relevant profiles based on skills, experience, and preferences. Reach out to top candidates and manage your entire hiring pipeline in one place.
+                Post a job and start receiving applications right away. Filter by skills and
+                experience level, review applicant profiles, and manage everyone through your
+                hiring pipeline from one dashboard.
               </p>
             </div>
           </Reveal>

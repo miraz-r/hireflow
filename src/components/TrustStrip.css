@@ -2,22 +2,42 @@
   position: relative;
   padding: var(--space-10) 0 var(--space-12);
   background-color: var(--color-bg-primary);
+  overflow: hidden;
 }
 
-.trust-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-6);
+/* Ticker viewport — clips the scrolling track so the loop never introduces
+   document-level horizontal overflow. */
+.trust-ticker {
+  overflow: hidden;
+}
+
+/* The track holds two identical copies of the stats and is twice the width of
+   the viewport. Animating translateX from 0 to -50% moves exactly one copy
+   across the viewport, which makes the loop seamless (no visible jump). */
+.trust-ticker-track {
+  display: flex;
+  width: 200%;
+  animation: trust-ticker-scroll 30s linear infinite;
+}
+
+.trust-ticker-group {
+  display: flex;
+  flex: 0 0 50%;
+  min-width: 0;
 }
 
 .trust-item {
+  flex: 1 1 0;
+  min-width: 0;
   text-align: center;
   padding: var(--space-4);
-  border-right: 1px solid var(--color-border-default);
+  border-right: none;
+  border-left: 1px solid var(--color-border-default);
 }
 
-.trust-item:last-child {
-  border-right: none;
+/* The very first stat in the first copy has no divider at the strip edge. */
+.trust-ticker-track > .trust-ticker-group:first-child > .trust-item:first-child {
+  border-left: none;
 }
 
 .trust-value {
@@ -37,21 +57,18 @@
   font-weight: var(--font-weight-medium);
 }
 
-@media (max-width: 768px) {
-  .trust-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
+@keyframes trust-ticker-scroll {
+  from {
+    transform: translateX(0);
   }
-
-  .trust-item:nth-child(2) {
-    border-right: none;
+  to {
+    transform: translateX(-50%);
   }
+}
 
-  .trust-item:nth-child(1),
-  .trust-item:nth-child(2) {
-    border-bottom: 1px solid var(--color-border-default);
-    padding-bottom: var(--space-5);
-    margin-bottom: var(--space-2);
+@media (prefers-reduced-motion: reduce) {
+  .trust-ticker-track {
+    animation: none;
   }
 }
 
@@ -63,22 +80,20 @@
   .trust-item {
     padding: var(--space-2);
   }
+
+  .trust-value {
+    font-size: var(--font-size-lg);
+  }
 }
 
-/* Extra-small viewports: keep the two-column stats grid, but stop unbreakable
-   stat values ("12,400+", "Remote-first") from forcing the 1fr tracks wider
-   than the viewport. Let tracks shrink and let values wrap instead. */
+/* Extra-small viewports: shrink padding further and let long labels wrap
+   instead of forcing the track wider than the viewport. */
 @media (max-width: 380px) {
-  .trust-grid {
-    gap: var(--space-3);
-  }
-
   .trust-item {
-    min-width: 0;
+    padding: var(--space-1) var(--space-2);
   }
 
   .trust-value {
-    font-size: var(--font-size-xl);
     overflow-wrap: anywhere;
   }
 

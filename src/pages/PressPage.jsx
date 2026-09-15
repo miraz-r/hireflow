@@ -7,19 +7,16 @@ const COVERAGE = [
     source: 'TechCrunch',
     title: 'HireFlow raises Series A to expand job marketplace',
     description: "TechCrunch covers HireFlow's funding round and vision for transparent hiring.",
-    link: '/press',
   },
   {
     source: 'Forbes',
     title: 'The startup making job searches less painful',
     description: "Forbes profiles HireFlow's approach to curating quality opportunities.",
-    link: '/press',
   },
   {
     source: 'Wall Street Journal',
     title: 'How HireFlow is changing salary transparency',
     description: 'The Wall Street Journal explores the impact of visible salary ranges on job markets.',
-    link: '/press',
   },
 ];
 
@@ -51,7 +48,7 @@ export default function PressPage() {
                 </h2>
                 <p className="press-inquiries-body">
                   For media inquiries, interview requests, or to request our brand assets,
-                  send us a message. We respond to all legitimate press inquiries
+                  our press team is happy to help. We respond to all legitimate press inquiries
                   within one business day.
                 </p>
               </div>
@@ -85,23 +82,6 @@ export default function PressPage() {
                   <span className="press-coverage-source">{item.source}</span>
                   <h3 className="press-coverage-title">{item.title}</h3>
                   <p className="press-coverage-desc">{item.description}</p>
-                  <Link to={item.link} className="press-coverage-link">
-                    Read more
-                    <svg
-                      className="press-coverage-arrow"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
-                    </svg>
-                  </Link>
                 </article>
               </Reveal>
             ))}

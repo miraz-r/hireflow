@@ -32,7 +32,6 @@ import AboutPage from './pages/AboutPage';
 import BlogPage from './pages/BlogPage';
 import CareersPage from './pages/CareersPage';
 import PressPage from './pages/PressPage';
-import InfoPage from './pages/InfoPage';
 import CareerAdvicePage from './pages/CareerAdvicePage';
 import PricingPage from './pages/PricingPage';
 import TalentSearchPage from './pages/TalentSearchPage';

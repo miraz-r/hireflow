@@ -19,7 +19,7 @@ const POSITIONS = [
   {
     category: 'Engineering',
     title: 'Data Engineer',
-    description: 'Build the infrastructure behind our matching algorithms and salary insights. Python, Spark, and curiosity required.',
+    description: 'Build the systems behind our job listings, search, and salary insights. Python, Spark, and curiosity required.',
     link: '/register',
   },
   {

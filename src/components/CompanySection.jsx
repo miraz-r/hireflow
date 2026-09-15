@@ -5,7 +5,7 @@ export default function CompanySection({ companies }) {
     <section className="companies-section" id="companies">
       <div className="container">
         <div className="section-header section-header-center">
-          <h2 className="section-title">Trusted by ambitious teams</h2>
+          <h2 className="section-title">Companies hiring on HireFlow</h2>
           <p className="section-subtitle">From early-stage startups to established industry leaders</p>
         </div>
         <div className="companies-grid">

@@ -7,7 +7,7 @@ const POSTS = [
   {
     category: 'Job Market',
     title: 'The state of remote hiring in 2026',
-    description: 'Remote work continues to reshape how companies hire. We analyzed trends across our platform to see what is changing.',
+    description: 'Remote work continues to reshape how companies hire — from fully distributed teams to flexible hybrid schedules.',
     image: '/resources/remote-work.jpg',
     link: '/blog',
   },
@@ -28,7 +28,7 @@ const POSTS = [
   {
     category: 'Compensation',
     title: 'Salary negotiation myths debunked',
-    description: 'We asked hiring managers and recruiters to separate fact from fiction when it comes to compensation discussions.',
+    description: 'Compensation conversations are full of myths. Here is how to separate fact from fiction and negotiate with confidence.',
     image: '/resources/salary-negotiate.jpg',
     link: '/blog',
   },

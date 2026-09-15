@@ -198,32 +198,8 @@
   font-size: var(--font-size-base);
   color: var(--color-text-secondary);
   line-height: var(--line-height-relaxed);
-  margin: 0 0 var(--space-6);
+  margin: 0;
   flex: 1;
-}
-
-.press-coverage-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-brand-primary);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-  align-self: flex-start;
-}
-
-.press-coverage-link:hover {
-  color: var(--color-brand-primary-hover);
-}
-
-.press-coverage-link:hover .press-coverage-arrow {
-  transform: translateX(2px);
-}
-
-.press-coverage-arrow {
-  transition: transform var(--transition-fast);
 }
 
 /* =========================================================
@@ -475,10 +451,6 @@
 
   .press-coverage-desc {
     font-size: var(--font-size-sm);
-  }
-
-  .press-coverage-link {
-    font-size: var(--font-size-xs);
   }
 
   .press-cta {
