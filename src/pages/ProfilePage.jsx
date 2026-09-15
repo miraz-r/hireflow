@@ -431,59 +431,61 @@ function ProfileTab({ user }) {
 
   return (
     <>
-      <div className="profile-header">
-        <div className="profile-avatar-col">
-          <div className="profile-avatar-wrap">
-            <Avatar
-              src={avatarSrc}
-              imgAlt="Profile"
-              imgClassName="profile-avatar"
-              placeholderClassName="profile-avatar profile-avatar--placeholder"
-              iconSize={44}
-            />
-            <label className="profile-avatar-upload" title="Change profile picture">
-              {uploadingAvatar ? (
-                '…'
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                  <circle cx="12" cy="13" r="4" />
-                </svg>
-              )}
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                onChange={handleAvatarUpload}
-                disabled={uploadingAvatar}
+      <div className="card profile-header-card">
+        <div className="profile-header">
+          <div className="profile-avatar-col">
+            <div className="profile-avatar-wrap">
+              <Avatar
+                src={avatarSrc}
+                imgAlt="Profile"
+                imgClassName="profile-avatar"
+                placeholderClassName="profile-avatar profile-avatar--placeholder"
+                iconSize={36}
               />
-            </label>
+              <label className="profile-avatar-upload" title="Change profile picture">
+                {uploadingAvatar ? (
+                  '…'
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                )}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  onChange={handleAvatarUpload}
+                  disabled={uploadingAvatar}
+                />
+              </label>
+            </div>
+            {avatarSrc && (
+              <button
+                type="button"
+                className="profile-avatar-remove"
+                onClick={() => {
+                  setRemoveAvatarError('');
+                  setShowRemoveAvatarConfirm(true);
+                }}
+              >
+                Remove picture
+              </button>
+            )}
           </div>
-          {avatarSrc && (
-            <button
-              type="button"
-              className="profile-avatar-remove"
-              onClick={() => {
-                setRemoveAvatarError('');
-                setShowRemoveAvatarConfirm(true);
-              }}
-            >
-              Remove picture
-            </button>
+          <div className="profile-header-text">
+            <h1 className="profile-title">{form.fullName || user.email || 'Your profile'}</h1>
+            <p className="profile-subtitle">
+              {isRecruiter
+                ? 'Manage your recruiting profile and company details.'
+                : 'Manage your professional profile and experience.'}
+            </p>
+          </div>
+          {profile && (
+            <span className="badge badge-neutral profile-status-badge">
+              {isRecruiter ? 'Recruiting' : 'Looking for work'}
+            </span>
           )}
         </div>
-        <div className="profile-header-text">
-          <h1 className="profile-title">{form.fullName || user.email || 'Your profile'}</h1>
-          <p className="profile-subtitle">
-            {isRecruiter
-              ? 'Manage your recruiting profile and company details.'
-              : 'Manage your professional profile and experience.'}
-          </p>
-        </div>
-        {profile && (
-          <span className="badge badge-neutral profile-status-badge">
-            {isRecruiter ? 'Recruiting' : 'Looking for work'}
-          </span>
-        )}
       </div>
 
       {!profile && !loading && (
@@ -905,7 +907,6 @@ function PostJobTab() {
     <div className="card profile-form">
       <div className="profile-header">
         <div className="profile-header-text">
-          <span className="section-eyebrow">Post</span>
           <h1 className="profile-title">Post a job</h1>
           <p className="profile-subtitle">Share a new role and start receiving applicants.</p>
         </div>
