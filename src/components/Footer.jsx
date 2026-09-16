@@ -101,10 +101,7 @@ function FooterSocial({ label, url }) {
 
 const publicLinks = {
   product: [
-    { label: 'Find Jobs', to: '#jobs' },
-    { label: 'Companies', to: '#companies' },
     { label: 'Salary Guide', to: '/salary-guide' },
-    { label: 'Resources', to: '/resources' },
     { label: 'Pricing', to: '/pricing' },
     { label: 'Career Advice', to: '/career-advice' }
   ],
