@@ -1,5 +1,5 @@
 /* =========================================================
-   ConfirmModal — fixed-to-viewport confirmation dialog
+   ConfirmModal - fixed-to-viewport confirmation dialog
    Rendered through a portal to <body> (see ConfirmModal.jsx)
    so the overlay is always rooted at the viewport. Mounting
    it inside a route layer would otherwise trap `position:
@@ -42,7 +42,7 @@
   animation: modalContentIn 200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* The container is focusable (tabIndex={-1}) for focus target only — never
+/* The container is focusable (tabIndex={-1}) for focus target only - never
    show a ring around the whole dialog. */
 .modal-content:focus {
   outline: none;

@@ -233,7 +233,7 @@ export default function ResourcesPage() {
                 )}
                 {newsletterState === 'success' && (
                   <span className="res-newsletter-success" id="newsletter-success" role="status">
-                    Thanks for subscribing! (Demo — no email was sent)
+                    Thanks for subscribing! (Demo - no email was sent)
                   </span>
                 )}
               </div>

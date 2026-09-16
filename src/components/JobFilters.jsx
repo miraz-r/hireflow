@@ -58,7 +58,7 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
     };
     // A scroll event fires for the dropdown's own scrollable container AND for
     // the page. Internal scrolling of the dropdown must be ignored entirely.
-    // A PAGE scroll must NOT close the dropdown either — instead the menu is
+    // A PAGE scroll must NOT close the dropdown either - instead the menu is
     // re-anchored to the (moving) trigger so it stays open and attached while
     // keeping its open-up/down direction stable (no flicker).
     // e.target of a scroll event is the element that was scrolled (the scroll

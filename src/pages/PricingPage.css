@@ -1,5 +1,5 @@
 /* =========================================================
-   PricingPage — product/business decision identity
+   PricingPage - product/business decision identity
    ========================================================= */
 
 .pricing-page {
@@ -7,7 +7,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening
+   1. HERO - dark editorial opening
    ========================================================= */
 .pricing-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -64,7 +64,7 @@
 }
 
 /* =========================================================
-   2. PRICING TIERS — integrated hierarchy
+   2. PRICING TIERS - integrated hierarchy
    ========================================================= */
 .pricing-tiers {
   padding: var(--space-20) 0 var(--space-16);
@@ -186,7 +186,7 @@
 }
 
 /* =========================================================
-   4. CTA — deep indigo closing section
+   4. CTA - deep indigo closing section
    ========================================================= */
 .pricing-cta {
   background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);

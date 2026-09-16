@@ -11,10 +11,10 @@
    * The whole homepage sits on ONE cool-neutral off-white surface.
    * The differences are subtle, not contrasting panels.
    *
-   * Canvas:    #F7F8FA  — the ONE dominant page background
-   * Surface:   #FFFFFF  — white elevated surfaces (clean white)
-   * Muted:     #F0F2F5  — secondary canvas (filter sidebar, hover wells)
-   * Tertiary:  #E8EAED  — subtle fills (chips, skill tags)
+   * Canvas:    #F7F8FA  - the ONE dominant page background
+   * Surface:   #FFFFFF  - white elevated surfaces (clean white)
+   * Muted:     #F0F2F5  - secondary canvas (filter sidebar, hover wells)
+   * Tertiary:  #E8EAED  - subtle fills (chips, skill tags)
    */
   --color-bg-primary: #F7F8FA;
   --color-bg-secondary: #FFFFFF;
@@ -32,7 +32,7 @@
   /* Hover text - muted brand tone for subtle interactive feedback */
   --color-text-hover: #3730a3;
 
-  /* Colors - Brand — the HireFlow indigo identity
+  /* Colors - Brand - the HireFlow indigo identity
    * Primary:    refined indigo (#4F46E5) for primary actions / focus
    * Hover:      deeper indigo (#3730A3) for hover state
    * Soft tint:  very light indigo (#EEF2FF) for selected backgrounds, soft chips
@@ -48,7 +48,7 @@
   --color-brand-deep-hover: #1E1B4B;
   --color-brand-accent: #7C3AED;
 
-  /* Colors - Borders — refined, cool-neutral, restrained
+  /* Colors - Borders - refined, cool-neutral, restrained
    * Default:  subtle cool gray
    * Strong:   slightly more present
    * Brand:    for focus rings
@@ -60,7 +60,7 @@
   --color-border-on-dark: rgba(255, 255, 255, 0.10);
   --color-border-on-dark-strong: rgba(255, 255, 255, 0.16);
 
-  /* Focus ring — dedicated color for :focus-visible box-shadow rings.
+  /* Focus ring - dedicated color for :focus-visible box-shadow rings.
    * Must stay bright enough to show against both light and dark surfaces. */
   --color-focus-ring: #4F46E5;
 
@@ -191,13 +191,13 @@
   --color-border-on-dark-strong: rgba(255, 255, 255, 0.16);
   --color-focus-ring: #818cf8;
 
-  /* State backgrounds — dark-mode adjusted for contrast */
+  /* State backgrounds - dark-mode adjusted for contrast */
   --color-success-bg: rgba(16, 185, 129, 0.12);
   --color-warning-bg: rgba(245, 158, 11, 0.12);
   --color-error-bg: rgba(239, 68, 68, 0.12);
   --color-info-bg: rgba(59, 130, 246, 0.12);
 
-  /* Shadows — heavier for dark surfaces */
+  /* Shadows - heavier for dark surfaces */
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.35), 0 1px 2px -1px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
@@ -372,7 +372,7 @@ input, textarea, select {
 /* ---------- Button System ---------- */
 /* Shared base for all HireFlow buttons. Every variant inherits
    the same typography, radius, height, transitions, focus, and
-   disabled treatment — only visual emphasis differs. */
+   disabled treatment - only visual emphasis differs. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -691,7 +691,7 @@ video {
   text-transform: uppercase;
 }
 
-/* Section intro — centered eyebrow + heading composition (mobile only) */
+/* Section intro - centered eyebrow + heading composition (mobile only) */
 .section-intro {
   text-align: left;
 }

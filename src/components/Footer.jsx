@@ -17,7 +17,7 @@ function FooterLink({ to, children }) {
         return;
       }
     }
-    // Not on homepage or element missing — navigate to homepage with anchor intent
+    // Not on homepage or element missing - navigate to homepage with anchor intent
     navigate('/', { state: { scrollTo: id } });
   };
 
@@ -51,7 +51,7 @@ function FooterLink({ to, children }) {
         to={to}
         onClick={(e) => {
           if (location.pathname === path) {
-            // Same page, different hash — scroll to target
+            // Same page, different hash - scroll to target
             e.preventDefault();
             const id = hash.replace('#', '');
             const el = document.getElementById(id);
@@ -59,7 +59,7 @@ function FooterLink({ to, children }) {
               el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           } else {
-            // Cross-page — navigate with hash preserved
+            // Cross-page - navigate with hash preserved
             handleCrossPageAnchor(e, path, hash);
           }
         }}

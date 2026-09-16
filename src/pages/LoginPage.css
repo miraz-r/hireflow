@@ -1,10 +1,10 @@
 /* =========================================================
-   LoginPage — HireFlow authentication screen
+   LoginPage - HireFlow authentication screen
    Reuses existing CSS variables (brand, spacing, radius, etc.).
    ========================================================= */
 
 /* Auth pages fill exactly the space below the sticky navbar so the page
-   itself never scrolls under normal viewport sizes. Scoped to auth only —
+   itself never scrolls under normal viewport sizes. Scoped to auth only -
    no global overflow rules. Inner panes may scroll internally only when
    the viewport is too short to fit the form (usability over clipping). */
 .auth-page {
@@ -517,7 +517,7 @@
    Responsive
    ========================================================= */
 
-/* Auth navbar — visible on auth pages */
+/* Auth navbar - visible on auth pages */
 .navbar--auth .navbar-nav {
   display: none;
 }
@@ -533,7 +533,7 @@
   }
 }
 
-/* Tablet — stack visual above form */
+/* Tablet - stack visual above form */
 @media (max-width: 960px) {
   .auth-shell {
     grid-template-columns: 1fr;
@@ -659,7 +659,7 @@
 }
 
 /* =========================================================
-   Short viewport overrides — ensure form stays accessible
+   Short viewport overrides - ensure form stays accessible
    on very short screens without global overflow: hidden.
    ========================================================= */
 @media (max-height: 700px) {

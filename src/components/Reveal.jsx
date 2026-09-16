@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * Reveal — wraps children and fades/slides them in the first time they scroll
+ * Reveal - wraps children and fades/slides them in the first time they scroll
  * into view. Uses IntersectionObserver; keeps `revealed` sticky once shown.
  *
  * Props:

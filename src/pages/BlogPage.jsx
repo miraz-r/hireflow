@@ -7,7 +7,7 @@ const POSTS = [
   {
     category: 'Job Market',
     title: 'The state of remote hiring in 2026',
-    description: 'Remote work continues to reshape how companies hire — from fully distributed teams to flexible hybrid schedules.',
+    description: 'Remote work continues to reshape how companies hire, from fully distributed teams to flexible hybrid schedules.',
     image: '/resources/remote-work.jpg',
   },
   {

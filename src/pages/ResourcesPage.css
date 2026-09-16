@@ -1,5 +1,5 @@
 /* =========================================================
-   ResourcesPage — editorial resource hub
+   ResourcesPage - editorial resource hub
    ========================================================= */
 
 .resources-page {
@@ -7,7 +7,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening
+   1. HERO - dark editorial opening
    ========================================================= */
 .res-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -68,7 +68,7 @@
 }
 
 /* =========================================================
-   2. FEATURED RESOURCE GRID — masonry editorial
+   2. FEATURED RESOURCE GRID - masonry editorial
    ========================================================= */
 .res-featured-section {
   padding: var(--space-12) 0;
@@ -228,7 +228,7 @@
 }
 
 /* =========================================================
-   3. CATEGORY NAVIGATION — editorial tabs
+   3. CATEGORY NAVIGATION - editorial tabs
    ========================================================= */
 .res-cat-nav-section {
   padding: var(--space-8) 0 0;
@@ -274,7 +274,7 @@
 }
 
 /* =========================================================
-   4. ARTICLE GRID — editorial content with images
+   4. ARTICLE GRID - editorial content with images
    ========================================================= */
 .res-articles-section {
   padding: var(--space-12) 0;
@@ -461,7 +461,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Tablet (<=960px)
+   RESPONSIVE - Tablet (<=960px)
    ========================================================= */
 @media (max-width: 960px) {
   .res-hero {
@@ -531,7 +531,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Mobile (<=640px)
+   RESPONSIVE - Mobile (<=640px)
    ========================================================= */
 @media (max-width: 640px) {
   .res-hero {
@@ -615,7 +615,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Small mobile (<=360px)
+   RESPONSIVE - Small mobile (<=360px)
    ========================================================= */
 @media (max-width: 360px) {
   .res-hero {
@@ -665,7 +665,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Ultra-small (<=260px for 240px/220px)
+   RESPONSIVE - Ultra-small (<=260px for 240px/220px)
    ========================================================= */
 @media (max-width: 260px) {
   .res-hero-title {

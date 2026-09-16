@@ -1,5 +1,5 @@
 /**
- * Avatar — renders a user's profile picture when one exists, otherwise a
+ * Avatar - renders a user's profile picture when one exists, otherwise a
  * neutral person-silhouette default that makes clear no picture is set.
  *
  * The caller supplies the existing CSS classes for each variant so the real

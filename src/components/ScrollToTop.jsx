@@ -31,7 +31,7 @@ export default function ScrollToTop() {
 
   useLayoutEffect(() => {
     // `key` changes on every real router navigation (push/replace/pop), but is
-    // identical across the initial mount — and across React StrictMode's
+    // identical across the initial mount - and across React StrictMode's
     // doubled mount effects. So a same-key run means the document just loaded:
     // the browser is restoring the scroll position natively and the Jobs
     // restoration state (state.restoreJobsScroll or the sessionStorage

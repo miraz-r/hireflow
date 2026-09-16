@@ -22,14 +22,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      // Server responded with a non-2xx status — normalize it.
+      // Server responded with a non-2xx status - normalize it.
       const { status, data } = error.response;
       const normalized = new Error(data?.error || 'An unexpected error occurred');
       normalized.status = status;
       normalized.data = data;
       return Promise.reject(normalized);
     }
-    // Network or request-level failure — surface as-is.
+    // Network or request-level failure - surface as-is.
     return Promise.reject(error);
   }
 );

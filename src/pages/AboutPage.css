@@ -1,5 +1,5 @@
 /* =========================================================
-   AboutPage — editorial About Us redesign
+   AboutPage - editorial About Us redesign
    ========================================================= */
 
 .about-page {
@@ -7,7 +7,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening
+   1. HERO - dark editorial opening
    ========================================================= */
 .about-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -71,7 +71,7 @@
   max-width: 480px;
 }
 
-/* Hero visual — values preview */
+/* Hero visual - values preview */
 .about-hero-visual {
   display: flex;
 }
@@ -113,7 +113,7 @@
 }
 
 /* =========================================================
-   2. MISSION — statement as focal point
+   2. MISSION - statement as focal point
    ========================================================= */
 .about-mission {
   padding: var(--space-20) 0;
@@ -155,7 +155,7 @@
 }
 
 /* =========================================================
-   3. PRINCIPLES — numbered editorial grid
+   3. PRINCIPLES - numbered editorial grid
    ========================================================= */
 .about-principles {
   padding: var(--space-20) 0 var(--space-24);
@@ -208,7 +208,7 @@
 }
 
 /* =========================================================
-   4. CTA — deep indigo closing section
+   4. CTA - deep indigo closing section
    ========================================================= */
 .about-cta {
   background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);

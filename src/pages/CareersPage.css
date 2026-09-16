@@ -1,5 +1,5 @@
 /* =========================================================
-   CareersPage — editorial careers redesign
+   CareersPage - editorial careers redesign
    ========================================================= */
 
 .careers-page {
@@ -7,7 +7,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening
+   1. HERO - dark editorial opening
    ========================================================= */
 .careers-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -64,7 +64,7 @@
 }
 
 /* =========================================================
-   2. OPEN POSITIONS — role cards (scroll target for nav)
+   2. OPEN POSITIONS - role cards (scroll target for nav)
    ========================================================= */
 #open-roles {
   scroll-margin-top: var(--space-20);
@@ -173,7 +173,7 @@
 }
 
 /* =========================================================
-   3. WHAT WE OFFER — benefit checklist (equal rhythm by grid)
+   3. WHAT WE OFFER - benefit checklist (equal rhythm by grid)
    ========================================================= */
 .careers-benefits {
   padding: var(--space-20) 0;
@@ -215,7 +215,7 @@
 }
 
 /* =========================================================
-   4. CTA — deep indigo closing section
+   4. CTA - deep indigo closing section
    ========================================================= */
 .careers-cta {
   background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);

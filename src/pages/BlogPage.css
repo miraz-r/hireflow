@@ -1,5 +1,5 @@
 /* =========================================================
-   BlogPage — editorial blog redesign
+   BlogPage - editorial blog redesign
    ========================================================= */
 
 .blog-page {
@@ -7,7 +7,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening
+   1. HERO - dark editorial opening
    ========================================================= */
 .blog-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -71,7 +71,7 @@
 }
 
 /* =========================================================
-   2. FEATURED — large editorial feature
+   2. FEATURED - large editorial feature
    ========================================================= */
 .blog-featured {
   padding: var(--space-20) 0;
@@ -168,7 +168,7 @@
 }
 
 /* =========================================================
-   4. GRID — article cards
+   4. GRID - article cards
    ========================================================= */
 .blog-grid {
   padding: var(--space-16) 0 var(--space-20);
@@ -241,7 +241,7 @@
 }
 
 /* =========================================================
-   5. CTA — deep indigo closing section
+   5. CTA - deep indigo closing section
    ========================================================= */
 .blog-cta {
   background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);

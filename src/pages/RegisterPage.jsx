@@ -15,7 +15,7 @@ const REGISTER_SLIDES = [
     badgeIcon: PEOPLE_ICON,
     title: 'Build your future with a workspace built for hiring',
     subtitle:
-      "Create a free HireFlow account in seconds — whether you're looking for work or searching for your next great hire.",
+      "Create a free HireFlow account in seconds, whether you're looking for work or searching for your next great hire.",
   },
   {
     id: 'track',
@@ -23,7 +23,7 @@ const REGISTER_SLIDES = [
     badgeIcon: TRACK_ICON,
     title: 'Track every application in one place',
     subtitle:
-      'From submitted to interviewed — get live status updates and never lose track of an opportunity again.',
+      'From submitted to interviewed, get live status updates and never lose track of an opportunity again.',
   },
   {
     id: 'secure',
@@ -163,7 +163,7 @@ export default function RegisterPage() {
       // number, and submits one unambiguous international (E.164) value.
       const normalizedPhone = toE164(phone, phoneCountry);
       await register(email.trim(), password, fullName.trim(), normalizedPhone);
-      // Registration succeeded — direct the user to sign in.
+      // Registration succeeded - direct the user to sign in.
       navigate('/login', { replace: true });
     } catch (err) {
       // api.js normalizes server errors into Error objects

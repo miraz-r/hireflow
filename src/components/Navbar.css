@@ -1,4 +1,4 @@
-/* Navbar Styles — premium, sticky, semi-transparent */
+/* Navbar Styles - premium, sticky, semi-transparent */
 
 .navbar {
   position: sticky;
@@ -163,7 +163,7 @@
 }
 
 /* =========================================================
-   Account menu — role label + clickable avatar trigger
+   Account menu - role label + clickable avatar trigger
    ========================================================= */
 .account-wrapper {
   display: flex;
@@ -230,7 +230,7 @@
   user-select: none;
 }
 
-/* Dropdown menu — z-index must exceed the navbar's z-index (200)
+/* Dropdown menu - z-index must exceed the navbar's z-index (200)
    so the menu sits above the navbar border and page content. */
 .account-menu {
   position: absolute;
@@ -388,7 +388,7 @@
   border-color: var(--color-brand-primary);
 }
 
-/* Mobile drawer toggle ON state — same purple */
+/* Mobile drawer toggle ON state - same purple */
 .mobile-drawer-theme-toggle[aria-pressed="true"] .toggle-switch {
   background-color: var(--color-brand-primary);
   border-color: var(--color-brand-primary);
@@ -410,7 +410,7 @@
 }
 
 /* =========================================================
-   Mobile Toggle — hidden by default, shown only on mobile
+   Mobile Toggle - hidden by default, shown only on mobile
    ========================================================= */
 .mobile-toggle {
   display: none;
@@ -436,7 +436,7 @@
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
-/* Hamburger icon — three horizontal bars */
+/* Hamburger icon - three horizontal bars */
 .hamburger {
   display: flex;
   flex-direction: column;

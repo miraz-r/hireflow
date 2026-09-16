@@ -28,7 +28,7 @@ const SEGMENTS = [
   {
     id: 3,
     title: 'Enterprise',
-    description: 'Coordinated hiring for large-scale programs — multiple postings, applicant tracking, and reporting across the whole pipeline.',
+    description: 'Coordinated hiring for large-scale programs, including multiple postings, applicant tracking, and reporting across the whole pipeline.',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" />
@@ -69,7 +69,7 @@ export default function SolutionsPage() {
             <span className="sol-hero-eyebrow">How HireFlow helps</span>
             <h1 className="sol-hero-title">Solutions</h1>
             <p className="sol-hero-desc">
-              Learn how HireFlow powers hiring for companies of every size — from first job posting to building an entire team.
+              Learn how HireFlow powers hiring for companies of every size, from first job posting to building an entire team.
             </p>
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function SolutionsPage() {
             </div>
           </Reveal>
 
-          {/* Primary segment — large block */}
+          {/* Primary segment - large block */}
           <Reveal delay={100}>
             <div className="sol-segment-primary">
               <div className="sol-segment-primary-icon">{SEGMENTS[0].icon}</div>
@@ -95,7 +95,7 @@ export default function SolutionsPage() {
             </div>
           </Reveal>
 
-          {/* Supporting segments — 2-column grid */}
+          {/* Supporting segments - 2-column grid */}
           <div className="sol-segments-grid">
             {SEGMENTS.slice(1).map((segment, i) => (
               <Reveal key={segment.id} delay={120 + i * 80}>

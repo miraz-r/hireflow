@@ -1,5 +1,5 @@
 /* =========================================================
-   SalaryGuidePage — polished editorial compensation guide
+   SalaryGuidePage - polished editorial compensation guide
    ========================================================= */
 
 .sg-page {
@@ -9,7 +9,7 @@
 }
 
 /* =========================================================
-   HERO — asymmetric layout with data preview
+   HERO - asymmetric layout with data preview
    ========================================================= */
 .sg-hero {
   padding: var(--space-20) 0 var(--space-16);
@@ -69,7 +69,7 @@
   max-width: 520px;
 }
 
-/* Hero visual — salary range preview */
+/* Hero visual - salary range preview */
 .sg-hero-visual {
   display: flex;
   flex-direction: column;
@@ -131,7 +131,7 @@
 }
 
 /* =========================================================
-   SECTIONS — shared
+   SECTIONS - shared
    ========================================================= */
 .sg-section {
   padding: var(--space-16) 0;
@@ -169,13 +169,13 @@
   margin-right: 0;
 }
 
-/* Salary data section intro — balanced rhythm before the table */
+/* Salary data section intro - balanced rhythm before the table */
 .sg-salary-section .sg-section-header {
   margin-bottom: var(--space-6);
 }
 
 /* =========================================================
-   SALARY TABLE — designed, not raw
+   SALARY TABLE - designed, not raw
    ========================================================= */
 .sg-salary-section {
   background-color: var(--color-bg-secondary);
@@ -443,7 +443,7 @@
 }
 
 /* =========================================================
-   CTA — editorial ending
+   CTA - editorial ending
    ========================================================= */
 .sg-cta-section {
   padding-bottom: var(--space-24);
@@ -519,7 +519,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Tablet (<=960px)
+   RESPONSIVE - Tablet (<=960px)
    ========================================================= */
 @media (max-width: 960px) {
   .sg-hero-layout {
@@ -576,7 +576,7 @@
 }
 
 /* =========================================================
-    RESPONSIVE — Mobile (<=640px)
+    RESPONSIVE - Mobile (<=640px)
     ========================================================= */
 @media (max-width: 640px) {
   .sg-hero {
@@ -637,7 +637,7 @@
 }
 
 /* =========================================================
-    RESPONSIVE — Tablet/Mobile safety net (<=768px)
+    RESPONSIVE - Tablet/Mobile safety net (<=768px)
     ========================================================= */
 @media (max-width: 768px) {
   .sg-context-items {
@@ -647,7 +647,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Small mobile (<=360px)
+   RESPONSIVE - Small mobile (<=360px)
    ========================================================= */
 @media (max-width: 360px) {
   .sg-hero {
@@ -713,7 +713,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Ultra-small (<=260px for 240px/220px)
+   RESPONSIVE - Ultra-small (<=260px for 240px/220px)
    ========================================================= */
 @media (max-width: 260px) {
   .sg-hero-title {

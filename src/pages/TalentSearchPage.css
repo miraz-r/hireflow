@@ -1,5 +1,5 @@
 /* =========================================================
-   TalentSearchPage — employer/talent discovery identity
+   TalentSearchPage - employer/talent discovery identity
    ========================================================= */
 
 .talent-search-page {
@@ -7,7 +7,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening
+   1. HERO - dark editorial opening
    ========================================================= */
 .ts-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -71,7 +71,7 @@
 }
 
 /* =========================================================
-   2. FEATURES — asymmetric composition
+   2. FEATURES - asymmetric composition
    ========================================================= */
 .ts-features {
   padding: var(--space-20) 0 var(--space-20);
@@ -89,7 +89,7 @@
   margin-bottom: var(--space-12);
 }
 
-/* Primary feature — large block */
+/* Primary feature - large block */
 .ts-feature-primary {
   padding: var(--space-8);
   background-color: var(--color-bg-primary);
@@ -126,7 +126,7 @@
   max-width: 560px;
 }
 
-/* Secondary features — 2x2 grid */
+/* Secondary features - 2x2 grid */
 .ts-features-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -167,7 +167,7 @@
 }
 
 /* =========================================================
-   3. HOW IT WORKS — connected explanatory section
+   3. HOW IT WORKS - connected explanatory section
    ========================================================= */
 .ts-how {
   padding: var(--space-20) 0 var(--space-16);
@@ -191,7 +191,7 @@
 }
 
 /* =========================================================
-   4. CTA — deep indigo closing section
+   4. CTA - deep indigo closing section
    ========================================================= */
 .ts-cta {
   background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);

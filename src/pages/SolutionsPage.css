@@ -1,5 +1,5 @@
 /* =========================================================
-   SolutionsPage — employer solutions/market segments identity
+   SolutionsPage - employer solutions/market segments identity
    ========================================================= */
 
 .solutions-page {
@@ -7,7 +7,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening
+   1. HERO - dark editorial opening
    ========================================================= */
 .sol-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -71,7 +71,7 @@
 }
 
 /* =========================================================
-   2. SEGMENTS — asymmetric hierarchy
+   2. SEGMENTS - asymmetric hierarchy
    ========================================================= */
 .sol-segments {
   padding: var(--space-20) 0 var(--space-20);
@@ -89,7 +89,7 @@
   margin-bottom: var(--space-12);
 }
 
-/* Primary segment — large block */
+/* Primary segment - large block */
 .sol-segment-primary {
   display: flex;
   gap: var(--space-6);
@@ -134,7 +134,7 @@
   max-width: 560px;
 }
 
-/* Supporting segments — 2-column grid */
+/* Supporting segments - 2-column grid */
 .sol-segments-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -175,7 +175,7 @@
 }
 
 /* =========================================================
-   3. WHY HIREFLOW — editorial numbered list
+   3. WHY HIREFLOW - editorial numbered list
    ========================================================= */
 .sol-why {
   padding: var(--space-20) 0 var(--space-24);
@@ -237,7 +237,7 @@
 }
 
 /* =========================================================
-   4. CTA — deep indigo closing section
+   4. CTA - deep indigo closing section
    ========================================================= */
 .sol-cta {
   background: linear-gradient(135deg, var(--color-brand-deep) 0%, #1e1b4b 60%, #312e81 100%);

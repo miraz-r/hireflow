@@ -356,7 +356,7 @@ export default function ApplyPage() {
                   placeholder="Tell the employer why you're a great fit…"
                   rows={6}
                 />
-                <span className="apply-field-hint">Optional — max 5000 characters</span>
+                <span className="apply-field-hint">Optional - max 5000 characters</span>
               </div>
             </fieldset>
 

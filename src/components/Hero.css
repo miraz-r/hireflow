@@ -1,4 +1,4 @@
-/* Hero Section — part of the unified canvas, subtle brand accent */
+/* Hero Section - part of the unified canvas, subtle brand accent */
 
 .hero {
   position: relative;
@@ -101,7 +101,7 @@
   margin-right: auto;
 }
 
-/* Search Form — premium, elevated, intentional */
+/* Search Form - premium, elevated, intentional */
 .search-form {
   display: flex;
   align-items: stretch;

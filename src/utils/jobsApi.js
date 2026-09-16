@@ -47,10 +47,10 @@ export async function fetchJobs() {
     if (rawJobs.length > 0) {
       return rawJobs.map(normalizeJob);
     }
-    // API reachable but empty — fall back to mock so the page isn't blank.
+    // API reachable but empty - fall back to mock so the page isn't blank.
     return mockJobs;
   } catch {
-    // Backend down — use the built-in mock catalogue.
+    // Backend down - use the built-in mock catalogue.
     return mockJobs;
   }
 }

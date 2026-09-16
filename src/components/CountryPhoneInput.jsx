@@ -145,7 +145,7 @@ export default function CountryPhoneInput({
     setPos({ top, left, width: popWidth });
   }, [open, query, filtered.length]);
 
-  // Close on any scroll/resize while the menu is open — safer than trying to
+  // Close on any scroll/resize while the menu is open - safer than trying to
   // chase re-positioning across the auth page's internal scroll containers.
   // Scrolls originating inside the list itself (browsing countries) are kept.
   useEffect(() => {

@@ -1,5 +1,5 @@
 /* =========================================================
-   RegisterPage — HireFlow registration screen
+   RegisterPage - HireFlow registration screen
    Layout (auth-page, auth-shell, auth-form-pane, etc.) is
    shared with LoginPage and imported via LoginPage.css.
    This file contains only RegisterPage-specific additions
@@ -69,7 +69,7 @@
   flex-wrap: wrap;
 }
 
-/* Each option card — styled as a selectable card, not a plain radio */
+/* Each option card - styled as a selectable card, not a plain radio */
 .auth-role-option {
   position: relative;
   display: flex;

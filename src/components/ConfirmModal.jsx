@@ -3,14 +3,14 @@ import { createPortal } from 'react-dom';
 import './ConfirmModal.css';
 
 /**
- * ConfirmModal — fixed-to-viewport confirmation dialog.
+ * ConfirmModal - fixed-to-viewport confirmation dialog.
  *
  * Rendered through a portal to <body>. Mounting a `position: fixed` overlay
  * inside a route layer would trap it in that layer's containing block (the
  * PageTransition route layers apply `will-change: transform` and, during
  * transitions, a real transform), which is what made the old in-place modal
- * float relative to the page instead of the viewport. Portaling to <body> —
- * the same approach the Navbar drawer uses — roots the overlay at the
+ * float relative to the page instead of the viewport. Portaling to <body> -
+ * the same approach the Navbar drawer uses - roots the overlay at the
  * viewport regardless of scroll position.
  *
  * While open it:

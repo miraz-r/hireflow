@@ -5,7 +5,7 @@
   overflow: hidden;
 }
 
-/* Ticker viewport — clips the scrolling track so the loop never introduces
+/* Ticker viewport - clips the scrolling track so the loop never introduces
    document-level horizontal overflow. */
 .trust-ticker {
   overflow: hidden;

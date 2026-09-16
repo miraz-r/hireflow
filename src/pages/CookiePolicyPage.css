@@ -1,5 +1,5 @@
 /* =========================================================
-   PrivacyPage — editorial legal-document layout
+   PrivacyPage - editorial legal-document layout
    ========================================================= */
 
 .privacy-page {
@@ -8,7 +8,7 @@
 }
 
 /* =========================================================
-   1. HEADER — dark editorial hero matching Blog/About
+   1. HEADER - dark editorial hero matching Blog/About
    ========================================================= */
 .privacy-header {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -70,7 +70,7 @@
 }
 
 /* =========================================================
-   3. TABLE OF CONTENTS — left column, sticky
+   3. TABLE OF CONTENTS - left column, sticky
    ========================================================= */
 .privacy-toc {
   width: 220px;
@@ -131,7 +131,7 @@
 }
 
 /* =========================================================
-   4. MAIN CONTENT — right column
+   4. MAIN CONTENT - right column
    ========================================================= */
 .privacy-content {
   flex: 1;
@@ -169,7 +169,7 @@
 }
 
 /* =========================================================
-   6. RESPONSIVE — Tablet (<=960px)
+   6. RESPONSIVE - Tablet (<=960px)
    ========================================================= */
 @media (max-width: 960px) {
   .privacy-toc {
@@ -182,7 +182,7 @@
 }
 
 /* =========================================================
-   7. RESPONSIVE — Mobile (<=768px)
+   7. RESPONSIVE - Mobile (<=768px)
    Stack TOC above content
    ========================================================= */
 @media (max-width: 768px) {
@@ -259,7 +259,7 @@
 }
 
 /* =========================================================
-   8. RESPONSIVE — Small mobile (<=480px)
+   8. RESPONSIVE - Small mobile (<=480px)
    ========================================================= */
 @media (max-width: 480px) {
   .privacy-header {
@@ -280,7 +280,7 @@
 }
 
 /* =========================================================
-   9. RESPONSIVE — Ultra-small (<=360px)
+   9. RESPONSIVE - Ultra-small (<=360px)
    ========================================================= */
 @media (max-width: 360px) {
   .privacy-header {
@@ -318,7 +318,7 @@
 }
 
 /* =========================================================
-   10. RESPONSIVE — Narrow viewport (<=260px for 240px/220px)
+   10. RESPONSIVE - Narrow viewport (<=260px for 240px/220px)
    ========================================================= */
 @media (max-width: 260px) {
   .privacy-title {
@@ -358,7 +358,7 @@
 }
 
 /* =========================================================
-   ANIMATIONS — Terms page only
+   ANIMATIONS - Terms page only
    ========================================================= */
 @keyframes terms-hero-fade-up {
   from { opacity: 0; transform: translateY(12px); }

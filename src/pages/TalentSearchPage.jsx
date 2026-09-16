@@ -8,7 +8,7 @@ const FEATURES = [
   {
     id: 1,
     title: 'Applicant review',
-    description: 'Review applicant profiles, resumes, and cover letters for your posted jobs — all in one place.',
+    description: 'Review applicant profiles, resumes, and cover letters for your posted jobs all in one place.',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
@@ -28,7 +28,7 @@ const FEATURES = [
   {
     id: 3,
     title: 'Applicant pipelines',
-    description: 'Move candidates through review, interview, and offer stages — all from your recruiting dashboard.',
+    description: 'Move candidates through review, interview, and offer stages all from your recruiting dashboard.',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3 6h.01" /><path d="M3 12h.01" /><path d="M3 18h.01" />
@@ -91,7 +91,7 @@ export default function TalentSearchPage() {
             </div>
           </Reveal>
 
-          {/* Primary feature — large block */}
+          {/* Primary feature - large block */}
           <Reveal delay={100}>
             <div className="ts-feature-primary">
               <div className="ts-feature-primary-icon">{PRIMARY_FEATURE.icon}</div>
@@ -100,7 +100,7 @@ export default function TalentSearchPage() {
             </div>
           </Reveal>
 
-          {/* Secondary features — 2x2 grid */}
+          {/* Secondary features - 2x2 grid */}
           <div className="ts-features-grid">
             {SECONDARY_FEATURES.map((feature, i) => (
               <Reveal key={feature.id} delay={120 + i * 80}>

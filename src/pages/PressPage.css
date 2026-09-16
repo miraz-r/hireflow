@@ -1,5 +1,5 @@
 /* =========================================================
-   PressPage — light editorial press page
+   PressPage - light editorial press page
    Visual language matches the rest of HireFlow:
    light neutral backgrounds, dark readable type,
    restrained purple accents, comfortable spacing.
@@ -11,7 +11,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening, matches Blog/Careers/About
+   1. HERO - dark editorial opening, matches Blog/Careers/About
    ========================================================= */
 .press-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);
@@ -68,7 +68,7 @@
 }
 
 /* =========================================================
-   2. RECENT COVERAGE — 3-column editorial grid
+   2. RECENT COVERAGE - 3-column editorial grid
    Surface matches the alternating public-page band pattern
    (like Blog featured / Careers benefits / About mission).
    ========================================================= */
@@ -158,7 +158,7 @@
 }
 
 /* =========================================================
-   3. PRESS CONTACT CTA — dark navy/indigo gradient panel
+   3. PRESS CONTACT CTA - dark navy/indigo gradient panel
    ========================================================= */
 .press-cta {
   position: relative;

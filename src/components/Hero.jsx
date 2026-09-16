@@ -76,7 +76,7 @@ export default function Hero({ onSearch, onQueryChange, onLocationChange, search
           
           <p className="hero-subheadline">
             {isRecruiter
-              ? 'Post roles, reach qualified candidates, and build your team — all in one place. HireFlow connects you with talent across engineering, design, product, and more.'
+              ? 'Post roles, reach qualified candidates, and build your team all in one place. HireFlow connects you with talent across engineering, design, product, and more.'
               : 'Discover opportunities that match your skills, values, and ambitions. HireFlow connects ambitious professionals with companies that care.'}
           </p>
 

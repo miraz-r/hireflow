@@ -1,5 +1,5 @@
 /* =========================================================
-   ContactPage — general contact page
+   ContactPage - general contact page
    Visual language matches the rest of HireFlow:
    dark hero, light content, restrained indigo accents.
    ========================================================= */
@@ -10,7 +10,7 @@
 }
 
 /* =========================================================
-   1. HERO — dark editorial opening
+   1. HERO - dark editorial opening
    ========================================================= */
 .contact-hero {
   background: linear-gradient(160deg, var(--color-brand-deep) 0%, #1e1b4b 40%, #312e81 100%);

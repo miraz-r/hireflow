@@ -312,7 +312,7 @@ export default function RecruiterDashboard() {
 
       {/* ── Main Content: Pipeline + Insights ────────────────── */}
       <div className="rc-content-grid">
-        {/* Hiring Pipeline — Hero Panel */}
+        {/* Hiring Pipeline - Hero Panel */}
         <div className="rc-pipeline">
           <div className="rc-pipeline-header">
             <h2 className="rc-panel-title">Hiring pipeline</h2>
@@ -495,7 +495,7 @@ export default function RecruiterDashboard() {
 }
 
 /* ======================================================================= */
-/* Applicant detail modal — fetches GET /applications/:id only when opened. */
+/* Applicant detail modal - fetches GET /applications/:id only when opened. */
 /* Portal-backed like ConfirmModal so the overlay roots at the viewport.    */
 /* Displays ONLY what the authorized detail endpoint returns; missing data  */
 /* hides the corresponding section/action.                                 */
@@ -648,7 +648,7 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
               <dl className="rc-detail-rows">
                 <div className="rc-detail-row">
                   <dt>Job</dt>
-                  <dd>{job?.title || '—'}</dd>
+                  <dd>{job?.title || '-'}</dd>
                 </div>
                 {job?.company && (
                   <div className="rc-detail-row">
@@ -658,7 +658,7 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
                 )}
                 <div className="rc-detail-row">
                   <dt>Applied</dt>
-                  <dd>{fmtDate(data.createdAt) || '—'}</dd>
+                  <dd>{fmtDate(data.createdAt) || '-'}</dd>
                 </div>
                 <div className="rc-detail-row">
                   <dt>Status</dt>

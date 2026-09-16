@@ -18,7 +18,7 @@ export function saveJobsScroll(bookmark) {
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(bookmark));
   } catch (e) {
-    // sessionStorage unavailable — treat as no bookmark
+    // sessionStorage unavailable - treat as no bookmark
   }
 }
 

@@ -97,7 +97,7 @@ export default function AccessibilityPage() {
             <h2 className="accessibility-known-heading">Known limitations.</h2>
             <div className="accessibility-known-card">
               <p className="accessibility-known-body">
-                While we strive for full accessibility, some legacy content may not yet meet our target standards. We are actively working to address these gaps. If you encounter a barrier, please let us know — your feedback directly shapes our priorities.
+                While we strive for full accessibility, some legacy content may not yet meet our target standards. We are actively working to address these gaps. If you encounter a barrier, please let us know. Your feedback directly shapes our priorities.
               </p>
             </div>
           </Reveal>

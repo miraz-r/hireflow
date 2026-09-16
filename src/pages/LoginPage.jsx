@@ -13,7 +13,7 @@ const LOGIN_SLIDES = [
     badgeIcon: PEOPLE_ICON,
     title: 'The smarter way to connect talent with opportunity',
     subtitle:
-      'HireFlow brings candidates, employers, and recruiters into one polished workspace — so the right people find each other, faster.',
+      'HireFlow brings candidates, employers, and recruiters into one polished workspace so the right people find each other, faster.',
   },
   {
     id: 'track',
@@ -21,7 +21,7 @@ const LOGIN_SLIDES = [
     badgeIcon: TRACK_ICON,
     title: 'Track every application in one place',
     subtitle:
-      'From submitted to interviewed — get live status updates and never lose track of an opportunity again.',
+      'From submitted to interviewed, get live status updates and never lose track of an opportunity again.',
   },
   {
     id: 'secure',

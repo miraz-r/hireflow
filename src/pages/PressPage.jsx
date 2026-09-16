@@ -46,7 +46,7 @@ const COVERAGE = [
   {
     id: 'cnbc',
     source: 'CNBC',
-    title: "We're in a 'hiring recession,' economist says — how job seekers can stand out",
+    title: "We're in a 'hiring recession,' economist says - how job seekers can stand out",
     description:
       'Last year was the worst for job growth outside of a recession in over two decades, with hiring concentrated in health care.',
     url: 'https://www.cnbc.com/2026/01/10/hiring-recession.html',

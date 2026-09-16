@@ -74,7 +74,7 @@ export default function Navbar() {
       document.body.style.top = '';
       document.body.style.width = '';
       // Restore the pre-open scroll position, UNLESS a drawer route link
-      // initiated navigation that changed the page — restoring the old offset
+      // initiated navigation that changed the page - restoring the old offset
       // onto the destination page would sabotage its intended scroll position.
       if (restoreScrollRef.current) {
         window.scrollTo(0, scrollY);
@@ -436,7 +436,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile drawer — portaled to body to escape header's backdrop-filter containing block */}
+      {/* Mobile drawer - portaled to body to escape header's backdrop-filter containing block */}
       {drawerMounted && createPortal(
         <>
           <div className={`mobile-drawer-backdrop ${mobileOpen ? 'active' : ''}`} onClick={closeMobile} aria-hidden="true" />
@@ -479,7 +479,7 @@ export default function Navbar() {
             </div>
 
             <nav className="mobile-drawer-nav" aria-label="Mobile navigation">
-              {/* Switch to Recruiter — above Navigation */}
+              {/* Switch to Recruiter - above Navigation */}
               {user && (
                 <div className="mobile-drawer-section">
                   <button
@@ -632,7 +632,7 @@ export default function Navbar() {
               )}
             </nav>
 
-            {/* Logout — completely separate at the bottom */}
+            {/* Logout - completely separate at the bottom */}
             {user && (
               <div className="mobile-drawer-logout">
                 <button

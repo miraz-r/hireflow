@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session on mount — read token from localStorage and validate it.
+  // Restore session on mount - read token from localStorage and validate it.
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
     if (!storedToken) {
@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
         setUser(res.data);
       })
       .catch(() => {
-        // Token is invalid or expired — clean up and stay logged out.
+        // Token is invalid or expired - clean up and stay logged out.
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
         setUser(null);

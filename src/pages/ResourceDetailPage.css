@@ -1,5 +1,5 @@
 /* =========================================================
-   ResourceDetailPage — editorial article layout
+   ResourceDetailPage - editorial article layout
    ========================================================= */
 
 .resource-detail-page {
@@ -274,7 +274,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Tablet (≤960px)
+   RESPONSIVE - Tablet (≤960px)
    ========================================================= */
 @media (max-width: 960px) {
   .resource-detail-related-grid {
@@ -283,7 +283,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Mobile (≤640px)
+   RESPONSIVE - Mobile (≤640px)
    ========================================================= */
 @media (max-width: 640px) {
   .resource-detail-hero {
@@ -330,7 +330,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Small mobile (≤360px)
+   RESPONSIVE - Small mobile (≤360px)
    ========================================================= */
 @media (max-width: 360px) {
   .resource-detail-hero {
@@ -379,7 +379,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE — Ultra-small (≤260px)
+   RESPONSIVE - Ultra-small (≤260px)
    ========================================================= */
 @media (max-width: 260px) {
   .resource-detail-title {

@@ -1,5 +1,5 @@
 /* =========================================================
-   Sitewide animations — Hero entrance + scroll-reveal system
+   Sitewide animations - Hero entrance + scroll-reveal system
    ========================================================= */
 
 /* --- Scroll reveal (IntersectionObserver-driven via Reveal component) ---
@@ -140,7 +140,7 @@
   }
 }
 
-/* --- Job cards fade in as they mount (async data) — no staggered timer:
+/* --- Job cards fade in as they mount (async data) - no staggered timer:
    job results must appear promptly once data has loaded. */
 .jobs-grid .job-card {
   animation: cardIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;

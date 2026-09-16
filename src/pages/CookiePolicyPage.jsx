@@ -18,7 +18,7 @@ const SECTIONS = [
     id: 'analytics-cookies',
     toc: 'Analytics Cookies',
     heading: 'Analytics Cookies',
-    body: `We use analytics tools to understand how visitors interact with HireFlow — which pages are most popular, where users encounter issues, and how we can improve. This data is aggregated and anonymized. It does not identify individual users personally and is used solely to enhance the platform experience.`,
+    body: `We use analytics tools to understand how visitors interact with HireFlow, including which pages are most popular, where users encounter issues, and how we can improve. This data is aggregated and anonymized. It does not identify individual users personally and is used solely to enhance the platform experience.`,
   },
   {
     id: 'managing-cookies',

@@ -223,7 +223,7 @@ export default function App() {
   // After a filter change, bring the user to the top of the Featured Jobs
   // section so the freshly-filtered results are immediately visible. Runs in a
   // passive effect (after the new results have rendered) and only when the
-  // effective filter state actually changed — never on normal scrolling, which
+  // effective filter state actually changed - never on normal scrolling, which
   // does not alter `filters`/`activeCategory`. The initial render is skipped so
   // the homepage is not auto-scrolled on first load.
   useEffect(() => {

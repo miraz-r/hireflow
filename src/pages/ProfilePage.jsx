@@ -122,7 +122,7 @@ export default function ProfilePage() {
 }
 
 /* ======================================================================= */
-/* Profile tab — contact, role fields, avatar, resume, social links         */
+/* Profile tab - contact, role fields, avatar, resume, social links         */
 /* ======================================================================= */
 function ProfileTab({ user }) {
   const navigate = useNavigate();
@@ -226,7 +226,7 @@ function ProfileTab({ user }) {
     } catch (err) {
       const fieldErrorsData = err?.data?.fieldErrors;
       if (fieldErrorsData && Object.keys(fieldErrorsData).length > 0) {
-        // Field-mappable validation errors live under their inputs only —
+        // Field-mappable validation errors live under their inputs only -
         // don't repeat them in a top-level alert.
         setFieldErrors(fieldErrorsData);
         setError('');
@@ -491,7 +491,7 @@ function ProfileTab({ user }) {
       {!profile && !loading && (
         <div className="card profile-welcome">
           <p>
-            Welcome! You haven't set up your profile yet. Fill in your details below —
+            Welcome! You haven't set up your profile yet. Fill in your details below, and
             you can edit them anytime.
           </p>
         </div>
@@ -764,7 +764,7 @@ function ProfileTab({ user }) {
         </div>
       </form>
 
-      {/* Delete profile — visually separated, destructive action */}
+      {/* Delete profile - visually separated, destructive action */}
       {profile && (
         <div className="profile-danger-zone">
           <div className="profile-danger-header">
@@ -827,7 +827,7 @@ function ProfileTab({ user }) {
 }
 
 /* ======================================================================= */
-/* Post a job tab — recruiter-only                                          */
+/* Post a job tab - recruiter-only                                          */
 /* ======================================================================= */
 function PostJobTab() {
   const [saving, setSaving] = useState(false);
@@ -1007,7 +1007,7 @@ const formatSalary = (salary) => {
 };
 
 /* ======================================================================= */
-/* Jobseeker Applications tab — the current jobseeker's own applications    */
+/* Jobseeker Applications tab - the current jobseeker's own applications    */
 /* ======================================================================= */
 function JobseekerApplicationsTab() {
   const [applications, setApplications] = useState(null);
@@ -1082,7 +1082,7 @@ function JobseekerApplicationsTab() {
                 <div className="app-card-info">
                   <h3 className="app-card-title">{app.job?.title || 'Job'}</h3>
                   <p className="app-card-company">
-                    {app.job?.company || '—'}
+                    {app.job?.company || '-'}
                     {app.job?.location ? <span className="app-card-sep" aria-hidden="true">·</span> : null}
                     {app.job?.location || ''}
                   </p>
@@ -1115,7 +1115,7 @@ function JobseekerApplicationsTab() {
 }
 
 /* ======================================================================= */
-/* Saved Jobs tab — the current jobseeker's saved jobs                      */
+/* Saved Jobs tab - the current jobseeker's saved jobs                      */
 /* ======================================================================= */
 function SavedJobsTab() {
   const [savedJobs, setSavedJobs] = useState(null);

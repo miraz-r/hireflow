@@ -1,5 +1,5 @@
 /* =========================================================
-   ProfilePage — HireFlow user profile (view/edit)
+   ProfilePage - HireFlow user profile (view/edit)
    Uses the shared design tokens from index.css.
    ========================================================= */
 
@@ -675,7 +675,7 @@ label.btn.disabled {
   text-decoration: none;
 }
 
-/* ---------- Applications (recruiter legacy — kept for old application-card) ---------- */
+/* ---------- Applications (recruiter legacy - kept for old application-card) ---------- */
 .applications-empty {
   text-align: center;
   padding: var(--space-12) var(--space-6);
@@ -688,7 +688,7 @@ label.btn.disabled {
 }
 
 /* ================================================================
-   RECRUITER DASHBOARD — Premium Hiring Workspace
+   RECRUITER DASHBOARD - Premium Hiring Workspace
    ================================================================ */
 
 /* ── Dashboard Container ───────────────────────────────────────── */
@@ -843,7 +843,7 @@ label.btn.disabled {
   min-width: 0;
 }
 
-/* Color treatments — subtle, restrained */
+/* Color treatments - subtle, restrained */
 .rc-metric--blue {
   border-top: 2px solid var(--color-brand-primary);
 }
@@ -913,7 +913,7 @@ label.btn.disabled {
   align-items: start;
 }
 
-/* ── Hiring Pipeline — Hero Panel ─────────────────────────────── */
+/* ── Hiring Pipeline - Hero Panel ─────────────────────────────── */
 .rc-pipeline {
   padding: var(--space-6);
   border: 1px solid var(--color-border-default);
@@ -1471,7 +1471,7 @@ label.btn.disabled {
   to { transform: rotate(360deg); }
 }
 
-/* Actions cell — "View" trigger for applicant details */
+/* Actions cell - "View" trigger for applicant details */
 .rc-th--actions {
   text-align: right;
 }
@@ -1486,7 +1486,7 @@ label.btn.disabled {
   flex-shrink: 0;
 }
 
-/* (application-status classes removed — see app-status system below) */
+/* (application-status classes removed - see app-status system below) */
 
 /* ── Legacy Application Card (jobseeker views) ─────────────────── */
 .application-card {
@@ -1619,11 +1619,11 @@ label.btn.disabled {
   line-height: var(--line-height-relaxed);
 }
 
-/* ── Jobseeker Applications — "My Applications" workspace ─────────
+/* ── Jobseeker Applications - "My Applications" workspace ─────────
    Card composition:
-   · Row 1 — avatar, job title (strongest) + company/location,
+   · Row 1 - avatar, job title (strongest) + company/location,
              status pill aligned to the right.
-   · Row 2 — hairline divider, applied date on the left and the
+   · Row 2 - hairline divider, applied date on the left and the
              "View job" action on the right. */
 .app-list,
 .js-saved-list {
@@ -1741,7 +1741,7 @@ label.btn.disabled {
   text-overflow: ellipsis;
 }
 
-/* ── Status — restrained, scannable pill with a state dot ───────
+/* ── Status - restrained, scannable pill with a state dot ───────
    Every status shares the same pill + dot shape; only the tone
    shifts. Most states use a soft tinted fill. Only the terminal,
    best outcome (hired) uses a solid brand fill so the list stays
@@ -1829,7 +1829,7 @@ label.btn.disabled {
   flex-shrink: 0;
 }
 
-/* ── Empty state — intentional, calm, on the card surface ─────── */
+/* ── Empty state - intentional, calm, on the card surface ─────── */
 .app-empty-state {
   display: flex;
   flex-direction: column;
@@ -2005,7 +2005,7 @@ label.btn.disabled {
     flex-wrap: wrap;
   }
 
-  /* Recruiter dashboard — tablet */
+  /* Recruiter dashboard - tablet */
   .rc-metrics {
     grid-template-columns: 1fr 1fr;
   }
@@ -2130,7 +2130,7 @@ label.btn.disabled {
     font-size: var(--font-size-base);
   }
 
-  /* Recruiter dashboard — narrow viewport */
+  /* Recruiter dashboard - narrow viewport */
   .rc-metrics {
     grid-template-columns: 1fr;
   }
@@ -2353,7 +2353,7 @@ label.btn.disabled {
   animation: rcDetailIn 200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Focus target only — never paint a ring around the whole dialog. */
+/* Focus target only - never paint a ring around the whole dialog. */
 .rc-detail:focus {
   outline: none;
 }

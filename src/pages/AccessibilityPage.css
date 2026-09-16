@@ -1,5 +1,5 @@
 /* =========================================================
-   AccessibilityPage — modern inclusion/product design
+   AccessibilityPage - modern inclusion/product design
    ========================================================= */
 
 .accessibility-page {
@@ -144,7 +144,7 @@
   max-width: 680px;
 }
 
-/* What we do — practices grid */
+/* What we do - practices grid */
 .accessibility-practices-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
