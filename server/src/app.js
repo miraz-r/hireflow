@@ -8,6 +8,7 @@ const profileRoutes = require('./routes/profile.routes');
 const jobRoutes = require('./routes/job.routes');
 const applicationRoutes = require('./routes/application.routes');
 const savedJobRoutes = require('./routes/savedJob.routes');
+const emailChangeRoutes = require('./routes/emailChange.routes');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -34,6 +35,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/saved-jobs', savedJobRoutes);
+app.use('/api/email-change', emailChangeRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

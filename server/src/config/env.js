@@ -18,4 +18,6 @@ module.exports = {
   jwtSecret: required('JWT_SECRET'),
   jwtExpiresIn: optional('JWT_EXPIRES_IN', '7d'),
   bcryptRounds: parseInt(optional('BCRYPT_ROUNDS', '12'), 10),
+  resendApiKey: optional('RESEND_API_KEY', ''),
+  emailFrom: optional('EMAIL_FROM', 'HireFlow <onboarding@resend.dev>'),
 };
