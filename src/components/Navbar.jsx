@@ -151,7 +151,13 @@ export default function Navbar() {
     setMenuOpen(false);
     try {
       await toggleRole(targetRole);
-      window.location.reload();
+      // A role switch always lands on the homepage at the very top. Replace
+      // the current entry with "/" so the reload isn't tied to whatever page
+      // the user was on, and suspend the browser's native scroll restoration
+      // for this reload so it can't drop them back to a previous scroll
+      // offset. ScrollToTop re-enables native restoration on the fresh mount.
+      history.scrollRestoration = 'manual';
+      window.location.replace('/');
     } catch {
       // role unchanged on failure
     }

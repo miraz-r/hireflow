@@ -42,7 +42,14 @@ export default function ScrollToTop() {
     prevRestoreKey.current = key;
 
     if (pathname !== '/') return;
-    if (!isRouterNavigation) return;
+    if (!isRouterNavigation) {
+      // Fresh load of "/" (initial visit, hard refresh, or the role-switch
+      // reload). The browser settles scroll natively here; re-enable native
+      // restoration so this document's entry behaves normally again instead
+      // of keeping the manual mode set right before a role-switch reload.
+      history.scrollRestoration = 'auto';
+      return;
+    }
 
     if (state?.restoreJobsScroll != null) {
       jobsScrollRestored.current = true;
