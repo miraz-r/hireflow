@@ -1449,7 +1449,7 @@ label.btn.disabled {
 
 .rc-status-select:focus {
   outline: none;
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
 }
 
 .rc-status-select:disabled {

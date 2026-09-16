@@ -236,8 +236,8 @@ body {
   color: var(--color-brand-primary);
 }
 
-/* Focus Visible */
-:focus-visible {
+/* Focus Visible – form controls get their own subtler ring below */
+:focus-visible:not(input):not(textarea):not(select):not(button):not([role="button"]):not(.btn) {
   outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
 }
@@ -566,7 +566,7 @@ input, textarea, select {
 .input:focus {
   outline: none;
   border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
 }
 
 /* ---------- Card Styles ---------- */
@@ -729,8 +729,9 @@ video {
 [data-theme="dark"] input:focus,
 [data-theme="dark"] textarea:focus,
 [data-theme="dark"] select:focus {
+  outline: none;
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
   background-color: var(--color-bg-elevated);
 }
 

@@ -446,7 +446,7 @@
 
 .res-newsletter-input--error:focus {
   border-color: var(--color-error);
-  box-shadow: 0 0 0 3px var(--color-error-bg);
+  box-shadow: 0 0 0 1px var(--color-error-bg);
 }
 
 .res-newsletter-error {

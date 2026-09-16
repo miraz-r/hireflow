@@ -36,7 +36,7 @@
 /* Match .auth-input:focus ring on the composite control */
 .phone-country-input:focus-within .phone-country-control {
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
 }
 
 /* Error state mirrors .auth-input.input-error */
@@ -79,8 +79,8 @@
 }
 
 .phone-country-trigger:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: -2px;
+  outline: 1px solid var(--color-brand-primary);
+  outline-offset: -1px;
 }
 
 .phone-country-flag {
@@ -216,7 +216,7 @@
 
 .phone-country-search input:focus {
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
 }
 
 .phone-country-list {
