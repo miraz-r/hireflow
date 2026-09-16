@@ -13,6 +13,7 @@ import { STATUS_LABELS } from '../components/RecruiterDashboard';
 import Toast from '../components/Toast';
 import Avatar from '../components/Avatar';
 import ConfirmModal from '../components/ConfirmModal';
+import ProfileTabs from '../components/ProfileTabs';
 import './ProfilePage.css';
 
 const AVATAR_BASE = 'http://localhost:5000';
@@ -61,57 +62,10 @@ export default function ProfilePage() {
     return null;
   }
 
-  const setTab = (next) => setSearchParams(next === 'profile' ? {} : { tab: next });
-
   return (
     <div className="profile-page">
       <div className="container">
-        <div className="profile-tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'profile'}
-            className={`profile-tab ${tab === 'profile' ? 'active' : ''}`}
-            onClick={() => setTab('profile')}
-          >
-            Profile
-          </button>
-          {user.role === 'jobseeker' && (
-            <>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === 'my-applications'}
-                className={`profile-tab ${tab === 'my-applications' ? 'active' : ''}`}
-                onClick={() => setTab('my-applications')}
-              >
-                Applications
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === 'saved-jobs'}
-                className={`profile-tab ${tab === 'saved-jobs' ? 'active' : ''}`}
-                onClick={() => setTab('saved-jobs')}
-              >
-                Saved Jobs
-              </button>
-            </>
-          )}
-          {user.role === 'recruiter' && (
-            <>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === 'post'}
-                className={`profile-tab ${tab === 'post' ? 'active' : ''}`}
-                onClick={() => setTab('post')}
-              >
-                Post a job
-              </button>
-            </>
-          )}
-        </div>
+        <ProfileTabs role={user.role} />
 
         {tab === 'post' ? (
           <PostJobTab />
