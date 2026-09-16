@@ -89,8 +89,16 @@ export function AuthProvider({ children }) {
     });
   };
 
+  // Reload the signed-in user from the backend (e.g. after an email change is
+  // verified) so everything bound to `user` reflects the fresh account state.
+  const refreshUser = async () => {
+    const res = await apiGet('/auth/me');
+    setUser(res.data);
+    return res.data;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, toggleRole, logout, setUserFullName, setUserAvatarUrl }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, toggleRole, logout, setUserFullName, setUserAvatarUrl, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

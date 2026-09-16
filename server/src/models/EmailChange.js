@@ -44,7 +44,7 @@ const emailChangeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Housekeeping: drop requests whose 24h window has passed.
+// Housekeeping: drop requests whose 1h window has passed.
 emailChangeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 emailChangeSchema.set('toJSON', {

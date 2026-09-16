@@ -63,7 +63,7 @@ const sendEmailChangeVerification = async ({ to, token }) => {
   const body = `
     <p>You requested to change the email address on your HireFlow account to:</p>
     <p><strong>${escapeHtml(to)}</strong></p>
-    <p>To confirm the change, open the link below. It is valid for 24 hours.</p>
+    <p>To confirm the change, open the link below. It is valid for 1 hour.</p>
     <p style="text-align:center">
       <a href="${verifyUrl}" style="display:inline-block;background:#111;color:#fff;padding:12px 20px;border-radius:6px;text-decoration:none">Verify new email</a>
     </p>

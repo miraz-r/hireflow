@@ -5,7 +5,7 @@ const EmailChange = require('../models/EmailChange');
 const emailService = require('../services/email.service');
 
 const TOKEN_BYTES = 32;
-const EMAIL_CHANGE_TTL_MS = 24 * 60 * 60 * 1000;
+const EMAIL_CHANGE_TTL_MS = 60 * 60 * 1000;
 
 const generateToken = () => crypto.randomBytes(TOKEN_BYTES).toString('hex');
 
@@ -75,8 +75,13 @@ const requestEmailChange = async (req, res, next) => {
     try {
       await emailService.sendEmailChangeVerification({ to: newEmail, token });
     } catch (err) {
+      // Remove the pending request so the user can retry cleanly. Log the real
+      // cause server-side but only expose a safe, generic reason to the client.
       await EmailChange.deleteMany({ userId: user._id }).catch(() => {});
-      return next(err);
+      console.error(`[email-change] failed to send verification email for user ${user._id}:`, err);
+      return res.status(502).json({
+        error: 'Could not send the verification email. Please try again.',
+      });
     }
 
     return res.status(201).json({
@@ -199,7 +204,10 @@ const resendVerification = async (req, res, next) => {
         token,
       });
     } catch (err) {
-      return next(err);
+      console.error(`[email-change] failed to resend verification email for user ${req.user.id}:`, err);
+      return res.status(502).json({
+        error: 'Could not send the verification email. Please try again.',
+      });
     }
 
     return res.status(200).json({
@@ -236,6 +244,36 @@ const cancelEmailChange = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/email-change
+ * Returns whether the current user has a pending, unexpired email change
+ * request. Exposes only safe information (new email + expiry) — never the
+ * token hash or any internal fields.
+ */
+const getPendingEmailChange = async (req, res, next) => {
+  try {
+    const request = await EmailChange.findOne({
+      userId: req.user.id,
+      consumedAt: null,
+      expiresAt: { $gt: new Date() },
+    })
+      .select('newEmail expiresAt')
+      .lean();
+
+    if (!request) {
+      return res.status(200).json({ pending: false });
+    }
+
+    return res.status(200).json({
+      pending: true,
+      newEmail: request.newEmail,
+      expiresAt: request.expiresAt,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   requestEmailChange,
   requestEmailChangeValidators,
@@ -243,4 +281,5 @@ module.exports = {
   verifyEmailChangeValidators,
   resendVerification,
   cancelEmailChange,
+  getPendingEmailChange,
 };

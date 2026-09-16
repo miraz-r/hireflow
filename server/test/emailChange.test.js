@@ -119,6 +119,21 @@ describe('POST /api/email-change (request email change)', () => {
     assert.equal(res.body.token, undefined);
   });
 
+  it('sets the verification expiry to exactly 1 hour', async () => {
+    const user = await makeUser('one-hour-expiry@example.com');
+    const res = await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'one-hour-expiry-new@example.com' },
+    });
+
+    assert.equal(res.status, 201);
+    const diff = Date.parse(res.body.expiresAt) - Date.now();
+    assert.ok(
+      Math.abs(diff - 60 * 60 * 1000) < 10 * 1000,
+      `expiry should be ~1 hour from creation, got diff ${diff}ms`
+    );
+  });
+
   it('requires authentication', async () => {
     const res = await request('POST', '/api/email-change', {
       body: { newEmail: 'anon@example.com' },
@@ -280,6 +295,30 @@ describe('POST /api/email-change/resend (resend verification)', () => {
     assert.equal(newRes.body.email, 'resend-fresh-new@example.com');
   });
 
+  it('resets the expiry to 1 hour on resend', async () => {
+    const user = await makeUser('resend-reset@example.com');
+    const initialRes = await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'resend-reset-new@example.com' },
+    });
+    assert.equal(initialRes.status, 201);
+    const initialExpiry = Date.parse(initialRes.body.expiresAt);
+
+    const resendRes = await request('POST', '/api/email-change/resend', {
+      token: signTokenFor(user),
+    });
+    assert.equal(resendRes.status, 200);
+    assert.ok(resendRes.body.expiresAt);
+
+    const resentExpiry = Date.parse(resendRes.body.expiresAt);
+    const diff = resentExpiry - Date.now();
+    assert.ok(
+      Math.abs(diff - 60 * 60 * 1000) < 10 * 1000,
+      `resend expiry should be ~1 hour from resend time, got diff ${diff}ms`
+    );
+    assert.ok(resentExpiry > initialExpiry, 'resend must push the expiry later');
+  });
+
   it('resends to the pending new email address', async () => {
     const user = await makeUser('resend-target@example.com');
     await request('POST', '/api/email-change', {
@@ -303,6 +342,74 @@ describe('POST /api/email-change/resend (resend verification)', () => {
       token: signTokenFor(user),
     });
     assert.equal(res.status, 404);
+  });
+});
+
+describe('second email change while a request is pending', () => {
+  it('replaces the pending request and invalidates the previous token', async () => {
+    const user = await makeUser('replace-a@example.com');
+
+    await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'replace-b-first@example.com' },
+    });
+    const firstToken = lastToken();
+
+    const replaceRes = await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'replace-c-second@example.com' },
+    });
+    assert.equal(replaceRes.status, 201);
+    assert.equal(replaceRes.body.newEmail, 'replace-c-second@example.com');
+
+    // Only one active pending request exists per user.
+    assert.equal(await EmailChange.countDocuments({ userId: user._id }), 1);
+
+    // The previous request's token must no longer work.
+    const oldVerify = await request('POST', '/api/email-change/verify-email', {
+      token: signTokenFor(user),
+      body: { token: firstToken },
+    });
+    assert.equal(oldVerify.status, 400);
+
+    // Pending status reflects the replacement request.
+    const statusRes = await request('GET', '/api/email-change', {
+      token: signTokenFor(user),
+    });
+    assert.equal(statusRes.status, 200);
+    assert.equal(statusRes.body.pending, true);
+    assert.equal(statusRes.body.newEmail, 'replace-c-second@example.com');
+
+    // The replacement token is usable and the email actually changes.
+    const newToken = lastToken();
+    const newVerify = await request('POST', '/api/email-change/verify-email', {
+      token: signTokenFor(user),
+      body: { token: newToken },
+    });
+    assert.equal(newVerify.status, 200);
+    assert.equal(newVerify.body.email, 'replace-c-second@example.com');
+  });
+
+  it('resend operates on the current pending email after a replacement', async () => {
+    const user = await makeUser('replace-resend@example.com');
+
+    await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'replace-resend-a@example.com' },
+    });
+    await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'replace-resend-b@example.com' },
+    });
+    resetEmails();
+
+    await request('POST', '/api/email-change/resend', {
+      token: signTokenFor(user),
+    });
+
+    const email = lastVerificationEmail();
+    assert.ok(email);
+    assert.equal(email.to, 'replace-resend-b@example.com');
   });
 });
 
@@ -336,6 +443,78 @@ describe('DELETE /api/email-change (cancel)', () => {
       token: signTokenFor(user),
     });
     assert.equal(res.status, 404);
+  });
+});
+
+describe('GET /api/email-change (pending status)', () => {
+  it('returns pending: false when there is no pending change', async () => {
+    const user = await makeUser('no-pending-status@example.com');
+    const res = await request('GET', '/api/email-change', {
+      token: signTokenFor(user),
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.pending, false);
+  });
+
+  it('returns the pending email and expiry when a change is active', async () => {
+    const user = await makeUser('pending-status@example.com');
+    await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'pending-status-new@example.com' },
+    });
+
+    const res = await request('GET', '/api/email-change', {
+      token: signTokenFor(user),
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.pending, true);
+    assert.equal(res.body.newEmail, 'pending-status-new@example.com');
+    assert.ok(res.body.expiresAt);
+    assert.equal(res.body.tokenHash, undefined);
+  });
+
+  it('returns pending: false for an expired request', async () => {
+    const user = await makeUser('expired-pending-status@example.com');
+    await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'expired-pending-status-new@example.com' },
+    });
+
+    await EmailChange.updateMany(
+      { userId: user._id },
+      { $set: { expiresAt: new Date(Date.now() - 60_000) } }
+    );
+
+    const res = await request('GET', '/api/email-change', {
+      token: signTokenFor(user),
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.pending, false);
+  });
+
+  it('returns pending: false after the token is consumed', async () => {
+    const user = await makeUser('consumed-pending-status@example.com');
+    await request('POST', '/api/email-change', {
+      token: signTokenFor(user),
+      body: { newEmail: 'consumed-pending-status-new@example.com' },
+    });
+    const rawToken = lastToken();
+
+    await request('POST', '/api/email-change/verify-email', {
+      token: signTokenFor(user),
+      body: { token: rawToken },
+    });
+
+    const res = await request('GET', '/api/email-change', {
+      token: signTokenFor(user),
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.pending, false);
+  });
+
+  it('requires authentication', async () => {
+    const res = await request('GET', '/api/email-change');
+    assert.equal(res.status, 401);
   });
 });
 

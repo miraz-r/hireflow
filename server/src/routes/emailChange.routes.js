@@ -7,6 +7,7 @@ const {
   verifyEmailChangeValidators,
   resendVerification,
   cancelEmailChange,
+  getPendingEmailChange,
 } = require('../controllers/emailChange.controller');
 
 const router = express.Router();
@@ -15,6 +16,7 @@ const router = express.Router();
 // derived exclusively from the JWT via the authenticate middleware.
 router.use(authenticate);
 
+router.get('/', getPendingEmailChange);
 router.post('/', requestEmailChangeValidators, requestEmailChange);
 router.post('/verify-email', verifyEmailChangeValidators, verifyEmailChange);
 router.post('/resend', resendVerification);

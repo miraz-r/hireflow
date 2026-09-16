@@ -21,6 +21,7 @@ import BackToTop from './components/BackToTop';
 import Reveal from './components/Reveal';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import ProfilePage from './pages/ProfilePage';
 import JobDetailPage from './pages/JobDetailPage';
 import ApplyPage from './pages/ApplyPage';
@@ -276,6 +277,7 @@ export default function App() {
           } />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/jobs/:id" element={<JobDetailPage />} />
           <Route path="/jobs/:id/apply" element={<ApplyPage />} />

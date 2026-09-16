@@ -1,0 +1,147 @@
+/* =========================================================
+   VerifyEmailPage - single, centered email verification state
+   Uses the shared design tokens from index.css.
+   ========================================================= */
+
+.verify-page {
+  min-height: calc(100vh - 68px);
+  min-height: calc(100dvh - 68px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  background:
+    radial-gradient(1200px 600px at 0% 0%, rgba(79, 70, 229, 0.06), transparent 60%),
+    radial-gradient(900px 500px at 100% 100%, rgba(124, 58, 237, 0.05), transparent 60%),
+    var(--color-bg-primary);
+}
+
+.verify-card {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-8);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+}
+
+.verify-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-brand-primary-light);
+  color: var(--color-brand-primary);
+}
+
+.verify-icon--success {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.verify-icon--error {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.verify-icon--info {
+  background-color: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.verify-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border-strong);
+  border-top-color: var(--color-brand-primary);
+  border-radius: 50%;
+  animation: verify-spin 0.6s linear infinite;
+}
+
+@keyframes verify-spin {
+  to { transform: rotate(360deg); }
+}
+
+.verify-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin: 0;
+}
+
+.verify-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+  max-width: 38ch;
+  overflow-wrap: break-word;
+}
+
+.verify-desc strong {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  word-break: break-all;
+}
+
+.verify-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .verify-page {
+    min-height: calc(100vh - 60px);
+    min-height: calc(100dvh - 60px);
+  }
+}
+
+@media (max-width: 640px) {
+  .verify-page {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .verify-card {
+    padding: var(--space-6) var(--space-5);
+  }
+}
+
+@media (max-width: 360px) {
+  .verify-page {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .verify-card {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .verify-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .verify-desc {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verify-spinner {
+    animation: none;
+  }
+}
