@@ -401,6 +401,13 @@ label.btn.disabled {
   gap: var(--space-3);
 }
 
+/* Dark mode: the native calendar icon on the Experience date inputs is a
+   dark glyph by default; invert it so it reads as a light control on the
+   dark input surface. */
+[data-theme="dark"] .profile-exp-editor input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 .profile-empty {
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
