@@ -7,6 +7,10 @@
  * A premium, art-directed, modern visual language
  * ============================================ */
 :root {
+  /* Native controls (date inputs, selects, form controls, scrollbars)
+     follow the light theme by default */
+  color-scheme: light;
+
   /* Colors - Premium Canvas Hierarchy
    * The whole homepage sits on ONE cool-neutral off-white surface.
    * The differences are subtle, not contrasting panels.
@@ -160,6 +164,10 @@
 
 /* ---------- Dark Theme Overrides ---------- */
 [data-theme="dark"] {
+  /* Native controls (date inputs, selects, form controls, scrollbars)
+     follow the active dark theme */
+  color-scheme: dark;
+
   /* Surface hierarchy: page → section → card → elevated → input → dropdown → modal */
   --color-bg-primary: #0c1222;
   --color-bg-secondary: #151d2e;
@@ -171,7 +179,7 @@
   /* Text hierarchy */
   --color-text-primary: #f1f5f9;
   --color-text-secondary: #94a3b8;
-  --color-text-tertiary: #64748b;
+  --color-text-tertiary: #8290a5;
   --color-text-inverse: #0c1222;
   --color-text-hover: #818cf8;
 

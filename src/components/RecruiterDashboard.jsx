@@ -176,7 +176,7 @@ export default function RecruiterDashboard() {
     </>
   );
 
-  if (total === 0 && !error) {
+  if (applications.length === 0 && !error) {
     return (
       <div className="rc-dashboard">
         <div className="rc-header">
@@ -253,7 +253,7 @@ export default function RecruiterDashboard() {
               return w > 0 ? <div key={s} className="rc-metric-dist-seg" style={{ flex: w, backgroundColor: stageColors[s] }} /> : null;
             })}
             {total > 0 && (
-              <div className="rc-metric-dist-seg" style={{ flex: metrics.rejected > 0 ? (metrics.rejected / total) * 100 : 0.5, backgroundColor: '#E5E7EB' }} />
+              <div className="rc-metric-dist-seg" style={{ flex: metrics.rejected > 0 ? (metrics.rejected / total) * 100 : 0.5, backgroundColor: 'var(--color-border-default)' }} />
             )}
           </div>
         </div>
@@ -479,6 +479,11 @@ export default function RecruiterDashboard() {
               </div>
             </div>
           ))}
+          {filtered.length === 0 && !error && (
+            <div className="rc-table-empty" role="status">
+              No applications match the selected filter. Try 'All jobs' or another job.
+            </div>
+          )}
         </div>
       </div>
 
