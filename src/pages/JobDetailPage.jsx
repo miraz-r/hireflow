@@ -27,7 +27,6 @@ export default function JobDetailPage({ onSignInPrompt }) {
   const [loading, setLoading] = useState(true);
   const [applied, setApplied] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState(null);
-  const [checkingStatus, setCheckingStatus] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savingJob, setSavingJob] = useState(false);
   const [checkingSaved, setCheckingSaved] = useState(false);
@@ -62,11 +61,9 @@ export default function JobDetailPage({ onSignInPrompt }) {
     if (!user || user.role !== 'jobseeker') {
       setApplied(false);
       setApplicationStatus(null);
-      setCheckingStatus(false);
       return;
     }
     let cancelled = false;
-    setCheckingStatus(true);
     api
       .get(`/applications/${job.id}/me`, { timeout: 4000 })
       .then((res) => {
@@ -81,9 +78,6 @@ export default function JobDetailPage({ onSignInPrompt }) {
       })
       .catch(() => {
         if (!cancelled) setApplied(false);
-      })
-      .finally(() => {
-        if (!cancelled) setCheckingStatus(false);
       });
     return () => {
       cancelled = true;

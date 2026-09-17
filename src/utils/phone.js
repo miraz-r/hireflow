@@ -15,7 +15,7 @@ const regionNames =
     ? new Intl.DisplayNames(['en'], { type: 'region' })
     : null;
 
-export function countryName(iso2) {
+function countryName(iso2) {
   if (!iso2) return '';
   if (regionNames) {
     const name = regionNames.of(iso2);

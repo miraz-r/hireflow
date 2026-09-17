@@ -49,98 +49,6 @@
   margin-top: var(--space-1);
 }
 
-/* ---------- Role selector ---------- */
-
-/* Fieldset reset so the legend + disabled state work correctly */
-.auth-role {
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-.auth-role[disabled] .auth-role-option {
-  pointer-events: none;
-  opacity: 0.55;
-}
-
-.auth-role-options {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
-/* Each option card - styled as a selectable card, not a plain radio */
-.auth-role-option {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex: 1;
-  min-width: 130px;
-  padding: var(--space-2) var(--space-3);
-  border: 1.5px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    background-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-  background-color: var(--color-bg-primary);
-}
-
-.auth-role-option:hover {
-  border-color: var(--color-brand-primary);
-  background-color: rgba(79, 70, 229, 0.04);
-}
-
-.auth-role-option--active {
-  border-color: var(--color-brand-primary);
-  background-color: rgba(79, 70, 229, 0.08);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
-}
-
-/* Visually hide the native radio but keep it accessible */
-.auth-role-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.auth-role-icon {
-  flex-shrink: 0;
-  color: var(--color-text-tertiary);
-  transition: color var(--transition-fast);
-}
-
-.auth-role-option--active .auth-role-icon {
-  color: var(--color-brand-primary);
-}
-
-.auth-role-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.auth-role-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-tight);
-}
-
-.auth-role-desc {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-  line-height: var(--line-height-normal);
-}
-
 /* ---------- Password strength hint ---------- */
 .auth-hint {
   display: block;
@@ -153,24 +61,6 @@
 .auth-hint--weak  { color: var(--color-error); }
 .auth-hint--ok    { color: var(--color-warning, #d97706); }
 .auth-hint--strong { color: var(--color-success, #059669); }
-
-/* ---------- Responsive tweaks for the role cards ---------- */
-@media (max-width: 480px) {
-  .auth-role-options {
-    flex-direction: column;
-  }
-
-  .auth-role-option {
-    min-width: 0;
-  }
-}
-
-@media (max-width: 360px) {
-  .auth-role-option {
-    min-width: 0;
-    padding: var(--space-2);
-  }
-}
 
 /* ---------- Tablet/mobile: register form pane padding ---------- */
 @media (max-width: 960px) {
@@ -214,18 +104,6 @@
 
   .auth-footnote {
     margin-top: var(--space-2);
-    font-size: 10px;
-  }
-
-  .auth-role-option {
-    padding: var(--space-2);
-  }
-
-  .auth-role-title {
-    font-size: var(--font-size-xs);
-  }
-
-  .auth-role-desc {
     font-size: 10px;
   }
 }

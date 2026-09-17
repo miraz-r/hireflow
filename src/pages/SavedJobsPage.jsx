@@ -6,8 +6,6 @@ import ProfileTabs from '../components/ProfileTabs';
 import { formatSalary } from '../utils/salary';
 import './SavedJobsPage.css';
 
-const AVATAR_BASE = 'http://localhost:5000';
-
 export default function SavedJobsPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getResourceBySlug, getRelatedResources } from '../data/resources';
 import './ResourceDetailPage.css';
 
@@ -16,7 +16,6 @@ const ChevronIcon = () => (
 
 export default function ResourceDetailPage() {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const resource = getResourceBySlug(slug);
   const related = getRelatedResources(slug, 3);
 

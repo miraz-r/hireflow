@@ -506,13 +506,6 @@
   max-width: 420px;
 }
 
-.auth-visual-pager {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  gap: 6px;
-  margin-top: var(--space-8);
-}
 /* =========================================================
    Responsive
    ========================================================= */
