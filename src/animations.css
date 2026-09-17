@@ -8,14 +8,20 @@
 .reveal {
   opacity: 0;
   transform: translateY(20px);
+  visibility: hidden;
   transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.6s;
   will-change: opacity, transform;
 }
 
 .reveal--in {
   opacity: 1;
   transform: translateY(0);
+  visibility: visible;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0s;
 }
 
 /* --- CSS-only scroll-driven reveal (animation-timeline: view) ---
@@ -53,6 +59,7 @@
   .reveal-scroll {
     opacity: 1 !important;
     transform: none !important;
+    visibility: visible !important;
     transition: none !important;
     animation: none !important;
   }
