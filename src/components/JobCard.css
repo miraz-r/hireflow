@@ -77,6 +77,10 @@
 
 /* Save Button */
 .save-btn {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;

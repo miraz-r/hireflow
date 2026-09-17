@@ -36,18 +36,6 @@ export default function JobCard({ job, isSaved, onSave, showSave = true }) {
               <p className="job-posted">{job.postedAt}</p>
             </div>
           </div>
-          {showSave && (
-            <button
-              className={`save-btn ${isSaved ? 'saved' : ''}`}
-              onClick={handleSave}
-              aria-label={isSaved ? 'Remove from saved' : 'Save job'}
-              aria-pressed={isSaved}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-              </svg>
-            </button>
-          )}
         </div>
 
         <div className="job-body">
@@ -90,6 +78,19 @@ export default function JobCard({ job, isSaved, onSave, showSave = true }) {
           <span className="experience-badge">{job.experienceLevel}</span>
         </div>
       </Link>
+      {showSave && (
+        <button
+          type="button"
+          className={`save-btn ${isSaved ? 'saved' : ''}`}
+          onClick={handleSave}
+          aria-label={isSaved ? 'Remove from saved' : 'Save job'}
+          aria-pressed={isSaved}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
+      )}
     </article>
   );
 }
