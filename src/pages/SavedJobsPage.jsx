@@ -21,7 +21,7 @@ const formatSalary = (salary) => {
 };
 
 export default function SavedJobsPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const navigate = useNavigate();
   const [savedJobs, setSavedJobs] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -41,13 +41,15 @@ export default function SavedJobsPage() {
       const res = await apiGet('/saved-jobs');
       setSavedJobs(res.data?.savedJobs || []);
     } catch (err) {
-      if (err.status !== 401) {
-        setError(err?.message || 'Unable to load your saved jobs.');
+      if (err.status === 401) {
+        logout();
+        return;
       }
+      setError(err?.message || 'Unable to load your saved jobs.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [logout]);
 
   useEffect(() => {
     if (user && user.role === 'jobseeker') {

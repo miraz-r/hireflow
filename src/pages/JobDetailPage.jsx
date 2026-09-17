@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchJobById } from '../utils/jobsApi';
@@ -10,10 +10,18 @@ import './JobDetailPage.css';
 const formatSalary = (salary) => {
   if (!salary || (salary.min === undefined && salary.max === undefined)) return 'Salary on application';
   if (salary.period === 'hourly') {
-    return `$${salary.min}–$${salary.max}/hr`;
+    if (salary.min !== undefined && salary.max !== undefined) {
+      return `$${salary.min}–$${salary.max}/hr`;
+    }
+    if (salary.min !== undefined) return `From $${salary.min}/hr`;
+    return `Up to $${salary.max}/hr`;
   }
   const fmt = (n) => (n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`);
-  return `${fmt(salary.min)} – ${fmt(salary.max)}`;
+  if (salary.min !== undefined && salary.max !== undefined) {
+    return `${fmt(salary.min)} – ${fmt(salary.max)}`;
+  }
+  if (salary.min !== undefined) return `From ${fmt(salary.min)}`;
+  return `Up to ${fmt(salary.max)}`;
 };
 
 const STATUS_LABELS = {
@@ -49,6 +57,7 @@ export default function JobDetailPage() {
   const [checkingSaved, setCheckingSaved] = useState(false);
 
   const isJobseeker = user?.role === 'jobseeker';
+  const notFoundTimerRef = useRef(null);
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -57,11 +66,18 @@ export default function JobDetailPage() {
       setJob(data);
       setLoading(false);
       if (!data) {
-        setTimeout(() => navigate('/', { replace: true }), 2000);
+        notFoundTimerRef.current = setTimeout(() => {
+          notFoundTimerRef.current = null;
+          navigate('/', { replace: true });
+        }, 2000);
       }
     });
     return () => {
       cancelled = true;
+      if (notFoundTimerRef.current) {
+        clearTimeout(notFoundTimerRef.current);
+        notFoundTimerRef.current = null;
+      }
     };
   }, [id, navigate]);
 

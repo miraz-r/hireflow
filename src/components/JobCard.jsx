@@ -11,12 +11,23 @@ export default function JobCard({ job, isSaved, onSave }) {
   };
 
   const formatSalary = (salary) => {
+    if (!salary || (salary.min === undefined && salary.max === undefined)) return 'Salary on application';
     if (salary.period === 'hourly') {
-      return `$${salary.min}–$${salary.max}/hr`;
+      if (salary.min !== undefined && salary.max !== undefined) {
+        return `$${salary.min}–$${salary.max}/hr`;
+      }
+      if (salary.min !== undefined) return `From $${salary.min}/hr`;
+      return `Up to $${salary.max}/hr`;
     }
     const formatNum = (n) => n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`;
-    return `${formatNum(salary.min)} – ${formatNum(salary.max)}`;
+    if (salary.min !== undefined && salary.max !== undefined) {
+      return `${formatNum(salary.min)} – ${formatNum(salary.max)}`;
+    }
+    if (salary.min !== undefined) return `From ${formatNum(salary.min)}`;
+    return `Up to ${formatNum(salary.max)}`;
   };
+
+  const skills = Array.isArray(job.skills) ? job.skills : [];
 
   const getWorkTypeBadge = (type) => {
     const variants = { Remote: 'success', Hybrid: 'primary', 'On-site': 'neutral' };
@@ -83,11 +94,11 @@ export default function JobCard({ job, isSaved, onSave }) {
 
         <div className="job-footer">
           <div className="skills-list">
-            {job.skills.slice(0, 3).map(skill => (
+            {skills.slice(0, 3).map(skill => (
               <span key={skill} className="skill-tag">{skill}</span>
             ))}
-            {job.skills.length > 3 && (
-              <span className="skill-more">+{job.skills.length - 3}</span>
+            {skills.length > 3 && (
+              <span className="skill-more">+{skills.length - 3}</span>
             )}
           </div>
           <span className="experience-badge">{job.experienceLevel}</span>
