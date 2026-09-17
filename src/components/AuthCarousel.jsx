@@ -202,13 +202,12 @@ export default function AuthCarousel({ slides }) {
       </div>
 
       <div className="auth-carousel-controls">
-        <div className="auth-carousel-dots" role="tablist" aria-label="Choose slide">
+        <div className="auth-carousel-dots" role="group" aria-label="Carousel pagination">
           {slides.map((slide, i) => (
             <button
               key={`dot-${slide.id ?? i}`}
               type="button"
-              role="tab"
-              aria-selected={i === index}
+              aria-current={i === index ? 'true' : undefined}
               aria-label={`Go to slide ${i + 1}: ${slide.title}`}
               className={`auth-pager-dot ${i === index ? 'auth-pager-dot--active' : ''}`}
               onClick={() => goTo(i)}

@@ -26,11 +26,10 @@ export default function ProfileTabs({ role }) {
   };
 
   return (
-    <div className="profile-tabs" role="tablist">
+    <nav className="profile-tabs" aria-label="Account sections">
       <button
         type="button"
-        role="tab"
-        aria-selected={active === 'profile'}
+        aria-current={active === 'profile' ? 'page' : undefined}
         className={`profile-tab ${active === 'profile' ? 'active' : ''}`}
         onClick={() => go('profile')}
       >
@@ -40,8 +39,7 @@ export default function ProfileTabs({ role }) {
         <>
           <button
             type="button"
-            role="tab"
-            aria-selected={active === 'my-applications'}
+            aria-current={active === 'my-applications' ? 'page' : undefined}
             className={`profile-tab ${active === 'my-applications' ? 'active' : ''}`}
             onClick={() => go('my-applications')}
           >
@@ -49,8 +47,7 @@ export default function ProfileTabs({ role }) {
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={active === 'saved-jobs'}
+            aria-current={active === 'saved-jobs' ? 'page' : undefined}
             className={`profile-tab ${active === 'saved-jobs' ? 'active' : ''}`}
             onClick={() => go('saved-jobs')}
           >
@@ -61,14 +58,13 @@ export default function ProfileTabs({ role }) {
       {isRecruiter && (
         <button
           type="button"
-          role="tab"
-          aria-selected={active === 'post'}
+          aria-current={active === 'post' ? 'page' : undefined}
           className={`profile-tab ${active === 'post' ? 'active' : ''}`}
           onClick={() => go('post')}
         >
           Post a job
         </button>
       )}
-    </div>
+    </nav>
   );
 }
