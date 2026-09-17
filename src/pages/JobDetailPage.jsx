@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchJobById } from '../utils/jobsApi';
 import { getJobsScroll } from '../utils/jobsScrollState';
@@ -29,7 +29,13 @@ export default function JobDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromApplications = location.state?.from === 'applications';
   const handleBack = () => {
+    if (fromApplications) {
+      navigate('/profile?tab=my-applications');
+      return;
+    }
     const bookmark = getJobsScroll();
     navigate('/', { state: { restoreJobsScroll: bookmark?.scrollY ?? null } });
   };
@@ -179,7 +185,7 @@ export default function JobDetailPage() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          Back to all jobs
+          {fromApplications ? 'Back to applications' : 'Back to all jobs'}
         </button>
 
         <div className="job-detail-layout">
