@@ -5,7 +5,7 @@
 .sg-page {
   background-color: var(--color-bg-primary);
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* =========================================================
