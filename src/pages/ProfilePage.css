@@ -555,6 +555,15 @@ label.btn.disabled {
   flex-shrink: 0;
 }
 
+/* Buttons inside the outlined field must not exceed the single text line
+   height of a normal .input (font-size-sm * line-height-normal), otherwise
+   the box grows and the Email field renders taller than the adjacent input. */
+.email-field-box .btn.btn-sm {
+  height: calc(var(--font-size-sm) * var(--line-height-normal));
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .email-field-loading {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
