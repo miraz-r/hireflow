@@ -93,14 +93,14 @@ export default function SalaryGuidePage() {
             <table className="sg-table">
               <thead>
                 <tr>
-                  <th className="sg-th-role">Role</th>
-                  <th className="sg-th-level">
+                  <th scope="col" className="sg-th-role">Role</th>
+                  <th scope="col" className="sg-th-level">
                     <span className="sg-level-label">Entry-level</span>
                   </th>
-                  <th className="sg-th-level">
+                  <th scope="col" className="sg-th-level">
                     <span className="sg-level-label">Mid-level</span>
                   </th>
-                  <th className="sg-th-level">
+                  <th scope="col" className="sg-th-level">
                     <span className="sg-level-label">Senior</span>
                   </th>
                 </tr>
@@ -108,7 +108,7 @@ export default function SalaryGuidePage() {
               <tbody>
                 {SALARY_DATA.map((row) => (
                   <tr key={row.role}>
-                    <td className="sg-td-role">{row.role}</td>
+                    <th scope="row" className="sg-td-role">{row.role}</th>
                     <td className="sg-td-salary">
                       <span className="sg-salary-value">{row.entry}</span>
                       <SalaryRangeBar min={row.entryMin} max={row.entryMax} maxVal={MAX_SENIOR} />
@@ -152,7 +152,7 @@ export default function SalaryGuidePage() {
             <div className="sg-context-items">
               <div className="sg-context-item">
                 <div className="sg-context-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                 </div>
                 <div>
                   <h3 className="sg-context-title">Base salary</h3>
@@ -161,7 +161,7 @@ export default function SalaryGuidePage() {
               </div>
               <div className="sg-context-item">
                 <div className="sg-context-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                 </div>
                 <div>
                   <h3 className="sg-context-title">Bonuses</h3>
@@ -170,7 +170,7 @@ export default function SalaryGuidePage() {
               </div>
               <div className="sg-context-item">
                 <div className="sg-context-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                 </div>
                 <div>
                   <h3 className="sg-context-title">Equity</h3>
@@ -179,7 +179,7 @@ export default function SalaryGuidePage() {
               </div>
               <div className="sg-context-item">
                 <div className="sg-context-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </div>
                 <div>
                   <h3 className="sg-context-title">Benefits and flexibility</h3>
