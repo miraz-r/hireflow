@@ -279,7 +279,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/jobs/:id" element={<JobDetailPage />} />
+          <Route path="/jobs/:id" element={<JobDetailPage onSignInPrompt={() => showToast('Please sign in to save jobs')} />} />
           <Route path="/jobs/:id/apply" element={<ApplyPage />} />
           <Route path="/resources/:slug" element={<ResourceDetailPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
@@ -354,7 +354,7 @@ function HomePage({
                 </div>
               ) : filteredJobs.length > 0 ? (
                 <>
-                  <div className="jobs-grid">{paginatedJobs.map(job => (<JobCard key={job.id} job={job} isSaved={savedJobs.has(job.id)} onSave={() => onSaveJob(job.id)} />))}</div>
+                  <div className="jobs-grid">{paginatedJobs.map(job => (<JobCard key={job.id} job={job} isSaved={savedJobs.has(job.id)} showSave={user?.role !== 'recruiter'} onSave={() => onSaveJob(job.id)} />))}</div>
                   {totalPages > 1 && (
                     <nav className="pagination" aria-label="Job list pagination">
                       <button

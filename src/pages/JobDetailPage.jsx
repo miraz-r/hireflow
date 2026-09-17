@@ -17,7 +17,7 @@ const STATUS_LABELS = {
   rejected: 'Rejected',
 };
 
-export default function JobDetailPage() {
+export default function JobDetailPage({ onSignInPrompt }) {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -149,7 +149,7 @@ export default function JobDetailPage() {
 
   const handleSave = async () => {
     if (!user) {
-      navigate('/login');
+      onSignInPrompt && onSignInPrompt();
       return;
     }
     if (!isJobseeker || savingJob) return;
@@ -170,7 +170,7 @@ export default function JobDetailPage() {
     }
   };
 
-  const showSaveButton = isJobseeker;
+  const showSaveButton = user?.role !== 'recruiter';
   let saveButtonLabel = saved ? 'Saved' : 'Save';
   if (savingJob) saveButtonLabel = saved ? 'Unsaving…' : 'Saving…';
 
