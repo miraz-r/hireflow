@@ -54,6 +54,11 @@
 
 /* --- Reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
+  .eyebrow-dot,
+  .hiring-dot {
+    animation: none !important;
+  }
+
   .reveal,
   .reveal--in,
   .reveal-scroll {
