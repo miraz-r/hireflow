@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -69,6 +70,12 @@ export default function CountryPhoneInput({
         o.callingCode.includes(q)
     );
   }, [options, query]);
+
+  const listboxId = useId();
+  const activeCountry =
+    activeIndex >= 0 && activeIndex < filtered.length
+      ? filtered[activeIndex]
+      : null;
 
   const resolvedPlaceholder =
     placeholder ?? getNationalExample(country) ?? 'Phone number';
@@ -263,6 +270,7 @@ export default function CountryPhoneInput({
           className="phone-country-trigger"
           aria-haspopup="listbox"
           aria-expanded={open}
+          aria-controls={listboxId}
           aria-label={
             selected
               ? `Country: ${selected.name}, calling code ${callingCode}`
@@ -316,8 +324,6 @@ export default function CountryPhoneInput({
         createPortal(
           <div
             ref={popRef}
-            role="listbox"
-            aria-label="Select a country"
             className="phone-country-pop"
             style={
               pos
@@ -355,8 +361,16 @@ export default function CountryPhoneInput({
               <input
                 ref={searchRef}
                 type="text"
-                role="searchbox"
+                role="combobox"
                 aria-label="Search countries"
+                aria-expanded={open}
+                aria-autocomplete="list"
+                aria-controls={listboxId}
+                aria-activedescendant={
+                  activeCountry
+                    ? `country-option-${activeCountry.iso2}`
+                    : undefined
+                }
                 placeholder="Search country or code"
                 value={query}
                 onChange={(e) => {
@@ -367,7 +381,13 @@ export default function CountryPhoneInput({
               />
             </div>
 
-            <ul ref={listRef} className="phone-country-list">
+            <ul
+              ref={listRef}
+              id={listboxId}
+              role="listbox"
+              aria-label="Select a country"
+              className="phone-country-list"
+            >
               {filtered.length === 0 && (
                 <li className="phone-country-empty">No countries match</li>
               )}
@@ -378,6 +398,7 @@ export default function CountryPhoneInput({
                 return (
                   <li
                     key={option.iso2}
+                    id={`country-option-${option.iso2}`}
                     ref={(el) => {
                       optionRefs.current[i] = el;
                     }}
