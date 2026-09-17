@@ -133,6 +133,7 @@ export default function CookiePolicyPage() {
                     <a
                       href={`#${id}`}
                       className={`privacy-toc-link${activeId === id ? ' privacy-toc-link--active' : ''}`}
+                      aria-current={activeId === id ? 'true' : undefined}
                       onClick={(e) => handleTocClick(e, id)}
                     >
                       {toc}

@@ -145,6 +145,7 @@ export default function PrivacyPage() {
                     <a
                       href={`#${id}`}
                       className={`privacy-toc-link${activeId === id ? ' privacy-toc-link--active' : ''}`}
+                      aria-current={activeId === id ? 'true' : undefined}
                       onClick={(e) => handleTocClick(e, id)}
                     >
                       {heading}
