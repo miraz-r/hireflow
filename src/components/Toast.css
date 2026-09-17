@@ -59,6 +59,24 @@
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
 }
 
+/* In dark mode the toast surface becomes the near-white --color-text-primary
+   token, so the close control must use the inverse ink foreground instead of
+   the white values above to stay visible. */
+[data-theme="dark"] .toast-close {
+  color: var(--color-text-inverse);
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .toast-close:hover {
+  color: var(--color-text-inverse);
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .toast-close:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-text-inverse);
+}
+
 @media (max-width: 640px) {
   .toast {
     left: var(--space-4);

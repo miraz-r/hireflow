@@ -167,6 +167,25 @@
   color: #ffffff;
 }
 
+/* Dark mode: --color-brand-primary is a light periwinkle (#818cf8); white text
+   only reaches ~3:1 against it. Use the inverse ink foreground instead, and
+   keep the fill bright when hovering (slightly deepened with --color-brand-deep)
+   so the ink text stays above 4.5:1. The focus ring is also keyed to the ink.
+   color-mix details degrade safely to the bright fill + ink text. */
+[data-theme="dark"] .blog-category-btn--active,
+[data-theme="dark"] .blog-category-btn--active:hover {
+  color: var(--color-text-inverse);
+}
+
+[data-theme="dark"] .blog-category-btn--active:hover {
+  background-color: color-mix(in srgb, var(--color-brand-primary) 85%, var(--color-brand-deep));
+  border-color: color-mix(in srgb, var(--color-brand-primary) 85%, var(--color-brand-deep));
+}
+
+[data-theme="dark"] .blog-category-btn--active:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-text-inverse);
+}
+
 /* =========================================================
    4. GRID - article cards
    ========================================================= */

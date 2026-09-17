@@ -9,6 +9,14 @@
   isolation: isolate;
 }
 
+/* Dark mode: --color-brand-deep resolves to the same value as the page
+   background (#0c1222), flattening this strong brand panel. Use the dark
+   --color-brand-deep-hover navy-indigo instead, which matches the #1e1b4b
+   tone used by the app's other strong brand panels in dark mode. */
+[data-theme="dark"] .value-section {
+  background-color: var(--color-brand-deep-hover);
+}
+
 /* Subtle layered indigo glow */
 .value-section::before {
   content: '';

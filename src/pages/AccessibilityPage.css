@@ -178,6 +178,14 @@
   margin-bottom: var(--space-4);
 }
 
+/* Dark mode: --color-brand-primary resolves to a light periwinkle (#818cf8);
+   white numbers on it only reach ~3:1. Deepen the gradient's light end with
+   --color-brand-deep so the white numbers hold >=4.5:1 across the whole badge
+   (start #818cf8 is their worst-case background). */
+[data-theme="dark"] .accessibility-practice-number {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-brand-primary) 65%, var(--color-brand-deep)), var(--color-brand-deep-hover));
+}
+
 .accessibility-practice-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);

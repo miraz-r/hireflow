@@ -36,6 +36,14 @@
   opacity: 0.6;
 }
 
+/* Dark mode: the dots are near-black rgba(17,24,39,0.04), which is invisible
+   against the near-black page background. Re-tint them from the dark primary
+   text color so the dot grid stays a subtle, visible texture. Geometry,
+   spacing, mask and opacity rules below are unchanged. */
+[data-theme="dark"] .hero::after {
+  background-image: radial-gradient(circle at center, color-mix(in srgb, var(--color-text-primary) 6%, transparent) 1px, transparent 1.5px);
+}
+
 .hero-content {
   position: relative;
   z-index: 1;
@@ -275,6 +283,26 @@
   color: var(--color-text-inverse);
   background-color: var(--color-brand-primary-hover);
   border-color: var(--color-brand-primary-hover);
+}
+
+/* Dark mode: the eyebrow border, pulse-dot ring, tag-hover border and selected
+   shadow were hardcoded to the light indigo rgba(79,70,229,...). Re-drive them
+   from the dark brand periwinkle at the same alpha so the Hero's borders,
+   rings and hover accents stay in the dark-theme brand family. */
+[data-theme="dark"] .hero-eyebrow {
+  border-color: color-mix(in srgb, var(--color-brand-primary) 14%, transparent);
+}
+
+[data-theme="dark"] .eyebrow-dot {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand-primary) 10%, transparent);
+}
+
+[data-theme="dark"] .popular-tag:hover {
+  border-color: color-mix(in srgb, var(--color-brand-primary) 40%, transparent);
+}
+
+[data-theme="dark"] .popular-tag--selected {
+  box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--color-brand-primary) 30%, transparent);
 }
 
 @media (max-width: 768px) {
