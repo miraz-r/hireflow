@@ -27,6 +27,7 @@ export default function Navbar() {
   const openRafRef = useRef(null);
   const pendingAnchorRef = useRef(null);
   const restoreScrollRef = useRef(true);
+  const restoreDrawerFocusRef = useRef(true);
 
   useEffect(() => {
     if (user && !loggingOut) return;
@@ -64,10 +65,44 @@ export default function Navbar() {
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
 
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') closeMobile();
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        closeMobile();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const container = drawerRef.current;
+      if (!container) return;
+
+      const candidates = container.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]'
+      );
+      const focusable = Array.from(candidates).filter((el) => {
+        if (el.tabIndex < 0) return false;
+        if (el.hasAttribute('disabled')) return false;
+        if (el.hidden || el.getAttribute('aria-hidden') === 'true') return false;
+        if (el.getClientRects().length === 0) return false;
+        return window.getComputedStyle(el).visibility !== 'hidden';
+      });
+
+      if (focusable.length === 0) {
+        e.preventDefault();
+        container.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.body.style.position = '';
@@ -79,7 +114,7 @@ export default function Navbar() {
       if (restoreScrollRef.current) {
         window.scrollTo(0, scrollY);
       }
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [drawerMounted]);
 
@@ -109,6 +144,7 @@ export default function Navbar() {
     }
     pendingAnchorRef.current = null;
     restoreScrollRef.current = true;
+    restoreDrawerFocusRef.current = true;
     setMobileOpen(true);
     setDrawerMounted(true);
     requestAnimationFrame(() => {
@@ -123,6 +159,11 @@ export default function Navbar() {
     if (openRafRef.current) {
       cancelAnimationFrame(openRafRef.current);
       openRafRef.current = null;
+    }
+    // Return focus to the hamburger unless this close was triggered by
+    // navigation taking the user to another page.
+    if (restoreDrawerFocusRef.current && hamburgerRef.current) {
+      hamburgerRef.current.focus();
     }
     setMobileOpen(false);
     setDrawerActive(false);
@@ -189,6 +230,7 @@ export default function Navbar() {
   const handleDrawerAnchor = (e, id) => {
     e.preventDefault();
     pendingAnchorRef.current = id;
+    restoreDrawerFocusRef.current = false;
     closeMobile();
   };
 
@@ -197,22 +239,26 @@ export default function Navbar() {
   // page's scroll offset onto the destination page.
   const handleDrawerRouteNav = () => {
     restoreScrollRef.current = false;
+    restoreDrawerFocusRef.current = false;
     closeMobile();
   };
 
   const handleDrawerSwitchRole = () => {
     restoreScrollRef.current = false;
+    restoreDrawerFocusRef.current = false;
     handleSwitchRole();
     closeMobile();
   };
 
   const handleDrawerLogout = (e) => {
     restoreScrollRef.current = false;
+    restoreDrawerFocusRef.current = false;
     handleLogout(e);
     closeMobile();
   };
 
   const handleLogoClick = (e) => {
+    restoreDrawerFocusRef.current = false;
     closeMobile();
     if (window.location.pathname === '/') {
       e.preventDefault();

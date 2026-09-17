@@ -58,6 +58,38 @@ export default function ConfirmModal({
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         onCloseRef.current();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const container = dialogRef.current;
+      if (!container) return;
+
+      const candidates = container.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]'
+      );
+      const focusable = Array.from(candidates).filter((el) => {
+        if (el.tabIndex < 0) return false;
+        if (el.hasAttribute('disabled')) return false;
+        if (el.hidden || el.getAttribute('aria-hidden') === 'true') return false;
+        if (el.getClientRects().length === 0) return false;
+        return window.getComputedStyle(el).visibility !== 'hidden';
+      });
+
+      if (focusable.length === 0) {
+        e.preventDefault();
+        container.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
       }
     };
     document.addEventListener('keydown', handleKeyDown);
