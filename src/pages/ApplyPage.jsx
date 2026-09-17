@@ -130,9 +130,13 @@ export default function ApplyPage() {
     try {
       await api.post('/applications', {
         jobId: job.id,
+        fullName: fullName.trim(),
+        email: email.trim(),
         coverLetter: coverLetter.trim(),
         phone: phone.trim(),
         resumeUrl: profile?.resumeUrl || '',
+        linkedin: linkedin.trim(),
+        portfolio: portfolio.trim(),
       }, { timeout: 10000 });
       setSubmitted(true);
     } catch (err) {
