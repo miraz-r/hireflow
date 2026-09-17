@@ -46,6 +46,36 @@ const createValidators = [
     .trim()
     .isLength({ max: 5000 })
     .withMessage('Cover letter must be at most 5000 characters'),
+  body('fullName')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 120 })
+    .withMessage('fullName must be 1-120 characters'),
+  body('email')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isEmail()
+    .withMessage('Email must be valid')
+    .isLength({ max: 254 })
+    .withMessage('Email must be at most 254 characters'),
+  body('linkedin')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('LinkedIn must be at most 500 characters')
+    .matches(/^https?:\/\/.+\..+/i)
+    .withMessage('LinkedIn must be a valid URL starting with http:// or https://'),
+  body('portfolio')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Portfolio must be at most 500 characters')
+    .matches(/^https?:\/\/.+\..+/i)
+    .withMessage('Portfolio must be a valid URL starting with http:// or https://'),
   runValidation,
 ];
 

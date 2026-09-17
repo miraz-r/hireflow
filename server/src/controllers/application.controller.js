@@ -33,6 +33,10 @@ const createApplication = async (req, res, next) => {
       coverLetter: req.body.coverLetter || '',
       phone: req.body.phone || '',
       resumeUrl: req.body.resumeUrl || '',
+      fullName: req.body.fullName || '',
+      email: req.body.email || '',
+      linkedin: req.body.linkedin || '',
+      portfolio: req.body.portfolio || '',
     });
 
     return res.status(201).json(application);
@@ -265,14 +269,18 @@ const getApplicationDetail = async (req, res, next) => {
       },
       applicant: {
         id: application.userId,
-        fullName: profile ? profile.fullName : 'Applicant',
+        // Prefer the values the applicant submitted with this application;
+        // fall back to profile/user data for pre-existing records.
+        fullName: application.fullName || (profile ? profile.fullName : '') || 'Applicant',
         headline: profile ? profile.headline || '' : '',
         avatarUrl: profile ? profile.avatarUrl || '' : '',
-        email: user ? user.email : null,
+        email: application.email || (user ? user.email : null) || null,
         // Prefer the phone the applicant submitted with this application;
         // fall back to the profile phone when it is missing.
         phone: application.phone || (profile ? profile.phone : '') || '',
         resumeUrl: application.resumeUrl || (profile ? profile.resumeUrl : '') || '',
+        linkedin: application.linkedin || '',
+        portfolio: application.portfolio || '',
       },
       coverLetter: application.coverLetter,
     });

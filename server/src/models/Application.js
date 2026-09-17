@@ -48,6 +48,35 @@ const applicationSchema = new mongoose.Schema(
       maxlength: 500,
       default: '',
     },
+
+    // Applicant contact info captured on the application form. Kept optional
+    // (default '') so applications created before these fields existed remain
+    // valid; recruiters read them with fallbacks to profile/user data.
+    fullName: {
+      type: String,
+      trim: true,
+      maxlength: 120,
+      default: '',
+    },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: 254,
+      default: '',
+    },
+    linkedin: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: '',
+    },
+    portfolio: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: '',
+    },
   },
   { timestamps: true }
 );
