@@ -1,17 +1,9 @@
 import { useState, useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { apiGet, apiPatch } from '../utils/api';
+import { STATUS_LABELS } from '../constants/applicationStatus';
 
 const AVATAR_BASE = 'http://localhost:5000';
-
-export const STATUS_LABELS = {
-  applied: 'Applied',
-  'under-review': 'Under review',
-  interview: 'Interview',
-  offer: 'Offer',
-  hired: 'Hired',
-  rejected: 'Rejected',
-};
 
 /* ======================================================================= */
 /* Recruiter dashboard: applications for the recruiter's own jobs.          */

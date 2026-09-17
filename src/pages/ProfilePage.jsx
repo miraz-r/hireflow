@@ -9,7 +9,7 @@ import {
   getPendingEmailChange,
 } from '../utils/emailChangeApi';
 import { categories, workTypes, employmentTypes, experienceLevels } from '../data/mockData';
-import { STATUS_LABELS } from '../components/RecruiterDashboard';
+import { STATUS_LABELS } from '../constants/applicationStatus';
 import Toast from '../components/Toast';
 import Avatar from '../components/Avatar';
 import ConfirmModal from '../components/ConfirmModal';

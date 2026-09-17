@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { APPLICATION_STATUSES } = require('../utils/applicationStatus');
 
 const applicationSchema = new mongoose.Schema(
   {
@@ -23,7 +24,7 @@ const applicationSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ['applied', 'under-review', 'interview', 'offer', 'hired', 'rejected'],
+        values: APPLICATION_STATUSES,
         message: 'Invalid application status',
       },
       default: 'applied',

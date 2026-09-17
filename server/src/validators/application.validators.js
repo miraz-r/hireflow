@@ -1,9 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
 const { PHONE_CHARS_RE } = require('../utils/phone');
-
-// The existing Application.status enum values. Kept here so route validation
-// and the model never drift apart accidentally.
-const APPLICATION_STATUSES = ['applied', 'under-review', 'interview', 'offer', 'hired', 'rejected'];
+const { APPLICATION_STATUSES } = require('../utils/applicationStatus');
 
 const runValidation = (req, res, next) => {
   const errors = validationResult(req);
@@ -109,7 +106,7 @@ const statusUpdateValidators = [
     .isString()
     .trim()
     .isIn(APPLICATION_STATUSES)
-    .withMessage('Status must be one of: applied, under-review, interview, offer, hired, rejected'),
+    .withMessage(`Status must be one of: ${APPLICATION_STATUSES.join(', ')}`),
   runValidation,
 ];
 

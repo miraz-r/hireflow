@@ -6,16 +6,8 @@ import { fetchJobById } from '../utils/jobsApi';
 import { getJobsScroll } from '../utils/jobsScrollState';
 import api from '../utils/api';
 import { formatSalary } from '../utils/salary';
+import { STATUS_LABELS } from '../constants/applicationStatus';
 import './JobDetailPage.css';
-
-const STATUS_LABELS = {
-  applied: 'Applied',
-  'under-review': 'Under review',
-  interview: 'Interview',
-  offer: 'Offer',
-  hired: 'Hired',
-  rejected: 'Rejected',
-};
 
 export default function JobDetailPage({ onSignInPrompt }) {
   const { id } = useParams();
