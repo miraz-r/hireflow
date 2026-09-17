@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import './JobFilters.css';
 
@@ -12,6 +12,8 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
   // stable inside event closures), so re-anchoring on page scroll never relies
   // on a stale `placement` value and never flips up/down.
   const directionRef = useRef(false);
+  const listboxId = useId();
+  const optionRefs = useRef([]);
 
   const openMenu = (preserveDirection = false) => {
     const trigger = triggerRef.current;
@@ -54,7 +56,11 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
       }
     };
     const handleEscape = (e) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key !== 'Escape') return;
+      setOpen(false);
+      if (menuRef.current && menuRef.current.contains(document.activeElement)) {
+        triggerRef.current?.focus();
+      }
     };
     // A scroll event fires for the dropdown's own scrollable container AND for
     // the page. Internal scrolling of the dropdown must be ignored entirely.
@@ -105,6 +111,46 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
     setOpen(false);
   };
 
+  // Focus the currently-selected option button in the listbox (falling back to
+  // the first option). Used when the listbox is opened via keyboard and when
+  // ArrowUp/ArrowDown is pressed while focus is still on the trigger.
+  const focusSelectedOption = () => {
+    const menu = menuRef.current;
+    if (!menu) return;
+    const sel = menu.querySelector('.filter-option.selected');
+    const target = sel || menu.querySelector('.filter-option');
+    if (target) target.focus();
+  };
+
+  // Roving-focus keyboard navigation for the portaled listbox. Options stay
+  // native focusable buttons; ArrowUp/ArrowDown wrap, Home/End jump.
+  const handleListboxKeyDown = (e) => {
+    if (!open) return;
+    const buttons = optionRefs.current.filter(Boolean);
+    const count = buttons.length;
+    if (count === 0) return;
+    const idx = buttons.indexOf(document.activeElement);
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (idx < 0) {
+        focusSelectedOption();
+      } else if (e.key === 'ArrowDown') {
+        buttons[(idx + 1) % count]?.focus();
+      } else if (idx === 0) {
+        buttons[count - 1]?.focus();
+      } else {
+        buttons[idx - 1]?.focus();
+      }
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      buttons[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      buttons[count - 1]?.focus();
+    }
+  };
+
   const selectedIsActive = selected !== null && selected !== undefined;
   let displayLabel = null;
   if (selectedIsActive && options.length > 0) {
@@ -121,6 +167,7 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
   const menu = open ? (
     <div
       ref={menuRef}
+      id={listboxId}
       className={`filter-menu ${placement.openUp ? 'filter-menu--up' : ''}`}
       style={{
         position: 'fixed',
@@ -131,8 +178,10 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
         zIndex: 9999,
       }}
       role="listbox"
+      onKeyDown={handleListboxKeyDown}
     >
       <button
+        ref={(el) => { optionRefs.current[0] = el; }}
         className={`filter-option ${!selectedIsActive ? 'selected' : ''}`}
         onClick={() => handleSelect(null)}
         role="option"
@@ -140,7 +189,7 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
       >
         Any
       </button>
-      {options.map(opt => {
+      {options.map((opt, i) => {
         const key = getOptionKey(opt);
         const optLabel = getOptionLabel ? getOptionLabel(opt) : String(opt);
         const optValue = getOptionValue ? getOptionValue(opt) : opt;
@@ -153,6 +202,7 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
         return (
           <button
             key={key}
+            ref={(el) => { optionRefs.current[i + 1] = el; }}
             className={`filter-option ${isSelected ? 'selected' : ''}`}
             onClick={() => handleSelect(optValue)}
             role="option"
@@ -170,9 +220,20 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
       <button
         ref={triggerRef}
         className={`filter-trigger ${selectedIsActive ? 'active' : ''}`}
-        onClick={() => (open ? setOpen(false) : openMenu())}
+        onClick={(e) => {
+          if (open) {
+            setOpen(false);
+            return;
+          }
+          const viaKeyboard = e.detail === 0;
+          openMenu();
+          if (viaKeyboard) {
+            requestAnimationFrame(focusSelectedOption);
+          }
+        }}
         aria-expanded={open}
         aria-haspopup="listbox"
+        aria-controls={listboxId}
       >
         <span>{label}: <strong>{displayLabel || 'Any'}</strong></span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
