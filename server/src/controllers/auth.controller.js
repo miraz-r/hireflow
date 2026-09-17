@@ -191,21 +191,31 @@ const toggleRole = async (req, res, next) => {
     }
 
     if (newRole !== user.role) {
+      const previousRole = user.role;
       user.role = newRole;
       await user.save();
 
-      await Profile.updateOne(
-        { userId: user._id },
-        {
-          $set: { role: newRole },
-          $unset: Object.fromEntries(
-            (newRole === 'jobseeker'
-              ? RECRUITER_ONLY_FIELDS
-              : JOBSEEKER_ONLY_FIELDS
-            ).map((f) => [f, 1])
-          ),
-        }
-      ).catch((err) => next(err));
+      try {
+        await Profile.updateOne(
+          { userId: user._id },
+          {
+            $set: { role: newRole },
+            $unset: Object.fromEntries(
+              (newRole === 'jobseeker'
+                ? RECRUITER_ONLY_FIELDS
+                : JOBSEEKER_ONLY_FIELDS
+              ).map((f) => [f, 1])
+            ),
+          }
+        );
+      } catch (err) {
+        // A failed Profile mirror must not silently drift the User and
+        // Profile roles out of sync, nor produce a success response. Roll
+        // the User back and surface the error before any response is sent.
+        user.role = previousRole;
+        await user.save().catch(() => {});
+        return next(err);
+      }
     }
 
     const token = jwt.sign(

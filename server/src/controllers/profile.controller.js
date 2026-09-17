@@ -4,7 +4,7 @@ const Profile = require('../models/Profile');
 const User = require('../models/User');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
-const { publicPathFor, UPLOAD_ROOT } = require('../config/uploads');
+const { publicPathFor, UPLOAD_ROOT, AVATAR_DIR } = require('../config/uploads');
 
 /**
  * Profile controller.
@@ -23,7 +23,10 @@ const ALLOWED_FIELDS = [
   'fullName',
   'phone',
   'location',
-  'avatarUrl',
+  // NOTE: avatarUrl is intentionally NOT client-settable. It is only
+  // assigned server-side by the avatar upload flow (publicPathFor), and
+  // cleared by removeAvatar. Letting clients set it would let a crafted
+  // value drive arbitrary filesystem deletion in removeAvatar.
   // jobseeker-only
   'headline',
   'bio',
@@ -299,13 +302,20 @@ const removeAvatar = async (req, res, next) => {
     await profile.save();
 
     // Best-effort cleanup of the stored image file. Avatars live on the local
-    // filesystem (see config/uploads.js); clearing the DB reference is the
-    // outcome that matters, so a cleanup failure must never fail the request.
-    if (prevUrl && prevUrl.startsWith('/uploads/')) {
+    // filesystem under AVATAR_DIR (see config/uploads.js); clearing the DB
+    // reference is the outcome that matters, so a cleanup failure must never
+    // fail the request.
+    if (typeof prevUrl === 'string' && prevUrl.startsWith('/uploads/')) {
       try {
         const rel = prevUrl.slice('/uploads/'.length);
-        const absPath = path.join(UPLOAD_ROOT, rel);
-        if (fs.existsSync(absPath)) {
+        const absPath = path.resolve(UPLOAD_ROOT, rel);
+        const resolvedAvatarDir = path.resolve(AVATAR_DIR);
+        // Defense-in-depth: only ever unlink a file that resolves strictly
+        // inside the avatar directory. This rejects `../` traversal,
+        // absolute paths, and the directory itself, so a crafted avatarUrl
+        // can never reach fs.unlink outside the configured avatar storage.
+        const isInsideAvatarDir = absPath.startsWith(resolvedAvatarDir + path.sep);
+        if (isInsideAvatarDir && fs.existsSync(absPath)) {
           fs.unlinkSync(absPath);
         }
       } catch {

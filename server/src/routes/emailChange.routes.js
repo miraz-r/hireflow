@@ -1,5 +1,6 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { createRateLimiter } = require('../middleware/rateLimit');
 const {
   requestEmailChange,
   requestEmailChangeValidators,
@@ -16,10 +17,28 @@ const router = express.Router();
 // derived exclusively from the JWT via the authenticate middleware.
 router.use(authenticate);
 
+// Authenticated, per-user limiters. authenticate runs above, so req.user.id is
+// the trusted identity — never a client-supplied header.
+const initiateLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  keyGenerator: (req) => String(req.user.id),
+});
+const verifyLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => String(req.user.id),
+});
+const resendLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  keyGenerator: (req) => String(req.user.id),
+});
+
 router.get('/', getPendingEmailChange);
-router.post('/', requestEmailChangeValidators, requestEmailChange);
-router.post('/verify-email', verifyEmailChangeValidators, verifyEmailChange);
-router.post('/resend', resendVerification);
+router.post('/', initiateLimiter, requestEmailChangeValidators, requestEmailChange);
+router.post('/verify-email', verifyLimiter, verifyEmailChangeValidators, verifyEmailChange);
+router.post('/resend', resendLimiter, resendVerification);
 router.delete('/', cancelEmailChange);
 
 module.exports = router;

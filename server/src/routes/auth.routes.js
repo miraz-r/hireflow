@@ -1,13 +1,20 @@
 const express = require('express');
 const { register, registerValidators, login, loginValidators, toggleRole, roleValidators } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth');
+const { createRateLimiter } = require('../middleware/rateLimit');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
 
 const router = express.Router();
 
-router.post('/register', registerValidators, register);
-router.post('/login', loginValidators, login);
+// Brute-force / credential-stuffing protection. Keyed by client IP: these are
+// unauthenticated endpoints, so no trusted user identity exists yet. Placed
+// before the validators so every attempt counts, not just well-formed ones.
+const loginLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 20 });
+const registerLimiter = createRateLimiter({ windowMs: 60 * 60 * 1000, max: 10 });
+
+router.post('/register', registerLimiter, registerValidators, register);
+router.post('/login', loginLimiter, loginValidators, login);
 
 router.post('/role', authenticate, roleValidators, toggleRole);
 

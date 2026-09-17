@@ -113,11 +113,16 @@ const createJob = async (req, res, next) => {
 const updateJob = async (req, res, next) => {
   try {
     const payload = pickFields(req.body);
-    const job = await Job.findByIdAndUpdate(req.params.id, payload, {
-      new: true,
-      runValidators: true,
-      context: 'query',
-    });
+    // Only the authenticated recruiter who posted the job may update it.
+    const job = await Job.findOneAndUpdate(
+      { _id: req.params.id, postedBy: req.user.id },
+      payload,
+      {
+        new: true,
+        runValidators: true,
+        context: 'query',
+      }
+    );
     if (!job) {
       return res.status(404).json({ error: 'Job not found' });
     }
@@ -138,7 +143,11 @@ const updateJob = async (req, res, next) => {
 // ---------------------------------------------------------------------------
 const deleteJob = async (req, res, next) => {
   try {
-    const job = await Job.findByIdAndDelete(req.params.id);
+    // Only the authenticated recruiter who posted the job may delete it.
+    const job = await Job.findOneAndDelete({
+      _id: req.params.id,
+      postedBy: req.user.id,
+    });
     if (!job) {
       return res.status(404).json({ error: 'Job not found' });
     }
