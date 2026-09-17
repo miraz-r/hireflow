@@ -159,6 +159,14 @@
   gap: var(--space-6);
 }
 
+/* Reveal renders an intermediate <div> as the actual grid item. Make it a flex
+   container so the card stretches to the full grid-track height, keeping cards
+   equal height within a row and letting .ca-article-desc { flex: 1 } pin the
+   "Read guide" link to the bottom of every card. */
+.ca-articles-grid > .reveal {
+  display: flex;
+}
+
 .ca-article-card {
   display: flex;
   flex-direction: column;

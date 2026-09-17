@@ -207,7 +207,15 @@
   gap: var(--space-8);
 }
 
+/* Reveal renders an intermediate <div> as the actual grid item. Make it a flex
+   container so the card stretches to the full grid-track height, keeping cards
+   equal height within a row regardless of differing content length. */
+.blog-grid-layout > .reveal {
+  display: flex;
+}
+
 .blog-card {
+  min-width: 0;
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
