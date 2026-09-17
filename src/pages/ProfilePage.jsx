@@ -48,10 +48,12 @@ export default function ProfilePage() {
     if (user && RECRUITER_ONLY_TABS.includes(tab) && user.role !== 'recruiter') {
       setSearchParams({}, { replace: true });
     }
-    if (user && JOBSEEKER_ONLY_TABS.includes(tab) && user.role !== 'jobseeker') {
+    if (user && tab === 'saved-jobs' && user.role === 'jobseeker') {
+      navigate('/saved-jobs', { replace: true });
+    } else if (user && JOBSEEKER_ONLY_TABS.includes(tab) && user.role !== 'jobseeker') {
       setSearchParams({}, { replace: true });
     }
-  }, [tab, user, setSearchParams]);
+  }, [tab, user, setSearchParams, navigate]);
 
   if (authLoading) {
     return <div className="app-loading" aria-busy="true" />;
@@ -71,8 +73,6 @@ export default function ProfilePage() {
           <PostJobTab />
         ) : tab === 'my-applications' ? (
           <JobseekerApplicationsTab />
-        ) : tab === 'saved-jobs' ? (
-          <SavedJobsTab />
         ) : (
           <ProfileTab user={user} />
         )}
@@ -1201,19 +1201,6 @@ function PostJobTab() {
   );
 }
 
-const formatSalary = (salary) => {
-  if (!salary || (salary.min === undefined && salary.max === undefined)) return 'Salary on application';
-  if (salary.period === 'hourly') {
-    return `$${salary.min}–$${salary.max}/hr`;
-  }
-  const fmt = (n) => (n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`);
-  if (salary.min !== undefined && salary.max !== undefined) {
-    return `${fmt(salary.min)} – ${fmt(salary.max)}`;
-  }
-  if (salary.min !== undefined) return `From ${fmt(salary.min)}`;
-  return `Up to ${fmt(salary.max)}`;
-};
-
 /* ======================================================================= */
 /* Jobseeker Applications tab - the current jobseeker's own applications    */
 /* ======================================================================= */
@@ -1315,124 +1302,6 @@ function JobseekerApplicationsTab() {
                 )}
               </div>
             </article>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ======================================================================= */
-/* Saved Jobs tab - the current jobseeker's saved jobs                      */
-/* ======================================================================= */
-function SavedJobsTab() {
-  const [savedJobs, setSavedJobs] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [removing, setRemoving] = useState({});
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const res = await apiGet('/saved-jobs');
-        if (!cancelled) setSavedJobs(res.data?.savedJobs || []);
-      } catch (err) {
-        if (!cancelled) setError(err?.message || 'Unable to load your saved jobs.');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const handleRemove = async (jobId) => {
-    if (removing[jobId]) return;
-    setRemoving((prev) => ({ ...prev, [jobId]: true }));
-    try {
-      await apiDelete(`/saved-jobs/${jobId}`);
-      setSavedJobs((prev) => prev.filter((j) => String(j.id) !== String(jobId)));
-    } catch (err) {
-      setError(err?.message || 'Unable to remove this job.');
-      setRemoving((prev) => { const next = { ...prev }; delete next[jobId]; return next; });
-    }
-  };
-
-  if (loading) {
-    return <div className="app-loading" aria-busy="true" />;
-  }
-
-  return (
-    <div className="card profile-form js-saved-tab">
-      <div className="profile-header">
-        <div className="profile-header-text">
-          <h1 className="profile-title">Saved jobs</h1>
-          <p className="profile-subtitle">Jobs you've saved for later. Apply or remove them anytime.</p>
-        </div>
-      </div>
-
-      {error && <div className="auth-alert auth-alert-error" role="alert"><span>{error}</span></div>}
-
-      {!error && savedJobs.length === 0 && (
-        <div className="js-empty-state">
-          <div className="js-empty-icon" aria-hidden="true">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-            </svg>
-          </div>
-          <h3 className="js-empty-title">No saved jobs yet</h3>
-          <p className="js-empty-desc">
-            Hit the bookmark on any job you find interesting and it will be saved here for easy access later.
-          </p>
-          <Link to="/" className="btn btn-primary">Find jobs</Link>
-        </div>
-      )}
-
-      {savedJobs.length > 0 && (
-        <div className="js-saved-list">
-          {savedJobs.map((job) => (
-            <div className="js-saved-card" key={job.id}>
-              <div className="js-saved-top">
-                <div className="js-saved-avatar" aria-hidden="true">
-                  {(job.company || 'C').charAt(0)}
-                </div>
-                <div className="js-saved-info">
-                  <Link to={`/jobs/${job.id}`} className="js-saved-title">{job.title}</Link>
-                  <span className="js-saved-company">
-                    {job.company}
-                    {job.location ? ` · ${job.location}` : ''}
-                  </span>
-                </div>
-                <span className="js-saved-badge">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                  </svg>
-                  Saved
-                </span>
-              </div>
-              <div className="js-saved-meta">
-                {job.workType && <span className="badge badge-neutral">{job.workType}</span>}
-                {job.employmentType && <span className="badge badge-neutral">{job.employmentType}</span>}
-                {job.experienceLevel && <span className="badge badge-neutral">{job.experienceLevel}</span>}
-                <span className="js-saved-salary">{formatSalary(job.salary)}</span>
-              </div>
-              <div className="js-saved-actions">
-                <Link to={`/jobs/${job.id}`} className="btn btn-sm btn-secondary">View job</Link>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-ghost js-saved-remove"
-                  onClick={() => handleRemove(job.id)}
-                  disabled={removing[job.id]}
-                >
-                  {removing[job.id] ? 'Removing…' : 'Remove'}
-                </button>
-              </div>
-            </div>
           ))}
         </div>
       )}
