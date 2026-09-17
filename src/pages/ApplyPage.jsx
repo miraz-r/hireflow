@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchJobById } from '../utils/jobsApi';
+import { PHONE_CHARS_RE } from '../utils/phone';
 import api from '../utils/api';
 import './ApplyPage.css';
 
@@ -102,7 +103,7 @@ export default function ApplyPage() {
     }
     if (!phone.trim()) {
       errs.phone = 'Phone number is required';
-    } else if (!/^[+0-9()\-\s]{6,32}$/.test(phone.trim())) {
+    } else if (!PHONE_CHARS_RE.test(phone.trim())) {
       errs.phone = 'Enter a valid phone number';
     }
     if (!profile?.resumeUrl) {

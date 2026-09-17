@@ -1,4 +1,5 @@
 const { body, validationResult } = require('express-validator');
+const { PHONE_CHARS_RE } = require('../utils/phone');
 
 // ---------------------------------------------------------------------------
 // Shared field validators — run for every role
@@ -17,7 +18,7 @@ const sharedValidators = [
     .isString()
     .withMessage('phone must be a string')
     .trim()
-    .matches(/^[+0-9()\-\s]{6,32}$/)
+    .matches(PHONE_CHARS_RE)
     .withMessage('Invalid phone format'),
 
   body('location')
@@ -226,7 +227,7 @@ const createOrReplaceValidators = (role) =>
       .withMessage('phone is required')
       .isString()
       .trim()
-      .matches(/^[+0-9()\-\s]{6,32}$/)
+      .matches(PHONE_CHARS_RE)
       .withMessage('Invalid phone format'),
     body('location')
       .exists({ values: 'falsy' })
@@ -254,7 +255,7 @@ const patchValidators = (role) =>
       .withMessage('phone is required')
       .isString()
       .trim()
-      .matches(/^[+0-9()\-\s]{6,32}$/)
+      .matches(PHONE_CHARS_RE)
       .withMessage('Invalid phone format'),
     body('location')
       .exists({ values: 'falsy' })

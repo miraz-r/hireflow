@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { PHONE_CHARS_RE } = require('../utils/phone');
 
 // Sub-schemas for collections embedded on a jobseeker profile.
 // Kept inline (not separate model files) because they only exist as part of Profile.
@@ -76,7 +77,7 @@ const profileSchema = new mongoose.Schema(
       required: [true, 'Phone is required'],
       trim: true,
       maxlength: 32,
-      match: [/^[+0-9()\-\s]{6,32}$/, 'Invalid phone format'],
+      match: [PHONE_CHARS_RE, 'Invalid phone format'],
     },
     location: {
       type: String,

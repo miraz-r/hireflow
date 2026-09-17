@@ -6,6 +6,10 @@ import {
 } from 'libphonenumber-js';
 import examples from 'libphonenumber-js/examples.mobile.json';
 
+// Shared phone-character format/backstop rule for the Apply form.
+// Registration remains the libphonenumber-js authority.
+export const PHONE_CHARS_RE = /^[+0-9()\-\s]{6,32}$/;
+
 const regionNames =
   typeof Intl !== 'undefined' && Intl.DisplayNames
     ? new Intl.DisplayNames(['en'], { type: 'region' })

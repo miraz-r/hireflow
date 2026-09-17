@@ -1,4 +1,5 @@
 const { body, param, validationResult } = require('express-validator');
+const { PHONE_CHARS_RE } = require('../utils/phone');
 
 // The existing Application.status enum values. Kept here so route validation
 // and the model never drift apart accidentally.
@@ -27,12 +28,15 @@ const createValidators = [
     .isMongoId()
     .withMessage('jobId must be a valid id'),
   body('phone')
+    .optional()
     .isString()
     .trim()
     .notEmpty()
     .withMessage('Phone number is required')
     .isLength({ max: 32 })
-    .withMessage('Phone must be at most 32 characters'),
+    .withMessage('Phone must be at most 32 characters')
+    .matches(PHONE_CHARS_RE)
+    .withMessage('Invalid phone format'),
   body('resumeUrl')
     .isString()
     .trim()
