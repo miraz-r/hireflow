@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import './JobCard.css';
 import { saveJobsScroll } from '../utils/jobsScrollState';
+import { formatSalary } from '../utils/salary';
 
 export default function JobCard({ job, isSaved, onSave }) {
   const location = useLocation();
@@ -8,23 +9,6 @@ export default function JobCard({ job, isSaved, onSave }) {
     e.preventDefault();
     e.stopPropagation();
     onSave && onSave(job.id);
-  };
-
-  const formatSalary = (salary) => {
-    if (!salary || (salary.min === undefined && salary.max === undefined)) return 'Salary on application';
-    if (salary.period === 'hourly') {
-      if (salary.min !== undefined && salary.max !== undefined) {
-        return `$${salary.min}–$${salary.max}/hr`;
-      }
-      if (salary.min !== undefined) return `From $${salary.min}/hr`;
-      return `Up to $${salary.max}/hr`;
-    }
-    const formatNum = (n) => n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`;
-    if (salary.min !== undefined && salary.max !== undefined) {
-      return `${formatNum(salary.min)} – ${formatNum(salary.max)}`;
-    }
-    if (salary.min !== undefined) return `From ${formatNum(salary.min)}`;
-    return `Up to ${formatNum(salary.max)}`;
   };
 
   const skills = Array.isArray(job.skills) ? job.skills : [];
