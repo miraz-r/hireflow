@@ -280,11 +280,25 @@
 }
 
 .profile-resume label.btn input[type="file"] {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  cursor: pointer;
 }
 
 .profile-resume label.btn {
   cursor: pointer;
+}
+
+.profile-resume label.btn:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 label.btn.disabled {
@@ -815,7 +829,7 @@ label.btn.disabled {
   transform: scale(1.05);
 }
 
-.profile-avatar-upload:focus-visible {
+.profile-avatar-upload:focus-within {
   outline: none;
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
