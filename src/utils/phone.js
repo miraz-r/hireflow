@@ -3,6 +3,7 @@ import {
   getCountryCallingCode,
   parsePhoneNumber,
   getExampleNumber,
+  validatePhoneNumberLength,
 } from 'libphonenumber-js';
 import examples from 'libphonenumber-js/examples.mobile.json';
 
@@ -73,6 +74,21 @@ export function isValidNationalNumber(value, iso2) {
       return true;
     }
     return false;
+  } catch {
+    return false;
+  }
+}
+
+// True when the value has more digits than the selected country's metadata
+// allows for any phone number. This caps the national-number input for both
+// typing and pasted input while staying tolerant of in-progress numbers
+// (short/partial values never trip a TOO_LONG result). Lengths come straight
+// from libphonenumber-js so each country's own min/max possible lengths are
+// respected instead of hardcoded.
+export function isNationalNumberTooLong(value, iso2) {
+  if (!value || !iso2) return false;
+  try {
+    return validatePhoneNumberLength(String(value), iso2) === 'TOO_LONG';
   } catch {
     return false;
   }

@@ -50,22 +50,6 @@
   overflow-x: hidden;
 }
 
-.auth-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-lg);
-  text-decoration: none;
-  margin-bottom: var(--space-3);
-  width: fit-content;
-}
-
-.auth-brand:hover { color: var(--color-text-primary); }
-.auth-brand-icon { display: block; flex-shrink: 0; }
-.auth-brand-text { letter-spacing: var(--letter-spacing-tight); }
-
 .auth-form-inner {
   flex: 1;
   display: flex;
@@ -166,6 +150,50 @@
 }
 
 .auth-input-wrap:focus-within .auth-input-icon {
+  color: var(--color-brand-primary);
+}
+
+/* ---------- Password visibility toggle ---------- */
+.auth-input.auth-input--password {
+  padding-right: 44px;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.auth-password-toggle:hover:not(:disabled) {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-tertiary);
+}
+
+.auth-password-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.auth-password-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.auth-input-wrap:focus-within .auth-password-toggle {
   color: var(--color-brand-primary);
 }
 
@@ -582,10 +610,6 @@
 
   .auth-form-pane {
     padding: var(--space-6) var(--space-5);
-  }
-
-  .auth-brand {
-    margin-bottom: var(--space-6);
   }
 
   .auth-title {

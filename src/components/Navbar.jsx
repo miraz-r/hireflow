@@ -9,9 +9,30 @@ import { useTheme } from '../hooks/useTheme';
 const LOGOUT_VISIBLE_MS = 750;
 const AVATAR_BASE = 'http://localhost:5000';
 
+const MOON_ICON = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  </svg>
+);
+
+const SUN_ICON = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5" />
+    <line x1="12" y1="1" x2="12" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="23" />
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+    <line x1="1" y1="12" x2="3" y2="12" />
+    <line x1="21" y1="12" x2="23" y2="12" />
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+  </svg>
+);
+
 export default function Navbar() {
   const { user, logout, toggleRole } = useAuth();
   const { theme, updateTheme } = useTheme();
+  const toggleTheme = () => updateTheme(theme === 'dark' ? 'light' : 'dark');
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -272,7 +293,9 @@ export default function Navbar() {
     { label: 'Resources', href: '/resources' },
   ];
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isLoginPage = location.pathname === '/login';
+  const isRegisterPage = location.pathname === '/register';
+  const isAuthPage = isLoginPage || isRegisterPage;
 
   if (isAuthPage) {
     return (
@@ -286,8 +309,21 @@ export default function Navbar() {
             <span className="brand-text">HireFlow</span>
           </Link>
           <div className="navbar-actions">
-            <Link to="/login" className="sign-in-link">Sign in</Link>
-            <Link to="/register" className="sign-up-link btn btn-primary btn-sm">Sign up</Link>
+            {isLoginPage && (
+              <Link to="/register" className="sign-in-link">Sign up</Link>
+            )}
+            {isRegisterPage && (
+              <Link to="/login" className="sign-in-link">Sign in</Link>
+            )}
+            <button
+              type="button"
+              className="navbar-theme-toggle"
+              onClick={toggleTheme}
+              aria-pressed={theme === 'dark'}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? SUN_ICON : MOON_ICON}
+            </button>
           </div>
         </div>
       </header>
@@ -470,6 +506,15 @@ export default function Navbar() {
             <>
               <Link to="/login" className="sign-in-link">Sign in</Link>
               <Link to="/register" className="sign-up-link btn btn-primary btn-sm">Sign up</Link>
+              <button
+                type="button"
+                className="navbar-theme-toggle"
+                onClick={toggleTheme}
+                aria-pressed={theme === 'dark'}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? SUN_ICON : MOON_ICON}
+              </button>
             </>
           )}
         </div>
@@ -666,6 +711,21 @@ export default function Navbar() {
               {/* Guest: Sign in / Sign up */}
               {!user && (
                 <div className="mobile-drawer-section">
+                  <span className="mobile-drawer-section-label">Preferences</span>
+                  <button
+                    type="button"
+                    className="mobile-drawer-link mobile-drawer-theme-toggle"
+                    onClick={toggleTheme}
+                    aria-pressed={theme === 'dark'}
+                    aria-label="Toggle dark mode"
+                  >
+                    {MOON_ICON}
+                    <span className="mobile-drawer-label">Dark mode</span>
+                    <span className="toggle-switch" aria-hidden="true">
+                      <span className={`toggle-thumb ${theme === 'dark' ? 'on' : ''}`} />
+                    </span>
+                  </button>
+                  <span className="mobile-drawer-section-label">Account</span>
                   <Link
                     to="/login"
                     className="btn btn-secondary btn-full"

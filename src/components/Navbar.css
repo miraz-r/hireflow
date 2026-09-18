@@ -132,6 +132,39 @@
   gap: var(--space-3);
 }
 
+/* Compact theme toggle for logged-out / auth navbars.
+   Borderless ghost icon button: sits at the far right of the actions and is
+   only visually distinguished on hover/focus, matching the surrounding
+   sign-in link styling. */
+.navbar-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 4px;
+  border-radius: var(--radius-full);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.navbar-theme-toggle:hover {
+  color: var(--color-brand-primary);
+  background-color: var(--color-bg-tertiary);
+}
+
+.navbar-theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
 /* Sign-in / Sign-up links (unauthenticated) */
 .sign-in-link {
   font-size: var(--font-size-sm);
@@ -766,6 +799,11 @@
 
   .navbar--auth .navbar-actions {
     gap: var(--space-1);
+  }
+
+  .navbar--auth .navbar-theme-toggle {
+    width: 32px;
+    height: 32px;
   }
 
   .navbar--auth .sign-in-link {

@@ -12,6 +12,7 @@ import {
   getCountryByIso2,
   getCountryOptions,
   getNationalExample,
+  isNationalNumberTooLong,
 } from '../utils/phone';
 import './CountryPhoneInput.css';
 
@@ -102,6 +103,18 @@ export default function CountryPhoneInput({
         if (input) input.focus();
       });
     }
+  };
+
+  // Enforce the selected country's maximum phone-number length (from the same
+  // libphonenumber-js metadata the rest of the component uses). Changes that
+  // would push the value past the allowed length are dropped so the user can
+  // neither over-type nor paste more digits than the country allows. Short or
+  // in-progress numbers are always accepted here; the min-length/format check
+  // remains the form's existing submit-time validation.
+  const handleNationalChange = (e) => {
+    const next = e.target.value;
+    if (isNationalNumberTooLong(next, country)) return;
+    onValueChange(next);
   };
 
   /* -------- dropdown position (portal, never clipped) -------- */
@@ -311,7 +324,7 @@ export default function CountryPhoneInput({
           autoComplete="tel-national"
           className="phone-country-number"
           value={value}
-          onChange={(e) => onValueChange(e.target.value)}
+          onChange={handleNationalChange}
           placeholder={resolvedPlaceholder}
           disabled={disabled}
           aria-invalid={ariaInvalid}
