@@ -568,7 +568,18 @@ function ProfileTab({ user }) {
     }
   };
 
-  const cancelExpEdit = () => setExpDraft(null);
+  const cancelExpEdit = () => {
+    setExpDraft(null);
+    // Discard any validation message tied to this unfinished entry so the
+    // section returns to its clean empty state instead of carrying
+    // stale "required" errors (and the form-level hint) after cancelling.
+    setFieldErrors((prev) => {
+      if (!prev.experience) return prev;
+      const n = { ...prev };
+      delete n.experience;
+      return n;
+    });
+  };
 
   const setExpField = (name, value) =>
     setExpDraft((prev) => (prev ? { ...prev, data: { ...prev.data, [name]: value } } : prev));
@@ -950,6 +961,9 @@ function ProfileTab({ user }) {
                     </div>
                   </div>
                   {fieldError('experience')}
+                  {fieldErrors.experience && (
+                    <p className="profile-validation-hint" role="alert">Please complete the required fields.</p>
+                  )}
                   <div className="profile-exp-editor-actions">
                     <button type="button" className="btn btn-primary" onClick={saveExp}>{expDraft.index === null ? 'Add experience' : 'Save experience'}</button>
                     <button type="button" className="btn btn-ghost" onClick={cancelExpEdit}>Cancel</button>
@@ -962,7 +976,7 @@ function ProfileTab({ user }) {
 
         <div className="profile-actions">
           <div className="profile-actions-left">
-            {Object.keys(fieldErrors).length > 0 && (
+            {Object.keys(fieldErrors).some((key) => key !== 'experience') && (
               <p className="profile-validation-hint" role="alert">Please complete the required fields.</p>
             )}
             <button type="submit" className="btn btn-primary btn-lg" disabled={saving}>

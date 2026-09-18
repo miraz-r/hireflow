@@ -1690,8 +1690,9 @@ label.btn.disabled {
 }
 
 .app-card-main {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
   gap: var(--space-4);
   min-width: 0;
 }
@@ -1732,7 +1733,7 @@ label.btn.disabled {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .app-card-company {
@@ -1744,7 +1745,7 @@ label.btn.disabled {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .app-card-sep {
@@ -1899,6 +1900,14 @@ label.btn.disabled {
     padding: var(--space-5);
   }
 
+  .js-application-tab.profile-form {
+    gap: var(--space-4);
+  }
+
+  .js-application-tab.profile-form > .profile-header {
+    margin-bottom: var(--space-2);
+  }
+
   .email-field-subrow {
     flex-direction: column;
     align-items: flex-start;
@@ -1918,7 +1927,6 @@ label.btn.disabled {
 
   .app-card-main {
     gap: var(--space-3);
-    flex-wrap: wrap;
   }
 
   /* Recruiter dashboard - tablet */
@@ -2087,6 +2095,44 @@ label.btn.disabled {
   .rc-empty-icon {
     width: 64px;
     height: 64px;
+  }
+
+  /* Email field - Verified badge + Change action align LEFT below the email
+     value instead of drifting to the right edge/middle of the narrow box. */
+  .email-field-end {
+    margin-left: 0;
+  }
+
+  /* Danger zone - stack the description above the Delete profile button so
+     the text uses the full row width instead of wrapping word-by-word. */
+  .profile-danger-body {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+}
+
+/* Narrow phones: move the status pill onto its own row below the job
+   title/company block (hugging its content, not stretched full-width),
+   and let the job title wrap naturally instead of being clipped. */
+@media (max-width: 480px) {
+  .app-card-main {
+    grid-template-columns: auto 1fr;
+  }
+
+  .app-status {
+    grid-column: 1 / -1;
+    justify-self: start;
+    align-self: start;
+  }
+
+  .app-card-title {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    -webkit-box-orient: unset;
+    overflow: visible;
+    overflow-wrap: break-word;
   }
 }
 

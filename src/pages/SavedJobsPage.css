@@ -75,8 +75,9 @@
 }
 
 .saved-jobs-card-main {
+  --saved-card-aside-offset: calc(48px + var(--space-4));
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-4);
 }
 
@@ -126,6 +127,7 @@
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  overflow-wrap: break-word;
 }
 
 .saved-jobs-card-location {
@@ -156,25 +158,6 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   white-space: nowrap;
-}
-
-.saved-jobs-card-saved {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.5;
-  color: var(--color-brand-primary);
-  background-color: var(--color-brand-primary-light);
-  border: 1px solid rgba(79, 70, 229, 0.14);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
-
-.saved-jobs-card-saved svg {
-  flex-shrink: 0;
 }
 
 .saved-jobs-card-meta {
@@ -230,6 +213,14 @@
 }
 
 @media (max-width: 640px) {
+  .saved-jobs-page .profile-form {
+    gap: var(--space-4);
+  }
+
+  .saved-jobs-page .profile-form > .profile-header {
+    margin-bottom: var(--space-2);
+  }
+
   .saved-jobs-card-main {
     flex-wrap: wrap;
   }
@@ -238,7 +229,8 @@
     width: 100%;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    padding-left: var(--saved-card-aside-offset);
   }
 
   .saved-jobs-card-salary {
@@ -249,9 +241,11 @@
 @media (max-width: 400px) {
   .saved-jobs-card {
     padding: var(--space-4);
+    gap: var(--space-3);
   }
 
   .saved-jobs-card-main {
+    --saved-card-aside-offset: calc(40px + var(--space-3));
     gap: var(--space-3);
   }
 
@@ -261,13 +255,22 @@
     font-size: var(--font-size-base);
   }
 
-  .saved-jobs-card-title,
+  .saved-jobs-card-title {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    -webkit-box-orient: unset;
+    overflow: visible;
+    overflow-wrap: break-word;
+  }
+
   .saved-jobs-card-location {
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .saved-jobs-card-actions {
     flex-wrap: wrap;
+    padding-top: var(--space-3);
   }
 }
 
