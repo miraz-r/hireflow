@@ -232,6 +232,11 @@ export default function App() {
       firstFilterRender.current = false;
       return;
     }
+    // On mobile/tablet (<=1024px) the filter sidebar is static and sits below
+    // the category section, so scrolling #jobs into view would yank the page up
+    // to "Browse by category". Only scroll on desktop, where the sticky sidebar
+    // keeps the filters visible and this behavior is intentional.
+    if (window.innerWidth <= 1024) return;
     featuredJobsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, activeCategory]);
