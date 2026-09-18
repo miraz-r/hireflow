@@ -60,8 +60,8 @@ const profileSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Profile role is required'],
       enum: {
-        values: ['jobseeker', 'recruiter'],
-        message: 'Profile role must be jobseeker or recruiter',
+        values: ['jobseeker', 'recruiter', 'admin'],
+        message: 'Profile role must be jobseeker, recruiter, or admin',
       },
     },
 

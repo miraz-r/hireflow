@@ -90,6 +90,25 @@ const jobSchema = new mongoose.Schema(
       default: '',
     },
 
+    // Lifecycle state. Expired is independent of manual closure: closing a job
+    // explicitly sets closedAt; an expired job is never mutated into closed.
+    status: {
+      type: String,
+      enum: {
+        values: ['active', 'closed', 'expired'],
+        message: 'Status must be active, closed, or expired',
+      },
+      default: 'active',
+      index: true,
+    },
+
+    // When the job was explicitly moved to closed. Set only on manual close;
+    // it is not a generic last-updated timestamp.
+    closedAt: {
+      type: Date,
+      default: null,
+    },
+
     // The recruiter who posted this job. Set server-side from the auth token on
     // creation; owners can later manage their own jobs and see applicants.
     postedBy: {

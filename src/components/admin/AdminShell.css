@@ -1,0 +1,119 @@
+/* =========================================================
+   HIREFLOW ADMIN SHELL
+   Full-bleed admin application layout that fully bypasses the
+   public Navbar/Footer. Self-contained design tokens in the
+   admin-* namespace. The admin area follows the same global
+   theme state as the public site (data-theme on <html>), with
+   dark-mode token overrides layered below.
+   ========================================================= */
+
+.admin-shell {
+  /* Admin design tokens - isolated to the admin area (light default) */
+  --admin-surface: #ffffff;
+  --admin-canvas: #f7f8fa;
+  --admin-border: #e5e7eb;
+  --admin-border-strong: #d1d5db;
+  --admin-text-strong: #111827;
+  --admin-text: #4b5563;
+  --admin-text-muted: #6b7280;
+  --admin-text-faint: #9ca3af;
+  --admin-primary: #4f46e5;
+  --admin-primary-hover: #3730a3;
+  --admin-primary-soft: #eef2ff;
+  --admin-hover: #f3f4f6;
+  --admin-focus: #4f46e5;
+  --admin-sidebar-width: 264px;
+  --admin-topbar-height: 64px;
+
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--admin-canvas);
+  color: var(--admin-text-strong);
+  font-family: var(--font-family-sans);
+  color-scheme: light;
+}
+
+/* Dark theme - follows the shared global theme (html[data-theme="dark"]).
+   Scoped overlay only redefines the admin tokens; layout/dimensions and
+   the purple b/focus/soft accents stay consistent across themes. */
+html[data-theme="dark"] .admin-shell {
+  --admin-surface: #1a2438;
+  --admin-canvas: #0c1222;
+  --admin-border: #1e293b;
+  --admin-border-strong: #334155;
+  --admin-text-strong: #f1f5f9;
+  --admin-text: #94a3b8;
+  --admin-text-muted: #8290a5;
+  --admin-text-faint: #64748b;
+  --admin-primary: #818cf8;
+  --admin-primary-hover: #6366f1;
+  --admin-primary-soft: rgba(129, 140, 248, 0.12);
+  --admin-hover: rgba(148, 163, 184, 0.08);
+  --admin-focus: #818cf8;
+  color-scheme: dark;
+}
+
+/* Scrollable main column */
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.admin-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--admin-canvas);
+  padding: 28px 32px 48px;
+}
+
+/* Mobile drawer backdrop (invisible/non-interactive on desktop) */
+.admin-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  background-color: rgba(15, 23, 42, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease-out, visibility 220ms ease-out;
+}
+
+.admin-shell--drawer-open .admin-drawer-backdrop {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-drawer-backdrop {
+    transition: none;
+  }
+}
+
+/* Tablet - slightly more compact chrome while the sidebar stays persistent */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .admin-shell {
+    --admin-sidebar-width: 232px;
+  }
+
+  .admin-content {
+    padding: 24px;
+  }
+}
+
+/* Mobile - sidebar becomes an off-canvas drawer */
+@media (max-width: 1023px) {
+  .admin-content {
+    padding: 20px 16px 40px;
+  }
+
+  /* Keep the drawer layer self-contained: no background scrolling behind it */
+  .admin-shell--drawer-open .admin-content {
+    overflow: hidden;
+  }
+}

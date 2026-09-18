@@ -43,11 +43,15 @@ import PrivacyPage from './pages/PrivacyPage';
 import CookiePolicyPage from './pages/CookiePolicyPage';
 import TermsPage from './pages/TermsPage';
 import AdminPage from './pages/AdminPage';
+import RecruiterDashboard from './components/RecruiterDashboard';
 import './App.css';
 
 export default function App() {
   const { loading: authLoading, user } = useAuth();
   const location = useLocation();
+  // The Admin area is a full-bleed workspace that completely bypasses the
+  // public Navbar and Footer. Any /admin* path renders the Admin Shell alone.
+  const isAdminArea = location.pathname.startsWith('/admin');
   const [searchQuery, setSearchQuery] = useState('');
   const [locationQuery, setLocationQuery] = useState('');
   const [filters, setFilters] = useState({ workType: null, employmentType: null, experienceLevel: null, salary: null });
@@ -248,6 +252,16 @@ export default function App() {
     return <div className="app app-loading" aria-busy="true" />;
   }
 
+  if (isAdminArea) {
+    return (
+      <div className="app app--admin">
+        <Routes>
+          <Route path="/admin/*" element={<AdminPage />} />
+        </Routes>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <ScrollToTop />
@@ -303,7 +317,7 @@ export default function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
           <Route path="/accessibility" element={<AccessibilityPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/dashboard" element={<RecruiterDashboard />} />
         </Routes>
         </PageTransition>
       </main>

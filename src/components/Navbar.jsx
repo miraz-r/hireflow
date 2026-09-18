@@ -330,7 +330,12 @@ export default function Navbar() {
     );
   }
 
-  const roleLabel = user?.role === 'recruiter' ? 'Recruiter' : 'Jobseeker';
+  const roleLabel =
+    user?.role === 'admin'
+      ? 'Administrator'
+      : user?.role === 'recruiter'
+        ? 'Recruiter'
+        : 'Jobseeker';
   const switchLabel = user?.role === 'recruiter' ? 'Switch to Jobseeker' : 'Switch to Recruiter';
   const avatarSrc = user?.avatarUrl ? `${AVATAR_BASE}${user.avatarUrl}` : null;
 
@@ -394,6 +399,22 @@ export default function Navbar() {
                     </svg>
                     Profile
                   </Link>
+                  {user.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="account-menu-item"
+                      role="menuitem"
+                      onClick={handleProfileNavigate}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="3" y="3" width="7" height="9" rx="1" />
+                        <rect x="14" y="3" width="7" height="5" rx="1" />
+                        <rect x="14" y="12" width="7" height="9" rx="1" />
+                        <rect x="3" y="16" width="7" height="5" rx="1" />
+                      </svg>
+                      Admin Dashboard
+                    </Link>
+                  )}
                   {user.role === 'jobseeker' && (
                     <>
                       <Link
@@ -424,7 +445,7 @@ export default function Navbar() {
                   {user.role === 'recruiter' && (
                     <>
                       <Link
-                        to="/admin"
+                        to="/dashboard"
                         className="account-menu-item"
                         role="menuitem"
                         onClick={handleProfileNavigate}
@@ -452,13 +473,15 @@ export default function Navbar() {
                       </Link>
                     </>
                   )}
-                  <div className="account-menu-divider" />
-                  <button
-                    type="button"
-                    className="account-menu-item"
-                    role="menuitem"
-                    onClick={handleSwitchRole}
-                  >
+                  {user.role !== 'admin' && (
+                    <>
+                      <div className="account-menu-divider" />
+                      <button
+                        type="button"
+                        className="account-menu-item"
+                        role="menuitem"
+                        onClick={handleSwitchRole}
+                      >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M17 1l4 4-4 4" />
                       <path d="M3 11V9a4 4 0 0 1 4-4h14" />
@@ -466,8 +489,10 @@ export default function Navbar() {
                       <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                     </svg>
                     {switchLabel}
-                  </button>
-                  <div className="account-menu-divider" />
+                    </button>
+                  </>
+                )}
+                <div className="account-menu-divider" />
                   <button
                     type="button"
                     className="account-menu-item account-menu-theme-toggle"
@@ -577,7 +602,7 @@ export default function Navbar() {
 
             <nav className="mobile-drawer-nav" aria-label="Mobile navigation">
               {/* Switch to Recruiter - above Navigation */}
-              {user && (
+              {user && user.role !== 'admin' && (
                 <div className="mobile-drawer-section">
                   <button
                     type="button"
@@ -636,6 +661,21 @@ export default function Navbar() {
                     </svg>
                     <span className="mobile-drawer-label">Profile</span>
                   </Link>
+                  {user.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="mobile-drawer-link"
+                      onClick={handleDrawerRouteNav}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="3" y="3" width="7" height="9" rx="1" />
+                        <rect x="14" y="3" width="7" height="5" rx="1" />
+                        <rect x="14" y="12" width="7" height="9" rx="1" />
+                        <rect x="3" y="16" width="7" height="5" rx="1" />
+                      </svg>
+                      <span className="mobile-drawer-label">Admin Dashboard</span>
+                    </Link>
+                  )}
                   {user.role === 'jobseeker' && (
                     <>
                       <Link
@@ -664,7 +704,7 @@ export default function Navbar() {
                   {user.role === 'recruiter' && (
                     <>
                       <Link
-                        to="/admin"
+                        to="/dashboard"
                         className="mobile-drawer-link"
                         onClick={handleDrawerRouteNav}
                       >

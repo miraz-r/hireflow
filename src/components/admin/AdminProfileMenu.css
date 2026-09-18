@@ -1,0 +1,103 @@
+/* =========================================================
+   ADMIN PROFILE MENU - shared compact account dropdown used by
+   both the sidebar profile footer and the topbar profile control.
+   ========================================================= */
+
+.admin-profile-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  width: 224px;
+  padding: 6px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  animation: admin-popover-in 140ms ease-out;
+}
+
+.admin-profile-menu--up {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+@keyframes admin-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-profile-menu {
+    animation: none;
+  }
+}
+
+.admin-profile-menu-header {
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.admin-profile-menu-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-profile-menu-email {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-profile-menu-divider {
+  height: 1px;
+  margin: 6px 4px;
+  background-color: var(--admin-border);
+}
+
+.admin-profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text);
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.admin-profile-menu-item svg {
+  flex-shrink: 0;
+  color: var(--admin-text-faint);
+}
+
+.admin-profile-menu-item:hover {
+  background-color: var(--admin-hover);
+  color: var(--admin-text-strong);
+}
+
+.admin-profile-menu-item:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--admin-focus);
+}

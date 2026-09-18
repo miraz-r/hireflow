@@ -190,6 +190,12 @@ const toggleRole = async (req, res, next) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Admins are never switchable via the public role endpoint. The only way
+    // in or out of the admin role is the protected server-side bootstrap.
+    if (user.role === 'admin') {
+      return res.status(403).json({ error: 'Admin role cannot be changed' });
+    }
+
     if (newRole !== user.role) {
       const previousRole = user.role;
       user.role = newRole;

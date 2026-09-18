@@ -1,14 +1,59 @@
-/* The Admin Dashboard reuses the existing recruiter dashboard design
-   system (rc-* classes) defined with the ProfilePage recruiter workspace. */
-@import './ProfilePage.css';
+/* Phase 1A - minimal admin page placeholder content inside the Admin Shell.
+   Provisional until the real Overview (1B), Jobs (1C) and Job Detail (1D)
+   pages are implemented. */
 
 .admin-page {
-  min-height: 60vh;
-  padding: var(--space-8) 0 var(--space-12);
+  max-width: 840px;
 }
 
-@media (max-width: 768px) {
-  .admin-page {
-    padding: var(--space-5) 0 var(--space-8);
+.admin-placeholder {
+  padding: 32px 36px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+}
+
+.admin-placeholder-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-primary);
+}
+
+.admin-placeholder-title {
+  margin: 8px 0 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--admin-text-strong);
+}
+
+.admin-placeholder-text {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--admin-text-muted);
+}
+
+.admin-placeholder-route {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 12px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-family: var(--font-family-mono);
+  font-size: 13px;
+  color: var(--admin-text);
+  background-color: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 767px) {
+  .admin-placeholder {
+    padding: 24px 20px;
   }
 }

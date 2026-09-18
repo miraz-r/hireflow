@@ -1,0 +1,241 @@
+/* =========================================================
+   ADMIN TOPBAR - white topbar: page title, global admin
+   search, notifications, profile control.
+   ========================================================= */
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: var(--admin-topbar-height);
+  padding: 0 20px;
+  background-color: var(--admin-surface);
+  border-bottom: 1px solid var(--admin-border);
+  flex-shrink: 0;
+}
+
+/* Mobile drawer toggle (desktop hidden) */
+.admin-topbar-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  color: var(--admin-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.admin-topbar-menu-btn:hover {
+  background-color: var(--admin-hover);
+  color: var(--admin-text-strong);
+}
+
+.admin-topbar-menu-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--admin-focus);
+}
+
+/* Route-aware page title */
+.admin-topbar-title {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--admin-text-strong);
+}
+
+/* Global search - visual shell only in Phase 1A */
+.admin-topbar-search {
+  position: relative;
+  margin-left: auto;
+  width: clamp(160px, 26vw, 320px);
+  flex: 0 1 auto;
+}
+
+.admin-topbar-search > svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--admin-text-faint);
+  pointer-events: none;
+}
+
+.admin-topbar-search-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px 0 36px;
+  font-size: 14px;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-topbar-search-input::placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-topbar-search-input:hover {
+  border-color: var(--admin-border-strong);
+}
+
+.admin-topbar-search-input:focus {
+  outline: none;
+  background-color: var(--admin-surface);
+  border-color: var(--admin-focus);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Grouped controls (notifications, profile) */
+.admin-topbar-group {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.admin-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  color: var(--admin-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.admin-icon-btn:hover {
+  background-color: var(--admin-hover);
+  color: var(--admin-text-strong);
+}
+
+.admin-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--admin-focus);
+}
+
+.admin-avatar-btn {
+  width: 42px;
+  height: 42px;
+  padding: 3px;
+}
+
+.admin-topbar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background-color: var(--admin-hover);
+}
+
+.admin-topbar-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--admin-primary), #7c3aed);
+  color: #ffffff;
+}
+
+/* Popover (notifications) */
+.admin-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 45;
+  width: min(300px, 78vw);
+  padding: 6px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  animation: admin-popover-in 140ms ease-out;
+}
+
+@keyframes admin-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-popover {
+    animation: none;
+  }
+}
+
+.admin-popover-header {
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-popover-empty {
+  display: grid;
+  place-items: center;
+  padding: 26px 16px 28px;
+  text-align: center;
+  color: var(--admin-text-faint);
+}
+
+.admin-popover-empty svg {
+  margin-bottom: 8px;
+}
+
+.admin-popover-empty p {
+  margin: 0 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.admin-popover-empty span {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+  .admin-topbar {
+    padding: 0 12px;
+    gap: 10px;
+  }
+
+  .admin-topbar-menu-btn {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-topbar-title {
+    display: none;
+  }
+
+  .admin-topbar-search {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+}

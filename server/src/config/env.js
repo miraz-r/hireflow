@@ -20,4 +20,12 @@ module.exports = {
   bcryptRounds: parseInt(optional('BCRYPT_ROUNDS', '12'), 10),
   resendApiKey: optional('RESEND_API_KEY', ''),
   emailFrom: optional('EMAIL_FROM', 'HireFlow <onboarding@resend.dev>'),
+
+  // Admin bootstrap (npm run seed:admin). Credentials are never hardcoded;
+  // supply them via the environment. See src/seed/admin.seed.js.
+  adminBootstrapEmail: optional('ADMIN_BOOTSTRAP_EMAIL', ''),
+  adminBootstrapPassword: optional('ADMIN_BOOTSTRAP_PASSWORD', ''),
+  adminBootstrapFullName: optional('ADMIN_BOOTSTRAP_FULL_NAME', ''),
+  adminBootstrapPhone: optional('ADMIN_BOOTSTRAP_PHONE', ''),
+  adminBootstrapAllowProduction: optional('ADMIN_BOOTSTRAP_ALLOW_PRODUCTION', 'false') === 'true',
 };
