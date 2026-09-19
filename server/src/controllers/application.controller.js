@@ -2,6 +2,7 @@ const Job = require('../models/Job');
 const Profile = require('../models/Profile');
 const Application = require('../models/Application');
 const User = require('../models/User');
+const RecruiterActivity = require('../models/RecruiterActivity');
 
 // ---------------------------------------------------------------------------
 // POST /api/applications  — jobseeker applies to a job
@@ -190,11 +191,21 @@ const updateApplicationStatus = async (req, res, next) => {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
+    const previousStatus = application.status;
     const updated = await Application.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
       { new: true, runValidators: true, context: 'query' }
     );
+
+    // Every status change becomes a new persistent activity event; past
+    // events are never overwritten.
+    await RecruiterActivity.create({
+      recruiterId: req.user.id,
+      applicationId: updated._id,
+      previousStatus,
+      newStatus: updated.status,
+    });
 
     return res.status(200).json({
       id: updated.id,
@@ -292,6 +303,110 @@ const getApplicationDetail = async (req, res, next) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// GET /api/applications/activity  — recruiter dashboard recent activity feed
+// Newest events first. "Application received" reflects each application's
+// immutable creation timestamp; every status change is read from the persistent
+// RecruiterActivity history so historical events are never mutated.
+// ---------------------------------------------------------------------------
+const getRecruiterActivity = async (req, res, next) => {
+  try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 20);
+
+    const jobs = await Job.find({ postedBy: req.user.id }).select('_id');
+    if (jobs.length === 0) {
+      return res.status(200).json({ items: [] });
+    }
+    const jobIds = jobs.map((j) => j._id);
+
+    const applications = await Application.find({ jobId: { $in: jobIds } })
+      .select('_id userId jobId createdAt')
+      .lean();
+    if (applications.length === 0) {
+      return res.status(200).json({ items: [] });
+    }
+
+    const jobIdsFromApps = [...new Set(applications.map((a) => String(a.jobId)))];
+    const applicantIds = [...new Set(applications.map((a) => String(a.userId)))];
+
+    const [events, jobsData, profiles] = await Promise.all([
+      RecruiterActivity.find({
+        recruiterId: req.user.id,
+        applicationId: { $in: applications.map((a) => a._id) },
+      })
+        .sort({ createdAt: -1 })
+        .lean(),
+      Job.find({ _id: { $in: jobIdsFromApps } }).select('title company location').lean(),
+      Profile.find({ userId: { $in: applicantIds } })
+        .select('userId fullName headline avatarUrl')
+        .lean(),
+    ]);
+
+    const applicationById = new Map(applications.map((a) => [String(a._id), a]));
+    const jobById = new Map(jobsData.map((j) => [String(j._id), j]));
+    const profileByUserId = new Map(profiles.map((p) => [String(p.userId), p]));
+
+    const items = [];
+    for (const app of applications) {
+      items.push({
+        id: `app-${app._id}`,
+        type: 'application-created',
+        applicationId: app._id,
+        previousStatus: null,
+        newStatus: 'applied',
+        at: app.createdAt,
+      });
+    }
+    for (const ev of events) {
+      items.push({
+        id: `activity-${ev._id}`,
+        type: 'status-changed',
+        applicationId: ev.applicationId,
+        previousStatus: ev.previousStatus,
+        newStatus: ev.newStatus,
+        at: ev.createdAt,
+      });
+    }
+
+    const merged = items
+      .sort((a, b) => new Date(b.at) - new Date(a.at))
+      .slice(0, limit);
+
+    const result = merged.map((item) => {
+      const app = applicationById.get(String(item.applicationId));
+      const job = app ? jobById.get(String(app.jobId)) : null;
+      const profile = app ? profileByUserId.get(String(app.userId)) : null;
+      return {
+        id: item.id,
+        type: item.type,
+        applicationId: item.applicationId,
+        previousStatus: item.previousStatus,
+        newStatus: item.newStatus,
+        at: item.at ? new Date(item.at).toISOString() : item.at,
+        job: job
+          ? {
+              id: job._id,
+              title: job.title || '',
+              company: job.company || '',
+              location: job.location || '',
+            }
+          : null,
+        applicant: profile
+          ? {
+              fullName: profile.fullName || 'Applicant',
+              headline: profile.headline || '',
+              avatarUrl: profile.avatarUrl || '',
+            }
+          : { fullName: 'Applicant', headline: '', avatarUrl: '' },
+      };
+    });
+
+    return res.status(200).json({ items: result });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   createApplication,
   getMyApplication,
@@ -299,5 +414,6 @@ module.exports = {
   listJobseekerApplications,
   updateApplicationStatus,
   getApplicationDetail,
+  getRecruiterActivity,
 };
 

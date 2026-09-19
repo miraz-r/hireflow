@@ -16,6 +16,7 @@ const User = require('../src/models/User');
 const Profile = require('../src/models/Profile');
 const Job = require('../src/models/Job');
 const Application = require('../src/models/Application');
+const RecruiterActivity = require('../src/models/RecruiterActivity');
 
 // Distinct DB so this file can run concurrently with other test files.
 const TEST_DB_NAME = 'hireflow_test_applications';
@@ -92,6 +93,7 @@ beforeEach(async () => {
   await Profile.deleteMany({});
   await Job.deleteMany({});
   await Application.deleteMany({});
+  await RecruiterActivity.deleteMany({});
 });
 
 let seedCounter = 0;
@@ -298,5 +300,85 @@ describe('application data retrieval', () => {
     assert.equal(detail.body.applicant.linkedin, '');
     assert.equal(detail.body.applicant.portfolio, '');
     assert.equal(detail.body.applicant.phone, '+1-555-0100');
+  });
+});
+
+describe('persistent recruiter activity history', () => {
+  const apply = async (jobId, jobseekerToken) => {
+    const res = await request('POST', '/api/applications', {
+      token: jobseekerToken,
+      body: { ...validApplication, jobId },
+    });
+    assert.equal(res.status, 201);
+    return res.body;
+  };
+
+  const setStatus = async (applicationId, status, recruiterToken) =>
+    request('PATCH', `/api/applications/${applicationId}/status`, {
+      token: recruiterToken,
+      body: { status },
+    });
+
+  it('records a new persistent event on every status change', async () => {
+    const { job, recruiter, recruiterToken, jobseekerToken } = await seedJobAndParties();
+    const created = await apply(job._id, jobseekerToken);
+
+    const first = await setStatus(created._id, 'under-review', recruiterToken);
+    assert.equal(first.status, 200);
+    assert.equal(first.body.status, 'under-review');
+
+    const second = await setStatus(created._id, 'interview', recruiterToken);
+    assert.equal(second.status, 200);
+    assert.equal(second.body.status, 'interview');
+
+    const events = await RecruiterActivity.find({ applicationId: created._id }).sort({
+      createdAt: 1,
+    });
+    assert.equal(events.length, 2);
+    assert.equal(events[0].previousStatus, 'applied');
+    assert.equal(events[0].newStatus, 'under-review');
+    assert.equal(events[1].previousStatus, 'under-review');
+    assert.equal(events[1].newStatus, 'interview');
+    assert.equal(String(events[0].recruiterId), String(recruiter._id));
+  });
+
+  it('exposes the full history through the activity feed, newest first', async () => {
+    const { job, recruiterToken, jobseekerToken } = await seedJobAndParties();
+    const created = await apply(job._id, jobseekerToken);
+
+    await setStatus(created._id, 'under-review', recruiterToken);
+    await setStatus(created._id, 'interview', recruiterToken);
+
+    const feed = await request('GET', '/api/applications/activity', {
+      token: recruiterToken,
+    });
+    assert.equal(feed.status, 200);
+
+    const statusItems = feed.body.items.filter((i) => i.type === 'status-changed');
+    assert.equal(statusItems.length, 2);
+    assert.equal(statusItems[0].newStatus, 'interview');
+    assert.equal(statusItems[0].previousStatus, 'under-review');
+    assert.equal(statusItems[1].newStatus, 'under-review');
+    assert.equal(statusItems[1].previousStatus, 'applied');
+
+    assert.ok(
+      feed.body.items.some((i) => i.type === 'application-created') &&
+        feed.body.items.some((i) => i.type === 'application-created' && i.at)
+    );
+    assert.equal(feed.body.items[0].applicant.fullName, 'Profile Name');
+    assert.equal(feed.body.items[0].job.title, 'Software Engineer');
+    assert.equal(feed.body.items[0].job.company, 'Acme Corp');
+  });
+
+  it('refuses the activity feed for a recruiter who owns none of the jobs', async () => {
+    const { job, jobseekerToken } = await seedJobAndParties();
+    await apply(job._id, jobseekerToken);
+
+    const otherRecruiter = await makeUser('other-activity-recruiter@example.com', 'recruiter');
+    const feed = await request('GET', '/api/applications/activity', {
+      token: signTokenFor(otherRecruiter),
+    });
+    assert.equal(feed.status, 200);
+    assert.deepEqual(feed.body.items, []);
   });
 });

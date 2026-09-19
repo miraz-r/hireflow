@@ -40,7 +40,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user?.role === 'recruiter' && tab === 'recruiter-applications') {
-      navigate('/admin', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [user, tab, navigate]);
 

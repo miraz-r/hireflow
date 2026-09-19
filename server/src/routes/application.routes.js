@@ -7,6 +7,7 @@ const {
   listJobseekerApplications,
   updateApplicationStatus,
   getApplicationDetail,
+  getRecruiterActivity,
 } = require('../controllers/application.controller');
 const {
   createValidators,
@@ -24,6 +25,10 @@ router.use(authenticate);
 // Recruiter-only: applications for the recruiter's own jobs.
 // Defined before the :jobId routes to keep the URL shape unambiguous.
 router.get('/mine', authorize('recruiter'), listMyApplications);
+
+// Recruiter-only: recent activity feed for the recruiter's own pipeline.
+// Defined before :id routes so the literal path is never shadowed.
+router.get('/activity', authorize('recruiter'), getRecruiterActivity);
 
 // Recruiter-only: update an application's status. Ownership is enforced in the
 // controller against the application's own job.

@@ -1,21 +1,106 @@
-import { useState, useEffect, useId, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useId, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { apiGet, apiPatch } from '../utils/api';
 import { STATUS_LABELS } from '../constants/applicationStatus';
+import { useAuth } from '../context/AuthContext';
+import './RecruiterDashboard.css';
 
 const AVATAR_BASE = 'http://localhost:5000';
 
+const PIPELINE = ['applied', 'under-review', 'interview', 'offer', 'hired'];
+
+const STAGE_COLORS = {
+  applied: 'var(--color-brand-primary)',
+  'under-review': 'var(--color-warning)',
+  interview: 'var(--rd-purple)',
+  offer: 'var(--color-success)',
+  hired: 'var(--color-success)',
+};
+
+function Icon({ children, size = 20 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
+
+const ICONS = {
+  users: (
+    <>
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </>
+  ),
+  user: (
+    <>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </>
+  ),
+  check: <polyline points="20 6 9 17 4 12" />,
+  arrowRight: (
+    <>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </>
+  ),
+  inbox: (
+    <>
+      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+    </>
+  ),
+  x: (
+    <>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </>
+  ),
+  briefcase: (
+    <>
+      <rect x="2" y="7" width="20" height="14" rx="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </>
+  ),
+};
+
 /* ======================================================================= */
 /* Recruiter dashboard: applications for the recruiter's own jobs.          */
-/* Rendered by the Admin Dashboard (/admin) as the single dashboard view.   */
+/* Renders as a normal HireFlow page (public Navbar/Footer layout) — the    */
+/* approved polished content (KPIs, pipeline, jobs, recent applicants,      */
+/* activity, applicants workspace) without a separate application shell.    */
 /* ======================================================================= */
 export default function RecruiterDashboard() {
+  const { user } = useAuth();
+
   const [applications, setApplications] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
   const [jobFilter, setJobFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [detailAppId, setDetailAppId] = useState(null);
   const [detailData, setDetailData] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -43,6 +128,52 @@ export default function RecruiterDashboard() {
     return () => { cancelled = true; };
   }, []);
 
+  const [activity, setActivity] = useState(null);
+
+  const fetchActivity = useCallback(async () => {
+    try {
+      const res = await apiGet('/applications/activity');
+      setActivity(res.data?.items || []);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    fetchActivity();
+  }, [fetchActivity]);
+
+  // Whenever the user ARRIVES at /dashboard from another route (including
+  // browser history POP/BACK traversal), the dashboard must open at the top.
+  // On a history traversal the browser natively restores the /dashboard entry's
+  // previously saved scroll position (e.g. the Applicants section) AFTER this
+  // component mounts, overriding any scroll reset. Disabling native restoration
+  // here, before the traversal's restore task applies, makes every arrival
+  // deterministic at the top. Native restoration is re-enabled on unmount so
+  // other routes keep their normal Back/Forward scroll behavior.
+  useLayoutEffect(() => {
+    history.scrollRestoration = 'manual';
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    return () => {
+      history.scrollRestoration = 'auto';
+    };
+  }, []);
+
+  /* Company name for the page sub-line (non-blocking). */
+  useEffect(() => {
+    let cancelled = false;
+    apiGet('/api/profile', { timeout: 4000 })
+      .then((res) => {
+        if (!cancelled) setCompanyName(res.data?.companyName || '');
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  /* This route is recruiter-only; keep non-recruiters on their own areas.
+     Placed after all hooks so hook order stays stable across renders. */
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role === 'admin') return <Navigate to="/admin" replace />;
+  if (user.role === 'jobseeker') return <Navigate to="/" replace />;
+
   const handleStatusChange = async (app, newStatus) => {
     if (updatingId === app.id || newStatus === app.status) return;
     setActionError('');
@@ -50,6 +181,7 @@ export default function RecruiterDashboard() {
     try {
       await apiPatch(`/applications/${app.id}/status`, { status: newStatus });
       setApplications((prev) => prev.map((a) => (a.id === app.id ? { ...a, status: newStatus } : a)));
+      fetchActivity();
     } catch (err) {
       setActionError(err?.message || 'Unable to update status. Please try again.');
     } finally {
@@ -82,7 +214,12 @@ export default function RecruiterDashboard() {
     setDetailError('');
   };
 
-  if (loading) return <div className="app-loading" aria-busy="true" />;
+  const resolveAvatar = (url) =>
+    url ? (url.startsWith('http') ? url : `${AVATAR_BASE}${url}`) : null;
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const firstName = (user?.fullName || '').trim().split(/\s+/)[0] || 'Recruiter';
 
   const fmtDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -104,22 +241,23 @@ export default function RecruiterDashboard() {
     return fmtDate(dateStr);
   };
 
-  const PIPELINE = ['applied', 'under-review', 'interview', 'offer', 'hired'];
+  const list = applications || [];
 
-  const countByStatus = (list) => {
+  const countByStatus = (items) => {
     const c = {};
     for (const s of PIPELINE) c[s] = 0;
     c.rejected = 0;
-    for (const app of list) {
+    for (const app of items) {
       if (c[app.status] !== undefined) c[app.status]++;
       else if (app.status === 'rejected') c.rejected++;
+      else c[app.status] = (c[app.status] || 0) + 1;
     }
     return c;
   };
 
   const uniqueJobs = [];
   const seenJobIds = new Set();
-  for (const app of applications) {
+  for (const app of list) {
     const jid = app.job?.id || app.job?._id;
     if (jid && !seenJobIds.has(String(jid))) {
       seenJobIds.add(String(jid));
@@ -127,356 +265,504 @@ export default function RecruiterDashboard() {
     }
   }
 
-  const filtered = jobFilter === 'all'
-    ? applications
-    : applications.filter((app) => String(app.job?.id || app.job?._id) === jobFilter);
+  const searchTerm = searchQuery.trim().toLowerCase();
+  const filtered = list.filter((app) => {
+    const okJob = jobFilter === 'all' || String(app.job?.id || app.job?._id) === jobFilter;
+    if (!okJob) return false;
+    if (!searchTerm) return true;
+    const hay = [
+      app.applicant?.fullName,
+      app.applicant?.headline,
+      app.job?.title,
+      app.job?.company,
+    ].filter(Boolean).join(' ').toLowerCase();
+    return hay.includes(searchTerm);
+  });
 
-  const metrics = countByStatus(filtered);
-  const total = filtered.length;
+  const metrics = countByStatus(list);
+  const total = list.length;
 
   const jobsByCount = [];
   const jobCountMap = new Map();
-  for (const app of applications) {
-    const jid = app.job?.id || app.job?._id;
-    const key = String(jid);
-    if (!jobCountMap.has(key)) {
-      jobCountMap.set(key, { title: app.job?.title || 'Job', company: app.job?.company || '', count: 0 });
+  for (const app of list) {
+    const jid = String(app.job?.id || app.job?._id);
+    if (!jobCountMap.has(jid)) {
+      jobCountMap.set(jid, { title: app.job?.title || 'Job', company: app.job?.company || '', count: 0 });
     }
-    jobCountMap.get(key).count++;
+    jobCountMap.get(jid).count++;
   }
   for (const [, v] of jobCountMap) jobsByCount.push(v);
   jobsByCount.sort((a, b) => b.count - a.count);
-
   const maxJobCount = jobsByCount.length > 0 ? Math.max(...jobsByCount.map((j) => j.count)) : 1;
 
-  const recentApps = [...applications]
+  const recentApps = [...list]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
-  const stageColors = {
-    applied: '#4F46E5',
-    'under-review': '#6B7280',
-    interview: '#7C3AED',
-    offer: '#059669',
-    hired: '#10B981',
+  const activityItems = (activity || []).map((item) => {
+    const name = item.applicant?.fullName || 'Applicant';
+    const jobTitle = item.job?.title || 'a job';
+    const company = item.job?.company || 'Your listing';
+    if (item.type === 'status-changed') {
+      return {
+        key: item.id,
+        status: item.newStatus || 'applied',
+        title: `${name} moved to ${STATUS_LABELS[item.newStatus] || item.newStatus}`,
+        detail: `${jobTitle} · ${company}`,
+        time: fmtTimeAgo(item.at),
+      };
+    }
+    return {
+      key: item.id,
+      status: 'applied',
+      title: 'New application received',
+      detail: `${jobTitle} · ${company}`,
+      time: fmtTimeAgo(item.at),
+    };
+  });
+
+  const clearFilters = () => {
+    setJobFilter('all');
+    setSearchQuery('');
   };
 
-  const header = (
-    <>
-      <h1 className="rc-header-title">Admin Dashboard</h1>
-      <p className="rc-header-sub">Your hiring workspace. Manage your pipeline and applicants.</p>
-    </>
-  );
+  const pctOf = (n) => (total > 0 ? (n / total) * 100 : 0);
 
-  if (applications.length === 0 && !error) {
-    return (
-      <div className="rc-dashboard">
-        <div className="rc-header">
-          <div className="rc-header-text">
-            {header}
-          </div>
-        </div>
-        <div className="rc-empty-state">
-          <div className="rc-empty-icon" aria-hidden="true">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-          </div>
-          <h3 className="rc-empty-title">No applications yet</h3>
-          <p className="rc-empty-desc">
-            When jobseekers apply to the jobs you post, their applications will appear here.
-            You can start by posting a new job.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // "Applicants" / "Review applicants" / "View all" jump to the applicants
+  // workspace. They must NOT add a "#applicants" fragment to the URL: a hash
+  // on /dashboard is preserved in the history entry, so a later browser Back
+  // (e.g. Dashboard -> Post a Job -> Back) restores /dashboard#applicants and
+  // ScrollToTop then forces the viewport down to #applicants. Scrolling
+  // programmatically keeps the jump but leaves the URL clean, so every history
+  // traversal into /dashboard opens at the top.
+  const jumpToApplicants = (e) => {
+    e.preventDefault();
+    document.getElementById('applicants')?.scrollIntoView({ block: 'start' });
+    if (window.location.hash) {
+      history.replaceState(history.state, '', window.location.pathname + window.location.search);
+    }
+  };
 
   return (
-    <div className="rc-dashboard">
-      {/* ── Header / Workspace Context ───────────────────────── */}
-      <div className="rc-header">
-        <div className="rc-header-text">
-          {header}
-        </div>
-        {uniqueJobs.length > 1 && (
-          <div className="rc-job-filter">
-            <label className="rc-filter-label" htmlFor="rc-job-select">Filter by job</label>
-            <select
-              id="rc-job-select"
-              className="input rc-filter-select"
-              value={jobFilter}
-              onChange={(e) => setJobFilter(e.target.value)}
-            >
-              <option value="all">All jobs</option>
-              {uniqueJobs.map((j) => (
-                <option key={j.id} value={j.id}>{j.title}</option>
-              ))}
-            </select>
+    <div className="rd-dashboard">
+      <div className="container">
+        {error && (
+          <div className="rd-alert" role="alert">
+            <span>{error}</span>
           </div>
         )}
-      </div>
+        {actionError && (
+          <div className="rd-alert" role="alert">
+            <span>{actionError}</span>
+          </div>
+        )}
 
-      {error && <div className="auth-alert auth-alert-error" role="alert"><span>{error}</span></div>}
-      {actionError && <div className="auth-alert auth-alert-error" role="alert"><span>{actionError}</span></div>}
-
-      {/* ── Metric Cards ─────────────────────────────────────── */}
-      <div className="rc-metrics">
-        <div className="rc-metric-card rc-metric--blue">
-          <div className="rc-metric-top">
-            <div className="rc-metric-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+        {loading ? (
+          <div className="rd-state" role="status" aria-live="polite">
+            <span className="rd-state-spinner" aria-hidden="true" />
+            <span className="rd-state-text">Loading your hiring workspace…</span>
+          </div>
+        ) : list.length === 0 ? (
+          <div className="rd-empty">
+            <div className="rd-empty-icon" aria-hidden="true">
+              <Icon size={32}>{ICONS.inbox}</Icon>
             </div>
-            <span className="rc-metric-label">Total applicants</span>
-          </div>
-          <div className="rc-metric-value">{total}</div>
-          <div className="rc-metric-context">{total === 1 ? 'candidate' : 'candidates'} across all jobs</div>
-          <div className="rc-metric-distribution" aria-hidden="true">
-            {PIPELINE.map((s) => {
-              const w = total > 0 ? (metrics[s] / total) * 100 : 0;
-              return w > 0 ? <div key={s} className="rc-metric-dist-seg" style={{ flex: w, backgroundColor: stageColors[s] }} /> : null;
-            })}
-            {total > 0 && (
-              <div className="rc-metric-dist-seg" style={{ flex: metrics.rejected > 0 ? (metrics.rejected / total) * 100 : 0.5, backgroundColor: 'var(--color-border-default)' }} />
-            )}
-          </div>
-        </div>
-
-        <div className="rc-metric-card rc-metric--indigo">
-          <div className="rc-metric-top">
-            <div className="rc-metric-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
+            <h2 className="rd-empty-title">No applications yet</h2>
+            <p className="rd-empty-desc">
+              When jobseekers apply to the jobs you post, their applications will appear here.
+              Start by posting a new job to begin building your pipeline.
+            </p>
+            <div className="rd-empty-actions">
+              <Link
+                className="btn btn-primary"
+                to="/profile?tab=post"
+              >
+                Post a job
+              </Link>
             </div>
-            <span className="rc-metric-label">Under review</span>
           </div>
-          <div className="rc-metric-value">{metrics['under-review']}</div>
-          <div className="rc-metric-context">actively being screened</div>
-          <div className="rc-metric-progress-track" aria-hidden="true">
-            <div className="rc-metric-progress-fill rc-metric-progress-fill--indigo" style={{ width: total > 0 ? `${(metrics['under-review'] / total) * 100}%` : '0%' }} />
-          </div>
-        </div>
-
-        <div className="rc-metric-card rc-metric--purple">
-          <div className="rc-metric-top">
-            <div className="rc-metric-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="M14 9l-2 2-2-2" />
-              </svg>
+        ) : (
+          <>
+            {/* ── Page header ───────────────────────────────── */}
+            <div className="rd-page-header">
+              <div className="rd-page-heading">
+                <h1 className="rd-page-title">Dashboard</h1>
+                <p className="rd-page-sub">
+                  {greeting}, {firstName}. Here's what's happening with your hiring
+                  {companyName ? ` at ${companyName}` : ''}.
+                </p>
+              </div>
+              <div className="rd-page-actions">
+                <Link
+                  className="btn btn-primary"
+                  to="/profile?tab=post"
+                >
+                  <Icon size={16}>{ICONS.briefcase}</Icon>
+                  Post a job
+                </Link>
+              </div>
             </div>
-            <span className="rc-metric-label">Interviews</span>
-          </div>
-          <div className="rc-metric-value">{metrics['interview']}</div>
-          <div className="rc-metric-context">scheduled conversations</div>
-          <div className="rc-metric-progress-track" aria-hidden="true">
-            <div className="rc-metric-progress-fill rc-metric-progress-fill--purple" style={{ width: total > 0 ? `${(metrics['interview'] / total) * 100}%` : '0%' }} />
-          </div>
-        </div>
 
-        <div className="rc-metric-card rc-metric--green">
-          <div className="rc-metric-top">
-            <div className="rc-metric-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </div>
-            <span className="rc-metric-label">Offers &amp; hired</span>
-          </div>
-          <div className="rc-metric-value">{metrics['offer'] + metrics['hired']}</div>
-          <div className="rc-metric-context">successful placements</div>
-          <div className="rc-metric-progress-track" aria-hidden="true">
-            <div className="rc-metric-progress-fill rc-metric-progress-fill--green" style={{ width: total > 0 ? `${((metrics['offer'] + metrics['hired']) / total) * 100}%` : '0%' }} />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Main Content: Pipeline + Insights ────────────────── */}
-      <div className="rc-content-grid">
-        {/* Hiring Pipeline - Hero Panel */}
-        <div className="rc-pipeline">
-          <div className="rc-pipeline-header">
-            <h2 className="rc-panel-title">Hiring pipeline</h2>
-            <span className="rc-pipeline-total">{total} total applications</span>
-          </div>
-          <div className="rc-pipeline-funnel">
-            {PIPELINE.map((s, i) => {
-              const pct = total > 0 ? Math.round((metrics[s] / total) * 100) : 0;
-              const barWidth = total > 0 ? (metrics[s] / total) * 100 : 0;
-              return (
-                <div className="rc-funnel-step" key={s}>
-                  <div className="rc-funnel-visual">
-                    <div className="rc-funnel-bar" style={{ width: `${Math.max(barWidth, metrics[s] > 0 ? 8 : 2)}%`, backgroundColor: stageColors[s] }} />
-                  </div>
-                  <div className="rc-funnel-meta">
-                    <div className="rc-funnel-stage-row">
-                      <span className="rc-funnel-dot" style={{ backgroundColor: stageColors[s] }} />
-                      <span className="rc-funnel-stage-name">{STATUS_LABELS[s]}</span>
-                      <span className="rc-funnel-count">{metrics[s]}</span>
-                    </div>
-                    {total > 0 && <span className="rc-funnel-pct">{pct}%</span>}
-                  </div>
-                  {i < PIPELINE.length - 1 && (
-                    <div className="rc-funnel-connector" aria-hidden="true" />
+            {/* ── KPI cards ─────────────────────────────────── */}
+            <div className="rd-kpis">
+              <div className="rd-kpi rd-kpi--brand">
+                <div className="rd-kpi-head">
+                  <span className="rd-kpi-icon"><Icon size={18}>{ICONS.users}</Icon></span>
+                  <span className="rd-kpi-label">Total applicants</span>
+                </div>
+                <div className="rd-kpi-value">{total}</div>
+                <div className="rd-kpi-sub">
+                  {total === 1 ? 'candidate' : 'candidates'} across all your jobs
+                </div>
+                <div className="rd-kpi-strip" aria-hidden="true">
+                  {PIPELINE.map((s) => {
+                    const w = metrics[s];
+                    return w > 0 ? (
+                      <span key={s} className="rd-kpi-strip-seg" style={{ flex: w, backgroundColor: STAGE_COLORS[s] }} />
+                    ) : null;
+                  })}
+                  {metrics.rejected > 0 && (
+                    <span
+                      className="rd-kpi-strip-seg"
+                      style={{ flex: metrics.rejected, backgroundColor: 'var(--color-error)' }}
+                    />
                   )}
                 </div>
-              );
-            })}
-          </div>
+              </div>
 
-          {metrics.rejected > 0 && (
-            <div className="rc-pipeline-rejected">
-              <span className="rc-rejected-dot" />
-              {metrics.rejected} {metrics.rejected === 1 ? 'applicant' : 'applicants'} rejected
+              <div className="rd-kpi rd-kpi--warning">
+                <div className="rd-kpi-head">
+                  <span className="rd-kpi-icon"><Icon size={18}>{ICONS.search}</Icon></span>
+                  <span className="rd-kpi-label">Under review</span>
+                </div>
+                <div className="rd-kpi-value">{metrics['under-review']}</div>
+                <div className="rd-kpi-sub">actively being screened</div>
+                <div className="rd-kpi-track" aria-hidden="true">
+                  <div className="rd-kpi-fill" style={{ width: `${pctOf(metrics['under-review'])}%` }} />
+                </div>
+              </div>
+
+              <div className="rd-kpi rd-kpi--purple">
+                <div className="rd-kpi-head">
+                  <span className="rd-kpi-icon"><Icon size={18}>{ICONS.user}</Icon></span>
+                  <span className="rd-kpi-label">Interviews</span>
+                </div>
+                <div className="rd-kpi-value">{metrics['interview']}</div>
+                <div className="rd-kpi-sub">scheduled conversations</div>
+                <div className="rd-kpi-track" aria-hidden="true">
+                  <div className="rd-kpi-fill" style={{ width: `${pctOf(metrics['interview'])}%` }} />
+                </div>
+              </div>
+
+              <div className="rd-kpi rd-kpi--success">
+                <div className="rd-kpi-head">
+                  <span className="rd-kpi-icon"><Icon size={18}>{ICONS.check}</Icon></span>
+                  <span className="rd-kpi-label">Offers &amp; hired</span>
+                </div>
+                <div className="rd-kpi-value">{metrics['offer'] + metrics['hired']}</div>
+                <div className="rd-kpi-sub">successful placements</div>
+                <div className="rd-kpi-track" aria-hidden="true">
+                  <div className="rd-kpi-fill" style={{ width: `${pctOf(metrics['offer'] + metrics['hired'])}%` }} />
+                </div>
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Insights Column */}
-        <div className="rc-insights">
-          {/* Applications by Job */}
-          <div className="rc-insight-panel">
-            <h3 className="rc-insight-title">Applications by job</h3>
-            <div className="rc-jobs-list">
-              {jobsByCount.map((j, i) => (
-                <div className="rc-job-row" key={i}>
-                  <div className="rc-job-row-head">
-                    <span className="rc-job-rank">{i + 1}</span>
-                    <span className="rc-job-row-title">{j.title}</span>
-                    <span className="rc-job-row-count">{j.count}</span>
+            {/* ── Hiring pipeline + Applications by job ────── */}
+            <div className="rd-grid-row">
+              <section className="rd-panel" id="pipeline" aria-labelledby="rd-pipe-title">
+                <div className="rd-panel-head">
+                  <div className="rd-panel-title-wrap">
+                    <h2 className="rd-panel-title" id="rd-pipe-title">Hiring pipeline</h2>
+                    <span className="rd-panel-sub">{total} total applications</span>
                   </div>
-                  <div className="rc-job-bar-track">
-                    <div
-                      className="rc-job-bar-fill"
-                      style={{ width: `${maxJobCount > 0 ? (j.count / maxJobCount) * 100 : 0}%` }}
+                  <a className="rd-panel-link" href="#applicants" onClick={jumpToApplicants}>
+                    Applicants <Icon size={15}>{ICONS.arrowRight}</Icon>
+                  </a>
+                </div>
+                <div className="rd-pipe">
+                  {PIPELINE.map((s) => {
+                    const count = metrics[s];
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div className="rd-pipe-stage" key={s}>
+                        <div className="rd-pipe-head">
+                          <span className="rd-pipe-dot" style={{ backgroundColor: STAGE_COLORS[s] }} aria-hidden="true" />
+                          <span className="rd-pipe-name">{STATUS_LABELS[s]}</span>
+                          <span className="rd-pipe-count">{count}</span>
+                        </div>
+                        <div className="rd-pipe-track" aria-hidden="true">
+                          <div
+                            className="rd-pipe-fill"
+                            style={{ width: `${pctOf(count)}%`, backgroundColor: STAGE_COLORS[s] }}
+                          />
+                        </div>
+                        {total > 0 && <span className="rd-pipe-pct">{pct}%</span>}
+                      </div>
+                    );
+                  })}
+                  {metrics.rejected > 0 && (
+                    <div className="rd-pipe-stage">
+                      <div className="rd-pipe-head">
+                        <span className="rd-pipe-dot" style={{ backgroundColor: 'var(--color-error)' }} aria-hidden="true" />
+                        <span className="rd-pipe-name">Rejected</span>
+                        <span className="rd-pipe-count">{metrics.rejected}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <section className="rd-panel rd-panel--scroll" aria-labelledby="rd-jobs-title">
+                <div className="rd-panel-head">
+                  <div className="rd-panel-title-wrap">
+                    <h2 className="rd-panel-title" id="rd-jobs-title">Applications by job</h2>
+                    <span className="rd-panel-sub">
+                      {jobsByCount.length} job{jobsByCount.length === 1 ? '' : 's'} receiving applications
+                    </span>
+                  </div>
+                  <span className="rd-panel-static">All jobs</span>
+                </div>
+                <div className="rd-jobs-list">
+                  {jobsByCount.map((j) => (
+                    <div className="rd-job-row" key={j.title}>
+                      <div className="rd-job-head">
+                        <span className="rd-job-title">{j.title}</span>
+                        <span className="rd-job-count">{j.count}</span>
+                      </div>
+                      <div className="rd-job-track" aria-hidden="true">
+                        <div className="rd-job-fill" style={{ width: `${(j.count / maxJobCount) * 100}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {jobsByCount.length > 0 && (
+                  <div className="rd-jobs-footer">
+                    <a className="rd-panel-link" href="#applicants" onClick={jumpToApplicants}>
+                      Review applicants <Icon size={15}>{ICONS.arrowRight}</Icon>
+                    </a>
+                  </div>
+                )}
+              </section>
+            </div>
+
+            {/* ── Recent applicants + Recent activity ──────── */}
+            <div className="rd-grid-row">
+              <section className="rd-panel" aria-labelledby="rd-recent-title">
+                <div className="rd-panel-head">
+                  <div className="rd-panel-title-wrap">
+                    <h2 className="rd-panel-title" id="rd-recent-title">Recent applicants</h2>
+                    <span className="rd-panel-sub">Latest applications across your jobs</span>
+                  </div>
+                  <a className="rd-panel-link" href="#applicants" onClick={jumpToApplicants}>
+                    View all <Icon size={15}>{ICONS.arrowRight}</Icon>
+                  </a>
+                </div>
+                <div className="rd-table-scroll">
+                  <table className="rd-table rd-table--recent">
+                    <thead>
+                      <tr>
+                        <th>Candidate</th>
+                        <th>Job</th>
+                        <th>Applied</th>
+                        <th className="rd-cell-status">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentApps.map((app) => (
+                        <tr key={app.id}>
+                          <td className="rd-cell-candidate">
+                            <div className="rd-candidate">
+                              {app.applicant?.avatarUrl ? (
+                                <span className="rd-candidate-avatar">
+                                  <img className="rd-candidate-avatar-img" src={resolveAvatar(app.applicant.avatarUrl)} alt="" />
+                                </span>
+                              ) : (
+                                <span className="rd-candidate-avatar">
+                                  <span className="rd-candidate-avatar-ph" aria-hidden="true">
+                                    {(app.applicant?.fullName || 'A').charAt(0).toUpperCase()}
+                                  </span>
+                                </span>
+                              )}
+                              <div className="rd-candidate-meta">
+                                <span className="rd-candidate-name">{app.applicant?.fullName || 'Applicant'}</span>
+                                <span className="rd-candidate-title">{app.applicant?.headline || 'Candidate'}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="rd-cell-job">
+                            <span className="rd-cell-job-title">{app.job?.title || 'Job'}</span>
+                            <span className="rd-cell-job-meta">
+                              {app.job?.company}
+                              {app.job?.location ? ` · ${app.job.location}` : ''}
+                            </span>
+                          </td>
+                          <td className="rd-cell-date">{fmtDate(app.createdAt)}</td>
+                          <td className="rd-cell-status">
+                            <span className={`rd-badge rd-badge--${app.status || 'applied'}`}>
+                              {STATUS_LABELS[app.status] || app.status || 'Applied'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section className="rd-panel rd-panel--scroll" id="activity" aria-labelledby="rd-activity-title">
+                <div className="rd-panel-head">
+                  <div className="rd-panel-title-wrap">
+                    <h2 className="rd-panel-title" id="rd-activity-title">Recent activity</h2>
+                    <span className="rd-panel-sub">Latest updates in your pipeline</span>
+                  </div>
+                </div>
+                <div className="rd-feed">
+                  {activityItems.map((item) => (
+                    <div className="rd-feed-item" key={item.key}>
+                      <span
+                        className="rd-feed-dot"
+                        style={{ backgroundColor: STAGE_COLORS[item.status] || 'var(--color-error)' }}
+                        aria-hidden="true"
+                      />
+                      <div className="rd-feed-body">
+                        <p className="rd-feed-title">{item.title}</p>
+                        <p className="rd-feed-detail">{item.detail}</p>
+                        <span className="rd-feed-time">{item.time}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            {/* ── Applicants workspace (full management) ───── */}
+            <section className="rd-panel rd-workspace" id="applicants" aria-labelledby="rd-applicants-title">
+              <div className="rd-workspace-head">
+                <div className="rd-workspace-title-wrap">
+                  <h2 className="rd-panel-title" id="rd-applicants-title">Applicants</h2>
+                  <span className="rd-workspace-count">
+                    {filtered.length} {filtered.length === 1 ? 'candidate' : 'candidates'}
+                    {jobFilter !== 'all' || searchQuery ? ' matching filters' : ''}
+                  </span>
+                </div>
+                <div className="rd-workspace-filters">
+                  <div className="rd-filter-field">
+                    <label className="rd-filter-label sr-only" htmlFor="rd-search">Search applicants or jobs</label>
+                    <input
+                      id="rd-search"
+                      className="rd-search"
+                      type="search"
+                      placeholder="Search applicants or jobs…"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                </div>
-              ))}
-              {jobsByCount.length === 0 && (
-                <p className="rc-insight-empty">No job applications yet</p>
-              )}
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="rc-insight-panel rc-insight-panel--activity">
-            <h3 className="rc-insight-title">Recent activity</h3>
-            <div className="rc-activity-timeline">
-              {recentApps.map((app, idx) => (
-                <div className="rc-activity-entry" key={app.id}>
-                  {idx < recentApps.length - 1 && <div className="rc-activity-line" aria-hidden="true" />}
-                  <div className="rc-activity-dot" aria-hidden="true">
-                    <div className="rc-activity-avatar-sm">
-                      {app.applicant?.avatarUrl ? (
-                        <img src={`${AVATAR_BASE}${app.applicant.avatarUrl}`} alt="" />
-                      ) : (
-                        (app.applicant?.fullName || 'A').charAt(0).toUpperCase()
-                      )}
+                  {uniqueJobs.length > 1 && (
+                    <div className="rd-filter-field">
+                      <label className="rd-filter-label" htmlFor="rd-workspace-job-select">Filter by job</label>
+                      <select
+                        id="rd-workspace-job-select"
+                        className="rd-filter-select"
+                        value={jobFilter}
+                        onChange={(e) => setJobFilter(e.target.value)}
+                      >
+                        <option value="all">All jobs</option>
+                        {uniqueJobs.map((j) => (
+                          <option key={j.id} value={j.id}>{j.title}</option>
+                        ))}
+                      </select>
                     </div>
-                  </div>
-                  <div className="rc-activity-content">
-                    <div className="rc-activity-text">
-                      <span className="rc-activity-name">{app.applicant?.fullName || 'Applicant'}</span>
-                      <span className="rc-activity-action">applied to</span>
-                      <span className="rc-activity-job">{app.job?.title || 'a job'}</span>
-                    </div>
-                    <span className="rc-activity-time">{fmtTimeAgo(app.createdAt)}</span>
-                  </div>
-                </div>
-              ))}
-              {recentApps.length === 0 && (
-                <p className="rc-insight-empty">No recent activity</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Applicants Workspace ──────────────────────────────── */}
-      <div className="rc-applicants">
-        <div className="rc-applicants-header">
-          <h2 className="rc-panel-title">Applicants</h2>
-          <span className="rc-applicants-count">{total} {total === 1 ? 'candidate' : 'candidates'}</span>
-        </div>
-        <div className="rc-table-header">
-          <span className="rc-th rc-th--candidate">Candidate</span>
-          <span className="rc-th rc-th--job">Job</span>
-          <span className="rc-th rc-th--date">Applied</span>
-          <span className="rc-th rc-th--status">Status</span>
-          <span className="rc-th rc-th--actions"><span className="sr-only">Details</span></span>
-        </div>
-        <div className="rc-table-body">
-          {filtered.map((app) => (
-            <div className="rc-table-row" key={app.id}>
-              <div className="rc-td rc-td--candidate">
-                <div className="rc-candidate-avatar" aria-hidden="true">
-                  {app.applicant?.avatarUrl ? (
-                    <img src={`${AVATAR_BASE}${app.applicant.avatarUrl}`} alt="" />
-                  ) : (
-                    (app.applicant?.fullName || 'A').charAt(0).toUpperCase()
                   )}
-                </div>
-                <div className="rc-candidate-info">
-                  <strong className="rc-candidate-name">{app.applicant?.fullName || 'Applicant'}</strong>
-                  {app.applicant?.headline && (
-                    <span className="rc-candidate-role">{app.applicant.headline}</span>
+                  {(jobFilter !== 'all' || searchQuery) && (
+                    <button type="button" className="btn btn-sm btn-secondary" onClick={clearFilters}>
+                      Clear filters
+                    </button>
                   )}
                 </div>
               </div>
-              <div className="rc-td rc-td--job">
-                <span className="rc-td-job-title">{app.job?.title || 'Job'}</span>
-                <span className="rc-td-job-meta">
-                  {app.job?.company}
-                  {app.job?.location ? ` · ${app.job.location}` : ''}
-                </span>
+
+              <div className="rd-table-scroll">
+                <table className="rd-table">
+                  <thead>
+                    <tr>
+                      <th>Candidate</th>
+                      <th>Job</th>
+                      <th>Applied</th>
+                      <th>Status</th>
+                      <th className="rd-cell-status"><span className="sr-only">Details</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((app) => (
+                      <tr key={app.id}>
+                        <td className="rd-cell-candidate">
+                          <div className="rd-candidate">
+                            {app.applicant?.avatarUrl ? (
+                              <span className="rd-candidate-avatar">
+                                <img className="rd-candidate-avatar-img" src={resolveAvatar(app.applicant.avatarUrl)} alt="" />
+                              </span>
+                            ) : (
+                              <span className="rd-candidate-avatar">
+                                <span className="rd-candidate-avatar-ph" aria-hidden="true">
+                                  {(app.applicant?.fullName || 'A').charAt(0).toUpperCase()}
+                                </span>
+                              </span>
+                            )}
+                            <div className="rd-candidate-meta">
+                              <span className="rd-candidate-name">{app.applicant?.fullName || 'Applicant'}</span>
+                              <span className="rd-candidate-title">{app.applicant?.headline || 'Candidate'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="rd-cell-job">
+                          <span className="rd-cell-job-title">{app.job?.title || 'Job'}</span>
+                          <span className="rd-cell-job-meta">
+                            {app.job?.company}
+                            {app.job?.location ? ` · ${app.job.location}` : ''}
+                          </span>
+                        </td>
+                        <td className="rd-cell-date">{fmtDate(app.createdAt)}</td>
+                        <td>
+                          <div className="rd-status-select-wrap">
+                            <label className="sr-only" htmlFor={`app-status-${app.id}`}>
+                              Status for {app.applicant?.fullName || 'applicant'}
+                            </label>
+                            <select
+                              id={`app-status-${app.id}`}
+                              className={`rd-status-select rd-status-select--${app.status || 'applied'}`}
+                              value={app.status || 'applied'}
+                              disabled={updatingId === app.id}
+                              onChange={(e) => handleStatusChange(app, e.target.value)}
+                            >
+                              {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                              ))}
+                            </select>
+                            {updatingId === app.id && <span className="rd-spinner" aria-hidden="true" />}
+                          </div>
+                        </td>
+                        <td className="rd-cell-status">
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => openDetail(app)}
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filtered.length === 0 && (
+                  <div className="rd-table-empty" role="status">
+                    No applicants match the current filters.
+                  </div>
+                )}
               </div>
-              <span className="rc-td rc-td--date">{fmtDate(app.createdAt)}</span>
-              <div className="rc-td rc-td--status">
-                <label className="sr-only" htmlFor={`app-status-${app.id}`}>
-                  Status for {app.applicant?.fullName || 'applicant'}
-                </label>
-                <select
-                  id={`app-status-${app.id}`}
-                  className={`rc-status-select rc-status-select--${app.status}`}
-                  value={app.status}
-                  disabled={updatingId === app.id}
-                  onChange={(e) => handleStatusChange(app, e.target.value)}
-                >
-                  {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-                {updatingId === app.id && <span className="rc-status-spinner" aria-hidden="true" />}
-              </div>
-              <div className="rc-td rc-td--actions">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-secondary rc-view-btn"
-                  onClick={() => openDetail(app)}
-                >
-                  View
-                </button>
-              </div>
-            </div>
-          ))}
-          {filtered.length === 0 && !error && (
-            <div className="rc-table-empty" role="status">
-              No applications match the selected filter. Try 'All jobs' or another job.
-            </div>
-          )}
-        </div>
+            </section>
+          </>
+        )}
       </div>
 
       <ApplicantDetailModal
@@ -493,9 +779,8 @@ export default function RecruiterDashboard() {
 
 /* ======================================================================= */
 /* Applicant detail modal - fetches GET /applications/:id only when opened. */
-/* Portal-backed like ConfirmModal so the overlay roots at the viewport.    */
-/* Displays ONLY what the authorized detail endpoint returns; missing data  */
-/* hides the corresponding section/action.                                 */
+/* Portal-backed so the overlay roots at the viewport. Displays ONLY what   */
+/* the authorized detail endpoint returns; missing data hides the section.  */
 /* ======================================================================= */
 function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) {
   const titleId = useId();
@@ -576,10 +861,7 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
 
   if (!open) return null;
 
-  const resolveMediaUrl = (url) => {
-    if (!url) return '';
-    return url.startsWith('http') ? url : `${AVATAR_BASE}${url}`;
-  };
+  const resolveMediaUrl = (url) => (url ? (url.startsWith('http') ? url : `${AVATAR_BASE}${url}`) : '');
 
   const fmtDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -596,37 +878,34 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
   const coverLetter = data?.coverLetter;
 
   return createPortal(
-    <div className="rc-detail-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
-      <div className="rc-detail" ref={dialogRef} tabIndex={-1}>
-        <div className="rc-detail-top">
-          <h3 id={titleId} className="rc-detail-title">Applicant details</h3>
+    <div className="rd-detail-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="rd-detail" ref={dialogRef} tabIndex={-1}>
+        <div className="rd-detail-top">
+          <h3 id={titleId} className="rd-detail-title">Applicant details</h3>
           <button
             type="button"
-            className="rc-detail-close"
+            className="rd-detail-close"
             onClick={onClose}
             aria-label="Close applicant details"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M18 6 6 18" />
-              <path d="m6 6 12 12" />
-            </svg>
+            <Icon size={16}>{ICONS.x}</Icon>
           </button>
         </div>
 
         {loading && (
-          <div className="rc-detail-state" role="status" aria-live="polite">
-            <span className="rc-detail-spinner" aria-hidden="true" />
-            <p className="rc-detail-state-text">Loading applicant details…</p>
+          <div className="rd-detail-state" role="status" aria-live="polite">
+            <span className="rd-detail-spinner" aria-hidden="true" />
+            <p className="rd-detail-state-text">Loading applicant details…</p>
           </div>
         )}
 
         {!loading && error && (
-          <div className="rc-detail-state">
-            <div className="auth-alert auth-alert-error" role="alert">
+          <div className="rd-detail-state">
+            <div className="rd-alert" role="alert">
               <span>{error}</span>
             </div>
-            <p className="rc-detail-state-text">We could not load this applicant's details. Please try again.</p>
-            <div className="rc-detail-state-actions">
+            <p className="rd-detail-state-text">We could not load this applicant's details. Please try again.</p>
+            <div className="rd-detail-state-actions">
               <button type="button" className="btn btn-secondary" onClick={onRetry}>Try again</button>
               <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
             </div>
@@ -634,37 +913,37 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
         )}
 
         {!loading && !error && data && (
-          <div className="rc-detail-body">
-            <div className="rc-detail-identity">
-              <div className="rc-detail-avatar" aria-hidden="true">
+          <div className="rd-detail-body">
+            <div className="rd-detail-identity">
+              <div className="rd-detail-avatar" aria-hidden="true">
                 {applicant?.avatarUrl ? (
-                  <img src={resolveMediaUrl(applicant.avatarUrl)} alt="" />
+                  <img className="rd-detail-avatar-img" src={resolveMediaUrl(applicant.avatarUrl)} alt="" />
                 ) : (
-                  (applicant?.fullName || 'A').charAt(0).toUpperCase()
+                  <span className="rd-detail-avatar-ph">{(applicant?.fullName || 'A').charAt(0).toUpperCase()}</span>
                 )}
               </div>
-              <div className="rc-detail-identity-text">
-                <span className="rc-detail-name">{applicant?.fullName || 'Applicant'}</span>
-                {applicant?.headline && <span className="rc-detail-headline">{applicant.headline}</span>}
+              <div className="rd-detail-identity-text">
+                <span className="rd-detail-name">{applicant?.fullName || 'Applicant'}</span>
+                {applicant?.headline && <span className="rd-detail-headline">{applicant.headline}</span>}
               </div>
             </div>
 
             {(email || phone) && (
-              <div className="rc-detail-section">
-                <h4 className="rc-detail-section-title">Contact</h4>
-                <div className="rc-detail-contact">
+              <div className="rd-detail-section">
+                <h4 className="rd-detail-section-title">Contact</h4>
+                <div className="rd-detail-contact">
                   {email && (
-                    <a className="btn btn-sm btn-secondary rc-contact-btn" href={`mailto:${email}`}>
+                    <a className="btn btn-sm btn-secondary" href={`mailto:${email}`}>
                       Email
                     </a>
                   )}
                   {phone && (
-                    <a className="btn btn-sm btn-secondary rc-contact-btn" href={`tel:${phone}`}>
+                    <a className="btn btn-sm btn-secondary" href={`tel:${phone}`}>
                       Call
                     </a>
                   )}
                   {phone && (
-                    <a className="btn btn-sm btn-secondary rc-contact-btn" href={`sms:${phone}`}>
+                    <a className="btn btn-sm btn-secondary" href={`sms:${phone}`}>
                       Text
                     </a>
                   )}
@@ -672,27 +951,27 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
               </div>
             )}
 
-            <div className="rc-detail-section">
-              <h4 className="rc-detail-section-title">Application</h4>
-              <dl className="rc-detail-rows">
-                <div className="rc-detail-row">
+            <div className="rd-detail-section">
+              <h4 className="rd-detail-section-title">Application</h4>
+              <dl className="rd-detail-rows">
+                <div className="rd-detail-row">
                   <dt>Job</dt>
                   <dd>{job?.title || '-'}</dd>
                 </div>
                 {job?.company && (
-                  <div className="rc-detail-row">
+                  <div className="rd-detail-row">
                     <dt>Company</dt>
                     <dd>{job.company}{job?.location ? ` · ${job.location}` : ''}</dd>
                   </div>
                 )}
-                <div className="rc-detail-row">
+                <div className="rd-detail-row">
                   <dt>Applied</dt>
                   <dd>{fmtDate(data.createdAt) || '-'}</dd>
                 </div>
-                <div className="rc-detail-row">
+                <div className="rd-detail-row">
                   <dt>Status</dt>
                   <dd>
-                    <span className={`rc-status-badge rc-status-badge--${status}`}>
+                    <span className={`rd-status-badge rd-status-badge--${status || 'applied'}`}>
                       {STATUS_LABELS[status] || status || 'Unknown'}
                     </span>
                   </dd>
@@ -701,8 +980,8 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
             </div>
 
             {resumeUrl && (
-              <div className="rc-detail-section">
-                <h4 className="rc-detail-section-title">Resume</h4>
+              <div className="rd-detail-section">
+                <h4 className="rd-detail-section-title">Resume</h4>
                 <a
                   className="btn btn-sm btn-secondary"
                   href={resolveMediaUrl(resumeUrl)}
@@ -714,12 +993,12 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
               </div>
             )}
 
-            <div className="rc-detail-section">
-              <h4 className="rc-detail-section-title">Cover letter</h4>
+            <div className="rd-detail-section">
+              <h4 className="rd-detail-section-title">Cover letter</h4>
               {coverLetter ? (
-                <p className="rc-detail-letter">{coverLetter}</p>
+                <p className="rd-detail-letter">{coverLetter}</p>
               ) : (
-                <p className="rc-detail-letter rc-detail-letter--empty">No cover letter provided.</p>
+                <p className="rd-detail-letter rd-detail-letter--empty">No cover letter provided.</p>
               )}
             </div>
           </div>
