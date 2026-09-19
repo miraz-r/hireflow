@@ -212,30 +212,12 @@
   flex-shrink: 0;
 }
 
-.admin-profile-wrap {
-  position: relative;
-}
-
-.admin-profile-chip {
+.admin-profile-identity {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
   padding: 8px;
-  border-radius: var(--radius-lg);
-  background: none;
-  border: none;
-  text-align: left;
-  transition: background-color var(--transition-fast);
-}
-
-.admin-profile-chip:hover {
-  background-color: var(--admin-hover);
-}
-
-.admin-profile-chip:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--admin-focus);
 }
 
 .admin-profile-avatar {
@@ -284,16 +266,6 @@
   text-overflow: ellipsis;
 }
 
-.admin-profile-chevron {
-  color: var(--admin-text-faint);
-  flex-shrink: 0;
-  transition: transform var(--transition-fast);
-}
-
-.admin-profile-chip[aria-expanded="true"] .admin-profile-chevron {
-  transform: rotate(180deg);
-}
-
 /* --- Mobile drawer behavior --- */
 @media (max-width: 1023px) {
   .admin-sidebar {
@@ -334,11 +306,6 @@
 @media (prefers-reduced-motion: reduce) {
   .admin-sidebar,
   .admin-shell--drawer-open .admin-sidebar {
-    transition: none;
-  }
-
-  .admin-profile-chevron,
-  .admin-profile-chip[aria-expanded="true"] .admin-profile-chevron {
     transition: none;
   }
 }

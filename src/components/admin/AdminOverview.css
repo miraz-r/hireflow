@@ -1,0 +1,567 @@
+﻿/* Admin Overview - the /admin index route. Everything below composes the
+   final token-based surface, so light and dark just work via AdminShell. */
+.admin-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* The public .admin-page cap (840px) is too narrow for the dashboard grid.
+   This two-class selector always outranks the single-class .admin-page rule
+   regardless of CSS bundle order, so the Overview sets its own generous
+   workspace width: full available width below the cap, centered above it. */
+.admin-page.admin-overview {
+  max-width: 1460px;
+  margin-inline: auto;
+}
+
+.admin-overview-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-overview-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-primary);
+}
+
+.admin-overview-title {
+  margin: 6px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--admin-text-strong);
+}
+
+.admin-overview-sub {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--admin-text-muted);
+}
+
+.admin-overview-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-overview-grid-main {
+  grid-column: span 9;
+}
+
+.admin-overview-grid-side {
+  grid-column: span 3;
+}
+
+@media (max-width: 1279px) {
+  .admin-overview-grid-main {
+    grid-column: span 8;
+  }
+  .admin-overview-grid-side {
+    grid-column: span 4;
+  }
+}
+
+/* Desktop: activity + pipeline share row 2 (approx 68/32), and recent
+   applications + activity feed share row 3 side-by-side. */
+.admin-overview-sections {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  column-gap: 18px;
+  row-gap: 24px;
+  align-items: stretch;
+}
+
+.admin-overview-chart-section,
+.admin-overview-pipeline-section,
+.admin-overview-applications-section,
+.admin-overview-activity-section {
+  min-width: 0;
+}
+
+/* Recent Applications + Recent Activity share one stable, equal height. The
+   card never grows with content: the header stays fixed and the list body
+   scrolls internally once it exceeds the available space. */
+.admin-overview-applications-section,
+.admin-overview-activity-section {
+  display: flex;
+  flex-direction: column;
+  height: 460px;
+}
+
+.admin-overview-applications-section .admin-section-head,
+.admin-overview-activity-section .admin-section-head {
+  flex-shrink: 0;
+}
+
+.admin-overview-applications-section .admin-overview-table-scroll,
+.admin-overview-activity-section .admin-activity {
+  flex: 1;
+  min-height: 0;
+}
+
+.admin-overview-pipeline-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-overview-pipeline-section .admin-section-head {
+  flex-shrink: 0;
+}
+
+.admin-overview-pipeline-section .admin-pipeline {
+  flex: 1;
+}
+
+@media (max-width: 1023px) {
+  .admin-overview-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-overview-grid-main,
+  .admin-overview-grid-side {
+    grid-column: span 12;
+  }
+  /* Stack activity + pipeline / applications + activity at tablet sizes */
+  .admin-overview-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 559px) {
+  .admin-overview-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Error / loading states (never fabricated data) ---------- */
+.admin-overview-error {
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  text-align: center;
+}
+
+.admin-overview-error-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-overview-error-text {
+  margin: 8px auto 18px;
+  max-width: 460px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--admin-text-muted);
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--admin-primary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.admin-btn:hover {
+  background-color: var(--admin-primary-hover);
+}
+
+.admin-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Section card used by chart / pipeline / tables ---------- */
+.admin-section-card {
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+}
+
+/* JSX uses .admin-section-head / .admin-section-kicker (no matching
+   selector existed) - these complete the section header styling. */
+.admin-section-head {
+  margin-bottom: 18px;
+}
+
+.admin-section-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-primary);
+  margin: 0 0 4px;
+}
+
+.admin-section-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.admin-section-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--admin-text-strong);
+}
+
+.admin-section-card-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--admin-text-muted);
+}
+
+.admin-section-card-action {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-primary);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.admin-section-card-action:hover {
+  color: var(--admin-primary-hover);
+  text-decoration: underline;
+}
+
+/* ---------- Chart ---------- */
+.admin-chart-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--admin-text-strong);
+}
+
+.admin-chart-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--admin-text-muted);
+}
+
+.admin-chart-supporting {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-stats-chart-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-chart-wrap {
+  width: 100%;
+}
+
+.admin-chart-caption {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-chart-tooltip {
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-chart-tooltip-date {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+}
+
+.admin-chart-tooltip-count {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--admin-text-strong);
+}
+
+/* ---------- Pipeline ---------- */
+.admin-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-pipeline-stage {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.admin-pipeline-stage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-pipeline-stage-label {
+  color: var(--admin-text-muted);
+}
+
+.admin-pipeline-stage-bar-wrap {
+  height: 8px;
+  background-color: var(--admin-hover);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.admin-pipeline-stage-bar {
+  height: 100%;
+  border-radius: 999px;
+  background-color: var(--admin-primary);
+  transition: width 420ms ease;
+}
+
+.admin-pipeline-stage-bar--empty {
+  background-color: transparent;
+}
+
+.admin-pipeline-stage-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-pipeline-total {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Recent applications table ---------- */
+.admin-overview-table-scroll {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-overview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-overview-table thead th {
+  padding: 0 14px 10px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-faint);
+  border-bottom: 1px solid var(--admin-border);
+  white-space: nowrap;
+}
+
+.admin-overview-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  white-space: nowrap;
+}
+
+.admin-overview-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-overview-table tbody tr:hover {
+  background-color: var(--admin-hover);
+}
+
+.admin-overview-applicant {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.admin-overview-applicant-name {
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-overview-applicant-mail {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-overview-empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--admin-text-muted);
+  font-size: 14px;
+}
+
+/* ---------- Status badge ---------- */
+.admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.admin-status-badge--applied { background-color:#eef2ff; color:#3730a3; }
+.admin-status-badge--under-review { background-color:#fef3c7; color:#92400e; }
+.admin-status-badge--interview { background-color:#e0e7ff; color:#3730a3; }
+.admin-status-badge--offer { background-color:#d1fae5; color:#065f46; }
+.admin-status-badge--hired { background-color:#d1fae5; color:#065f46; }
+.admin-status-badge--rejected { background-color:#fee2e2; color:#991b1b; }
+
+html[data-theme="dark"] .admin-status-badge--applied { background-color:#1e1b4b; color:#c7d2fe; }
+html[data-theme="dark"] .admin-status-badge--under-review { background-color:#422006; color:#fde68a; }
+html[data-theme="dark"] .admin-status-badge--interview { background-color:#312e81; color:#c7d2fe; }
+html[data-theme="dark"] .admin-status-badge--offer,
+html[data-theme="dark"] .admin-status-badge--hired { background-color:#064e3b; color:#a7f3d0; }
+html[data-theme="dark"] .admin-status-badge--rejected { background-color:#450a0a; color:#fecaca; }
+
+/* ---------- Activity feed ---------- */
+.admin-activity {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.admin-activity-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 12px 4px;
+}
+
+.admin-activity-item + .admin-activity-item {
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-activity-dot {
+  margin-top: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--admin-primary);
+  flex-shrink: 0;
+}
+
+.admin-activity-dot--job {
+  background-color: var(--admin-primary);
+}
+
+.admin-activity-body {
+  min-width: 0;
+  flex: 1;
+}
+
+/* Spans sit in the same line by default; make each part its own line so
+   label / detail / time get clear visual separation. */
+.admin-activity-label,
+.admin-activity-detail,
+.admin-activity-time {
+  display: block;
+}
+
+.admin-activity-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-activity-detail {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--admin-text-muted);
+}
+
+.admin-activity-time {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+  white-space: nowrap;
+}
+
+/* ---------- Loading skeleton ---------- */
+.admin-skeleton {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    100deg,
+    var(--admin-hover) 40%,
+    var(--admin-primary-soft) 50%,
+    var(--admin-hover) 60%
+  );
+  background-size: 220% 100%;
+  animation: admin-shimmer 1.3s linear infinite;
+}
+
+.admin-skeleton-kpi {
+  height: 100px;
+}
+
+.admin-skeleton-wide {
+  height: 300px;
+}
+
+@keyframes admin-shimmer {
+  to {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-skeleton {
+    animation: none;
+  }
+}

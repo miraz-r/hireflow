@@ -1,9 +1,6 @@
-import { useCallback, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../Avatar';
-import AdminProfileMenu from './AdminProfileMenu';
-import useDismissible from '../../hooks/useDismissible';
 import './AdminSidebar.css';
 
 const AVATAR_BASE = 'http://localhost:5000';
@@ -198,53 +195,32 @@ export default function AdminSidebar({ drawerRef, closeBtnRef, onClose, onNaviga
         ))}
       </nav>
 
-      <SidebarProfileFooter onNavigate={onNavigate} />
+      <SidebarProfileFooter />
     </aside>
   );
 }
 
 /**
- * Profile footer - authenticated administrator with a compact dropdown that
- * stays limited to functionality that already exists (public site + sign out).
+ * Profile footer - non-interactive identity block for the signed-in
+ * administrator. Account actions live exclusively in the topbar avatar menu.
  */
-function SidebarProfileFooter({ onNavigate }) {
+function SidebarProfileFooter() {
   const { user } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const wrapRef = useRef(null);
-  const closeMenu = useCallback(() => setMenuOpen(false), []);
   const avatarSrc = user?.avatarUrl ? `${AVATAR_BASE}${user.avatarUrl}` : null;
-
-  useDismissible(menuOpen, wrapRef, closeMenu);
 
   return (
     <div className="admin-sidebar-profile">
-      <div className="admin-profile-wrap" ref={wrapRef}>
-        <button
-          type="button"
-          className="admin-profile-chip"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-haspopup="true"
-          aria-expanded={menuOpen}
-          aria-label="Account menu"
-        >
-          <Avatar
-            src={avatarSrc}
-            imgClassName="admin-profile-avatar"
-            placeholderClassName="admin-profile-avatar-placeholder"
-            iconSize={18}
-          />
-          <span className="admin-profile-meta">
-            <span className="admin-profile-name">{user?.fullName || 'Administrator'}</span>
-            <span className="admin-profile-role">Administrator</span>
-          </span>
-          <svg className="admin-profile-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-
-        {menuOpen && (
-          <AdminProfileMenu openUp onClose={closeMenu} onNavigate={onNavigate} />
-        )}
+      <div className="admin-profile-identity">
+        <Avatar
+          src={avatarSrc}
+          imgClassName="admin-profile-avatar"
+          placeholderClassName="admin-profile-avatar-placeholder"
+          iconSize={18}
+        />
+        <span className="admin-profile-meta">
+          <span className="admin-profile-name">{user?.fullName || 'Administrator'}</span>
+          <span className="admin-profile-role">Administrator</span>
+        </span>
       </div>
     </div>
   );
