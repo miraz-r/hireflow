@@ -67,21 +67,24 @@ export default function AdminOverview() {
   }
 
   const kpis = [
-    { label: 'Total jobs', value: stats.totalJobs, context: 'All listings' },
+    { label: 'Total jobs', value: stats.totalJobs, context: 'All listings', tone: 'indigo' },
     {
       label: 'Active jobs',
       value: stats.activeJobs,
-      context: 'Currently accepting applications',
+      context: 'Now accepting applications',
+      tone: 'amber',
     },
     {
       label: 'Applications',
       value: stats.totalApplications,
       context: 'All time',
+      tone: 'sky',
     },
     {
       label: 'Registered users',
       value: stats.totalUsers,
       context: 'Jobseekers + recruiters',
+      tone: 'emerald',
     },
   ];
 
@@ -113,20 +116,23 @@ export default function AdminOverview() {
             <h3 id="overview-chart-title" className="admin-chart-title">
               Application Activity
             </h3>
-            <p className="admin-chart-sub">Applications received per day</p>
-            <p className="admin-chart-supporting">Trailing 30 days</p>
           </div>
           <div className="admin-stats-chart-wrap">
             <AdminStatsChart points={trend?.points || []} />
           </div>
+          <p
+            className="admin-section-foot"
+          >Daily applications, last 30 days.</p>
         </section>
 
         <section className="admin-section admin-overview-pipeline-section admin-section-card" aria-labelledby="overview-pipeline-title">
           <div className="admin-section-head">
             <h3 id="overview-pipeline-title" className="admin-chart-title">Application Pipeline</h3>
-            <p className="admin-chart-sub">Applications at each stage</p>
           </div>
-          <AdminPipeline stages={pipeline} counts={pipelineCounts} max={pipelineMax} total={stats.totalApplications} />
+          <AdminPipeline stages={pipeline} counts={pipelineCounts} max={pipelineMax} />
+          <p className="admin-section-foot">
+            How many applications are sitting in each stage right now.
+          </p>
         </section>
 
         <section className="admin-section admin-overview-applications-section admin-section-card" aria-labelledby="overview-applications-title">
@@ -134,6 +140,9 @@ export default function AdminOverview() {
             <h3 id="overview-applications-title" className="admin-chart-title">Recent Applications</h3>
           </div>
           <AdminRecentApplications applications={recentApplications || []} />
+          <p className="admin-section-foot">
+            The newest applications to arrive on the platform.
+          </p>
         </section>
 
         <section className="admin-section admin-overview-activity-section admin-section-card" aria-labelledby="overview-activity-title">
@@ -141,13 +150,16 @@ export default function AdminOverview() {
             <h3 id="overview-activity-title" className="admin-chart-title">Recent Activity</h3>
           </div>
           <AdminRecentActivity items={recentActivity || []} />
+          <p className="admin-section-foot">
+            The latest activity across the platform.
+          </p>
         </section>
       </div>
     </div>
   );
 }
 
-function AdminPipeline({ stages, counts, max, total }) {
+function AdminPipeline({ stages, counts, max }) {
   return (
     <div className="admin-pipeline">
       {stages.map((stage) => {
@@ -168,9 +180,6 @@ function AdminPipeline({ stages, counts, max, total }) {
           </div>
         );
       })}
-      <p className="admin-pipeline-total">
-        {total || 0} total applications
-      </p>
     </div>
   );
 }

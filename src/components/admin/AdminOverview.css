@@ -6,6 +6,8 @@
   gap: 24px;
   width: 100%;
   box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
 }
 
 /* The public .admin-page cap (840px) is too narrow for the dashboard grid.
@@ -85,6 +87,8 @@
   column-gap: 18px;
   row-gap: 24px;
   align-items: stretch;
+  flex: 1;
+  min-height: 0;
 }
 
 .admin-overview-chart-section,
@@ -291,28 +295,6 @@
   margin: 10px 0 0;
   font-size: 12px;
   color: var(--admin-text-faint);
-}
-
-.admin-chart-tooltip {
-  background-color: var(--admin-surface);
-  border: 1px solid var(--admin-border-strong);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  box-shadow: var(--shadow-md);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.admin-chart-tooltip-date {
-  font-size: 12px;
-  color: var(--admin-text-muted);
-}
-
-.admin-chart-tooltip-count {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--admin-text-strong);
 }
 
 /* ---------- Pipeline ---------- */
@@ -563,5 +545,154 @@ html[data-theme="dark"] .admin-status-badge--rejected { background-color:#450a0a
 @media (prefers-reduced-motion: reduce) {
   .admin-skeleton {
     animation: none;
+  }
+}
+
+/* ---------- Premium surface balance ----------
+   Restrained HireFlow palette: a whisper of lavender canvas, white primary
+   surfaces, indigo primary accent, and one consistent very faint lavender
+   tint shared by the KPI / chart / activity surfaces. No layout changes. */
+.admin-section-card {
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+/* The Overview page sits on the admin canvas; tint that canvas a very light
+   cool lavender so the dashboard no longer reads flat white/gray. Scoped to
+   only this page (never affects sidebar/topbar/other admin pages). */
+.admin-content:has(.admin-overview) {
+  background-color: #f4f5fb;
+}
+
+html[data-theme="dark"] .admin-content:has(.admin-overview) {
+  background-color: var(--admin-canvas);
+}
+
+/* KPI cards each carry their own distinct hue; the hairline top edge and label
+   use each card's accent (set on .admin-kpi-tone-* in AdminKpiCard.css). On
+   hover the card lifts up a touch. */
+.admin-overview-kpis .admin-kpi-card {
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    inset 0 2px 0 0 var(--tone-accent, var(--admin-primary));
+}
+
+.admin-overview-kpis .admin-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--admin-border-strong);
+  box-shadow:
+    0 14px 28px -12px rgba(16, 24, 40, 0.2),
+    inset 0 2px 0 0 var(--tone-accent, var(--admin-primary));
+}
+
+/* Application Activity card is one of the subtly lavender-tinted surfaces. */
+.admin-overview-chart-section {
+  background-color: #fbfbff;
+}
+
+html[data-theme="dark"] .admin-overview-chart-section {
+  background-color: #161d35;
+}
+
+/* Recent Activity card shares the same quiet lavender surface as the chart,
+   so the two data surfaces balance the white pipeline/applications cards. */
+.admin-overview-activity-section {
+  background-color: #fbfbff;
+}
+
+html[data-theme="dark"] .admin-overview-activity-section {
+  background-color: #161d35;
+}
+
+/* The fixed-height Recent Applications / Recent Activity cards keep their
+   original spacing; no extra header band is applied. */
+
+/* ---------- Pipeline identity ----------
+   Indigo-family progress bars on a faint indigo track, and a subtle
+   per-stage progression within the brand family. */
+.admin-pipeline-stage-bar-wrap {
+  background-color: #eceffb;
+}
+
+html[data-theme="dark"] .admin-pipeline-stage-bar-wrap {
+  background-color: rgba(129, 140, 248, 0.12);
+}
+
+.admin-pipeline-stage-bar--applied {
+  background-color: #6366f1;
+}
+html[data-theme="dark"] .admin-pipeline-stage-bar--applied {
+  background-color: #818cf8;
+}
+
+.admin-pipeline-stage-bar--under-review {
+  background-color: #4f46e5;
+}
+
+.admin-pipeline-stage-bar--interview {
+  background-color: #4338ca;
+}
+
+.admin-pipeline-stage-bar--offer {
+  background-color: #7c3aed;
+}
+
+.admin-pipeline-stage-bar--hired {
+  background-color: #10b981;
+}
+
+/* ---------- Recent applications table ----------
+   Table stays white with the original header look. */
+
+/* ---------- Card footers ----------
+   One short line at the bottom of every card explaining what it shows, so the
+   labelled card titles stay short. Cards are flex columns, so the footnote
+   pins to the card bottom. */
+.admin-section-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--admin-border);
+  font-size: 13px;
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--admin-text-muted);
+}
+
+/* ---------- Bottom-aligned cards ----------
+   The Overview fills the full admin viewport: cards pin to the bottom of the
+   page instead of leaving white space. The Recents row grows to swallow the
+   leftover height while keeping its internal scrolling. Only the Overview page
+   is affected (scoped via :has). */
+.admin-content:has(.admin-overview) {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+.admin-overview-chart-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-overview-chart-section .admin-stats-chart-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-overview-chart-section .admin-stats-chart-wrap > .admin-activity-chart {
+  flex: 1;
+}
+
+.admin-overview-applications-section,
+.admin-overview-activity-section {
+  height: auto;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+@media (min-width: 1024px) {
+  .admin-overview-sections {
+    grid-template-rows: auto minmax(0, 1fr);
   }
 }

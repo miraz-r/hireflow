@@ -1,0 +1,129 @@
+/* AdminActivityChart — premium chart styling for the Overview's Application
+   Activity. All colours read the admin design tokens so light and dark themes
+   stay consistent. SVG presentation attributes cannot resolve CSS custom
+   properties, so every chart paint is applied here via CSS. */
+
+.admin-activity-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-chart-wrap {
+  width: 100%;
+  height: 264px;
+}
+
+/* Chart focus border — the actual fix.
+   Recharts v3 puts tabindex="0" + role="application" on <svg class="recharts-surface">
+   (its built-in accessibility layer is on by default), so clicking anywhere in
+   the chart focuses the SVG — and the app's global :focus-visible rule in
+   src/index.css then paints a rectangular outline around whatever is focused
+   (the whole plot on empty area, a small box near the data, etc). That global
+   rule outspans any plain scoped rule, so the box survived. Here we suppress
+   outline/box-shadow for EVERY element inside .admin-activity-chart always,
+   and again on :focus/:focus-visible/:focus-within with !important so it
+   reliably beats the global rule no matter which chart element gets focus.
+   All selectors are descendants of .admin-activity-chart, so focus indicators
+   on buttons/links/inputs everywhere else are untouched, keyboard chart
+   navigation (arrow keys / Enter) still works, and tooltip/hover are
+   unaffected. */
+.admin-activity-chart,
+.admin-activity-chart * {
+  outline: none !important;
+}
+
+.admin-activity-chart:focus,
+.admin-activity-chart:focus-visible,
+.admin-activity-chart:focus-within,
+.admin-activity-chart *:focus,
+.admin-activity-chart *:focus-visible,
+.admin-activity-chart *:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Grid — hairline, extremely subtle */
+.admin-activity-chart .recharts-cartesian-grid-horizontal line {
+  stroke: var(--admin-text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  stroke-opacity: 0.45;
+}
+
+/* Axes — muted and readable */
+.admin-activity-chart .recharts-cartesian-axis-line {
+  stroke: var(--admin-border-strong);
+  stroke-width: 1;
+}
+
+.admin-activity-chart .recharts-cartesian-axis-tick-value {
+  fill: var(--admin-text-faint);
+  font-size: 11px;
+}
+
+/* Area wash — restrained translucent lavender/indigo gradient */
+.admin-activity-chart #adminChartFill stop:first-child {
+  stop-color: var(--admin-primary);
+  stop-opacity: 0.28;
+}
+
+.admin-activity-chart #adminChartFill stop:last-child {
+  stop-color: var(--admin-primary);
+  stop-opacity: 0.04;
+}
+
+/* Primary line — HireFlow indigo, slightly lifted off the grid */
+.admin-activity-chart .recharts-area-area {
+  fill: url(#adminChartFill);
+}
+
+.admin-activity-chart .recharts-area-curve {
+  stroke: var(--admin-primary);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 2px 3px rgba(79, 70, 229, 0.25));
+}
+
+/* Hover cursor + active dot — clean, theme-aware, premium */
+.admin-activity-chart .recharts-tooltip-cursor {
+  stroke: var(--admin-primary);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  stroke-opacity: 0.4;
+}
+
+.admin-activity-chart .recharts-active-dot .recharts-dot {
+  fill: var(--admin-surface);
+  stroke: var(--admin-primary);
+  stroke-width: 2.5;
+}
+
+/* Tooltip — clean, premium card with a restrained indigo edge */
+.admin-chart-tooltip {
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-left: 3px solid var(--admin-primary);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 148px;
+}
+
+.admin-chart-tooltip-date {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--admin-text-muted);
+}
+
+.admin-chart-tooltip-count {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
