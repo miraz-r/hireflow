@@ -273,3 +273,102 @@ describe('path-traversal guard: avatar removal', () => {
     assert.equal(res.status, 404);
   });
 });
+
+describe('role-aware profile location requirement', () => {
+  it('admin PATCH without location succeeds and persists the new phone', async () => {
+    const admin = await makeUser('admin-patch@example.com', 'admin');
+    const token = signTokenFor(admin);
+
+    const createRes = await request('POST', '/api/profile', {
+      token,
+      body: { fullName: 'Admin User', phone: '+8801712345678' },
+    });
+    assert.equal(createRes.status, 201);
+    assert.equal(createRes.body.location, '');
+
+    const patchRes = await request('PATCH', '/api/profile', {
+      token,
+      body: { fullName: 'Admin User', phone: '+1-555-0199' },
+    });
+    assert.equal(patchRes.status, 200);
+    assert.equal(patchRes.body.phone, '+1-555-0199');
+    assert.equal(patchRes.body.fullName, 'Admin User');
+    assert.equal(patchRes.body.location, '');
+
+    const getRes = await request('GET', '/api/profile', { token });
+    assert.equal(getRes.status, 200);
+    assert.equal(getRes.body.phone, '+1-555-0199');
+    assert.equal(getRes.body.location, '');
+  });
+
+  it('admin PATCH with a phone change persists across repeated saves', async () => {
+    const admin = await makeUser('admin-patch-2@example.com', 'admin');
+    const token = signTokenFor(admin);
+
+    await request('POST', '/api/profile', {
+      token,
+      body: { fullName: 'Admin Two', phone: '+8801711111111' },
+    });
+
+    const first = await request('PATCH', '/api/profile', {
+      token,
+      body: { fullName: 'Admin Two', phone: '+1-555-0199' },
+    });
+    assert.equal(first.status, 200);
+
+    const second = await request('PATCH', '/api/profile', {
+      token,
+      body: { fullName: 'Admin Two', phone: '+1-555-0200' },
+    });
+    assert.equal(second.status, 200);
+    assert.equal(second.body.phone, '+1-555-0200');
+
+    const getRes = await request('GET', '/api/profile', { token });
+    assert.equal(getRes.body.phone, '+1-555-0200');
+  });
+
+  it('admin POST create-or-replace without location succeeds (POST fallback)', async () => {
+    const admin = await makeUser('admin-post@example.com', 'admin');
+    const token = signTokenFor(admin);
+
+    const createRes = await request('POST', '/api/profile', {
+      token,
+      body: { fullName: 'Admin Post', phone: '+8801712345678' },
+    });
+    assert.equal(createRes.status, 201);
+    assert.equal(createRes.body.location, '');
+    assert.equal(createRes.body.phone, '+8801712345678');
+  });
+
+  it('recruiter PATCH without location still returns 400 with location field error', async () => {
+    const recruiter = await makeUser('rec-location@example.com', 'recruiter');
+    const token = signTokenFor(recruiter);
+    assert.equal(
+      (await request('POST', '/api/profile', { token, body: validProfile })).status,
+      201
+    );
+
+    const patchRes = await request('PATCH', '/api/profile', {
+      token,
+      body: { fullName: 'Jane Recruiter', phone: '+1-555-0199' },
+    });
+    assert.equal(patchRes.status, 400);
+    assert.equal(patchRes.body.fieldErrors.location, 'location is required');
+  });
+
+  it('jobseeker PATCH without location still returns 400 with location field error', async () => {
+    const jobseeker = await makeUser('js-location@example.com', 'jobseeker');
+    const token = signTokenFor(jobseeker);
+    assert.equal(
+      (await request('POST', '/api/profile', { token, body: validProfile })).status,
+      201
+    );
+
+    const patchRes = await request('PATCH', '/api/profile', {
+      token,
+      body: { fullName: 'Jane Applicant', phone: '+1-555-0199' },
+    });
+    assert.equal(patchRes.status, 400);
+    assert.equal(patchRes.body.fieldErrors.location, 'location is required');
+  });
+});

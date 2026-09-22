@@ -212,9 +212,17 @@ const buildRoleChain = (role) => {
   return [...sharedValidators, ...roleValidators];
 };
 
-/** Full chain for POST (create) and PUT (full replace) — requires fullName and phone. */
-const createOrReplaceValidators = (role) =>
-  buildRoleChain(role).concat([
+/**
+ * Required shared-detail validators for POST/PUT (create-or-replace) and PATCH.
+ *
+ * fullName and phone are required for every role. location is required for
+ * jobseeker and recruiter profiles (their professional profiles carry a
+ * professional location), but NOT for admin accounts, which have no
+ * professional profile location. The decision stays role-aware: `role` is the
+ * authenticated req.user.role (see buildChain), never a client-supplied value.
+ */
+const sharedRequired = (role) => {
+  const required = [
     body('fullName')
       .exists({ values: 'falsy' })
       .withMessage('fullName is required')
@@ -229,42 +237,32 @@ const createOrReplaceValidators = (role) =>
       .trim()
       .matches(PHONE_CHARS_RE)
       .withMessage('Invalid phone format'),
-    body('location')
-      .exists({ values: 'falsy' })
-      .withMessage('location is required')
-      .isString()
-      .trim()
-      .isLength({ max: 160 })
-      .withMessage('location cannot exceed 160 characters'),
-  ]);
+  ];
 
-/** Chain for PATCH (partial update) — all fields optional, but the profile's
- * required shared details (fullName, phone, location) stay required so a
- * profile is never persisted without them. */
+  if (role !== 'admin') {
+    required.push(
+      body('location')
+        .exists({ values: 'falsy' })
+        .withMessage('location is required')
+        .isString()
+        .trim()
+        .isLength({ max: 160 })
+        .withMessage('location cannot exceed 160 characters')
+    );
+  }
+  return required;
+};
+
+/** Full chain for POST (create) and PUT (full replace). */
+const createOrReplaceValidators = (role) =>
+  buildRoleChain(role).concat(sharedRequired(role));
+
+/** Chain for PATCH (partial update) — role-specific fields stay optional, and
+ * the profile's required shared details (fullName, phone, and — for non-admin
+ * roles — location) stay required so a profile is never persisted without
+ * them. */
 const patchValidators = (role) =>
-  buildRoleChain(role).concat([
-    body('fullName')
-      .exists({ values: 'falsy' })
-      .withMessage('fullName is required')
-      .isString()
-      .trim()
-      .isLength({ min: 1, max: 120 })
-      .withMessage('fullName must be 1-120 characters'),
-    body('phone')
-      .exists({ values: 'falsy' })
-      .withMessage('phone is required')
-      .isString()
-      .trim()
-      .matches(PHONE_CHARS_RE)
-      .withMessage('Invalid phone format'),
-    body('location')
-      .exists({ values: 'falsy' })
-      .withMessage('location is required')
-      .isString()
-      .trim()
-      .isLength({ max: 160 })
-      .withMessage('location cannot exceed 160 characters'),
-  ]);
+  buildRoleChain(role).concat(sharedRequired(role));
 
 /**
  * Middleware-style runner — collects express-validator errors and returns them
