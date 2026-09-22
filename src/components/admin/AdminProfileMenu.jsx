@@ -4,8 +4,7 @@ import './AdminProfileMenu.css';
 
 /**
  * AdminProfileMenu - the compact account dropdown shared by the sidebar
- * profile footer and the topbar profile control. Limited to functionality
- * that already exists: view the public site and sign out.
+ * profile footer and the topbar profile control.
  */
 export default function AdminProfileMenu({ openUp = false, onClose, onNavigate }) {
   const { user, logout } = useAuth();
@@ -35,13 +34,21 @@ export default function AdminProfileMenu({ openUp = false, onClose, onNavigate }
 
       <div className="admin-profile-menu-divider" />
 
+      <Link to="/admin/account" className="admin-profile-menu-item" role="menuitem" onClick={navigateAndClose}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        Account
+      </Link>
+
       <Link to="/" className="admin-profile-menu-item" role="menuitem" onClick={navigateAndClose}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="10" />
           <line x1="2" y1="12" x2="22" y2="12" />
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
-        View public site
+        View site
       </Link>
 
       <button type="button" className="admin-profile-menu-item" role="menuitem" onClick={handleSignOut}>

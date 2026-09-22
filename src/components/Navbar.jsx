@@ -388,7 +388,7 @@ export default function Navbar() {
                   </div>
                   <div className="account-menu-divider" />
                   <Link
-                    to="/profile"
+                    to={user.role === 'admin' ? '/admin/account' : '/profile'}
                     className="account-menu-item"
                     role="menuitem"
                     onClick={handleProfileNavigate}
@@ -397,7 +397,7 @@ export default function Navbar() {
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
-                    Profile
+                    {user.role === 'admin' ? 'Account' : 'Profile'}
                   </Link>
                   {user.role === 'admin' && (
                     <Link
@@ -651,7 +651,7 @@ export default function Navbar() {
                 <div className="mobile-drawer-section">
                   <span className="mobile-drawer-section-label">Account</span>
                   <Link
-                    to="/profile"
+                    to={user.role === 'admin' ? '/admin/account' : '/profile'}
                     className="mobile-drawer-link"
                     onClick={handleDrawerRouteNav}
                   >
@@ -659,7 +659,7 @@ export default function Navbar() {
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
-                    <span className="mobile-drawer-label">Profile</span>
+                    <span className="mobile-drawer-label">{user.role === 'admin' ? 'Account' : 'Profile'}</span>
                   </Link>
                   {user.role === 'admin' && (
                     <Link

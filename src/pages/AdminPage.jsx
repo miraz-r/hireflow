@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AdminShell from '../components/admin/AdminShell';
+import AdminAccountPage from './AdminAccountPage';
 import './AdminPage.css';
 
 /**
@@ -48,6 +49,7 @@ export default function AdminPage() {
     <AdminShell>
       <Routes>
         <Route index element={<OverviewPlaceholder />} />
+        <Route path="account" element={<AdminAccountPage />} />
         <Route path="jobs" element={<JobsManagementPlaceholder />} />
         <Route path="jobs/:jobId" element={<JobDetailPlaceholder />} />
         <Route path="*" element={<NotFoundPlaceholder />} />

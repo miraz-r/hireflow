@@ -1,0 +1,179 @@
+/* EmailField - inline account email with verification.
+   Default = label + current email + Verified badge + Change action; clicking
+   Change transforms that same field into an inline edit form; the pending
+   confirmation stays attached to the same field. Relocated verbatim from
+   ProfilePage.css when EmailField was extracted into its own component. */
+
+.email-field {
+  min-width: 0;
+}
+
+/* Outlined container that mirrors .input so the account email reads as a
+   normal Contact details field (Full name | Email side by side). */
+.email-field-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+[data-theme="dark"] .email-field-box {
+  background-color: var(--color-bg-elevated);
+}
+
+.email-field-box:hover {
+  border-color: var(--color-border-strong);
+}
+
+/* Right-aligned group (Verified + Change, Verification required) pinned to
+   the far right of the outlined field. */
+.email-field-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.email-field-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  word-break: break-all;
+  min-width: 0;
+}
+
+.email-field-badge {
+  flex-shrink: 0;
+}
+
+.email-field-action {
+  flex-shrink: 0;
+}
+
+/* Buttons inside the outlined field must not exceed the single text line
+   height of a normal .input (font-size-sm * line-height-normal), otherwise
+   the box grows and the Email field renders taller than the adjacent input. */
+.email-field-box .btn.btn-sm {
+  height: calc(var(--font-size-sm) * var(--line-height-normal));
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.email-field-loading {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.email-field-input {
+  width: 100%;
+}
+
+/* Edit state - the input and Cancel/Save share the same outlined container
+   so the field keeps the height of the other Contact details fields; focus
+   is reflected on the container (1px ring, matching the other inputs). */
+.email-field-box--edit {
+  flex-wrap: nowrap;
+}
+
+.email-field-box--edit .email-field-input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-text-primary);
+}
+
+.email-field-box--edit .email-field-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.email-field-box--edit .email-field-input:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.email-field-box--edit:focus-within {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
+}
+
+[data-theme="dark"] .email-field-box--edit .email-field-input {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .email-field-box--edit .email-field-input:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.email-field-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.email-field-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.email-field-alert {
+  margin-bottom: 0;
+}
+
+.email-field-subrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-1);
+  min-width: 0;
+}
+
+.email-field-expiry {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-normal);
+  flex-shrink: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .email-field-subrow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Email field - Verified badge + Change action align LEFT below the email
+     value instead of drifting to the right edge/middle of the narrow box. */
+  .email-field-end {
+    margin-left: 0;
+  }
+}

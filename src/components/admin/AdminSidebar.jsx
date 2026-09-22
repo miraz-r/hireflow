@@ -134,14 +134,14 @@ export default function AdminSidebar({ drawerRef, closeBtnRef, onClose, onNaviga
   return (
     <aside id="admin-sidebar" ref={drawerRef} className="admin-sidebar" aria-label="Admin navigation sidebar">
       <div className="admin-sidebar-header">
-        <Link to="/admin" className="admin-brand" aria-label="HireFlow admin home" onClick={onNavigate}>
+        <Link to="/" className="admin-brand" aria-label="HireFlow home" onClick={onNavigate}>
           <svg className="admin-brand-icon" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
             <rect width="32" height="32" rx="7" fill="#4f46e5" />
             <path d="M9 11h14v2.5H9zm0 5h10v2.5H9zm0 5h12v2.5H9z" fill="white" />
           </svg>
           <span className="admin-brand-name">HireFlow</span>
-          <span className="admin-brand-badge">Admin</span>
         </Link>
+        <span className="admin-brand-badge">Admin</span>
         <button
           ref={closeBtnRef}
           type="button"

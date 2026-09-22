@@ -53,6 +53,7 @@ const BELL_ICON = (
 
 function getPageTitle(pathname) {
   if (pathname === '/admin') return 'Overview';
+  if (pathname === '/admin/account') return 'Account';
   if (pathname === '/admin/jobs') return 'Jobs';
   if (pathname.startsWith('/admin/jobs/')) return 'Job Detail';
   return 'Page not found';
