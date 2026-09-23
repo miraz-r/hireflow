@@ -128,7 +128,7 @@
   line-height: var(--line-height-normal);
   color: var(--color-text-primary);
   background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-field);
   border-radius: var(--radius-lg);
   transition:
     border-color var(--transition-fast),
@@ -139,7 +139,7 @@
 .auth-input::placeholder { color: var(--color-text-tertiary); }
 
 .auth-input:hover:not(:disabled) {
-  border-color: var(--color-border-strong);
+  border-color: var(--color-border-field-hover);
 }
 
 .auth-input:focus {

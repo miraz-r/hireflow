@@ -4,6 +4,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { apiGet, apiPatch } from '../utils/api';
 import { STATUS_LABELS } from '../constants/applicationStatus';
 import { useAuth } from '../context/AuthContext';
+import Select from './ui/Select';
 import './RecruiterDashboard.css';
 
 const AVATAR_BASE = 'http://localhost:5000';
@@ -660,17 +661,16 @@ export default function RecruiterDashboard() {
                   {uniqueJobs.length > 1 && (
                     <div className="rd-filter-field">
                       <label className="rd-filter-label" htmlFor="rd-workspace-job-select">Filter by job</label>
-                      <select
+                      <Select
                         id="rd-workspace-job-select"
                         className="rd-filter-select"
                         value={jobFilter}
                         onChange={(e) => setJobFilter(e.target.value)}
-                      >
-                        <option value="all">All jobs</option>
-                        {uniqueJobs.map((j) => (
-                          <option key={j.id} value={j.id}>{j.title}</option>
-                        ))}
-                      </select>
+                        options={[
+                          { value: 'all', label: 'All jobs' },
+                          ...uniqueJobs.map((j) => ({ value: j.id, label: j.title })),
+                        ]}
+                      />
                     </div>
                   )}
                   {(jobFilter !== 'all' || searchQuery) && (
@@ -727,17 +727,14 @@ export default function RecruiterDashboard() {
                             <label className="sr-only" htmlFor={`app-status-${app.id}`}>
                               Status for {app.applicant?.fullName || 'applicant'}
                             </label>
-                            <select
+                            <Select
                               id={`app-status-${app.id}`}
                               className={`rd-status-select rd-status-select--${app.status || 'applied'}`}
                               value={app.status || 'applied'}
                               disabled={updatingId === app.id}
                               onChange={(e) => handleStatusChange(app, e.target.value)}
-                            >
-                              {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                                <option key={value} value={value}>{label}</option>
-                              ))}
-                            </select>
+                              options={Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }))}
+                            />
                             {updatingId === app.id && <span className="rd-spinner" aria-hidden="true" />}
                           </div>
                         </td>

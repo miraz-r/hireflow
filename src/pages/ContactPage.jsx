@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import Reveal from '../components/Reveal';
+import Select from '../components/ui/Select';
 import './ContactPage.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -232,28 +233,17 @@ export default function ContactPage() {
                   <label htmlFor="contact-subject" className="contact-label">
                     Subject <span className="contact-required" aria-hidden="true">*</span>
                   </label>
-                  <div className="contact-select-wrap">
-                    <select
-                      id="contact-subject"
-                      name="subject"
-                      required
-                      value={subject}
-                      onChange={handleSubjectChange}
-                      className={`contact-select${fieldErrors.subject ? ' input-error' : ''}`}
-                      aria-invalid={fieldErrors.subject ? true : undefined}
-                      aria-describedby={fieldErrors.subject ? 'contact-subject-error' : undefined}
-                      disabled={submitting}
-                    >
-                      {SUBJECTS.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
-                    <svg className="contact-select-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </div>
+                  <Select
+                    id="contact-subject"
+                    name="subject"
+                    value={subject}
+                    onChange={handleSubjectChange}
+                    className={`contact-select${fieldErrors.subject ? ' input-error' : ''}`}
+                    aria-invalid={fieldErrors.subject ? true : undefined}
+                    aria-describedby={fieldErrors.subject ? 'contact-subject-error' : undefined}
+                    disabled={submitting}
+                    options={SUBJECTS.map((s) => ({ value: s.value, label: s.label }))}
+                  />
                   {fieldErrors.subject && (
                     <span id="contact-subject-error" className="contact-field-error" role="alert">
                       {fieldErrors.subject}

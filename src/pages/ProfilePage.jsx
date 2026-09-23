@@ -9,6 +9,7 @@ import Avatar from '../components/Avatar';
 import ConfirmModal from '../components/ConfirmModal';
 import ProfileTabs from '../components/ProfileTabs';
 import EmailField from '../components/EmailField';
+import Select from '../components/ui/Select';
 import './ProfilePage.css';
 
 const AVATAR_BASE = 'http://localhost:5000';
@@ -910,28 +911,48 @@ function PostJobTab() {
             </div>
             <div className="profile-field">
               <label className="profile-label" htmlFor="post-category">Category</label>
-              <select id="post-category" name="category" className={`input ${fieldErrors.category ? 'input-error' : ''}`} value={form.category} onChange={handleChange}>
-                {categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-              </select>
+              <Select
+                id="post-category"
+                name="category"
+                className={`input ${fieldErrors.category ? 'input-error' : ''}`}
+                value={form.category}
+                onChange={handleChange}
+                options={categories.map((c) => ({ value: c.name, label: c.name }))}
+              />
               {fieldError('category')}
             </div>
             <div className="profile-field">
               <label className="profile-label" htmlFor="post-worktype">Work type</label>
-              <select id="post-worktype" name="workType" className="input" value={form.workType} onChange={handleChange}>
-                {workTypes.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <Select
+                id="post-worktype"
+                name="workType"
+                className="input"
+                value={form.workType}
+                onChange={handleChange}
+                options={workTypes.map((t) => ({ value: t, label: t }))}
+              />
             </div>
             <div className="profile-field">
               <label className="profile-label" htmlFor="post-emptype">Employment type</label>
-              <select id="post-emptype" name="employmentType" className="input" value={form.employmentType} onChange={handleChange}>
-                {employmentTypes.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <Select
+                id="post-emptype"
+                name="employmentType"
+                className="input"
+                value={form.employmentType}
+                onChange={handleChange}
+                options={employmentTypes.map((t) => ({ value: t, label: t }))}
+              />
             </div>
             <div className="profile-field">
               <label className="profile-label" htmlFor="post-exp">Experience level</label>
-              <select id="post-exp" name="experienceLevel" className="input" value={form.experienceLevel} onChange={handleChange}>
-                {experienceLevels.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <Select
+                id="post-exp"
+                name="experienceLevel"
+                className="input"
+                value={form.experienceLevel}
+                onChange={handleChange}
+                options={experienceLevels.map((t) => ({ value: t, label: t }))}
+              />
             </div>
             <div className="profile-field">
               <label className="profile-label" htmlFor="post-smin">Salary min</label>
