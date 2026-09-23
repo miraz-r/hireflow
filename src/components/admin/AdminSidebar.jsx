@@ -104,7 +104,7 @@ const NAV_SECTIONS = [
     label: 'Manage',
     items: [
       { id: 'jobs', label: 'Jobs', to: '/admin/jobs', icon: ICON_JOBS },
-      { id: 'applications', label: 'Applications', icon: ICON_APPLICATIONS, disabled: true },
+      { id: 'applications', label: 'Applications', to: '/admin/applications', icon: ICON_APPLICATIONS },
       { id: 'recruiters', label: 'Recruiters', icon: ICON_RECRUITERS, disabled: true },
       { id: 'companies', label: 'Companies', icon: ICON_COMPANIES, disabled: true },
       { id: 'jobseekers', label: 'Jobseekers', icon: ICON_JOBSEEKERS, disabled: true },

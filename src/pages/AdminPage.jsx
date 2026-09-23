@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import AdminShell from '../components/admin/AdminShell';
 import AdminOverview from '../components/admin/AdminOverview';
 import AdminJobsPage from '../components/admin/AdminJobsPage';
+import AdminApplicationsPage from '../components/admin/AdminApplicationsPage';
 import AdminAccountPage from './AdminAccountPage';
 import './AdminPage.css';
 
@@ -53,6 +54,7 @@ export default function AdminPage() {
         <Route path="account" element={<AdminAccountPage />} />
         <Route path="jobs" element={<AdminJobsPage />} />
         <Route path="jobs/:jobId" element={<AdminJobsPage />} />
+        <Route path="applications" element={<AdminApplicationsPage />} />
         <Route path="*" element={<NotFoundPlaceholder />} />
       </Routes>
     </AdminShell>

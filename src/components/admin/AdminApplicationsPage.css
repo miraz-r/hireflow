@@ -1,0 +1,1207 @@
+/* ===========================================================================
+   ADMIN APPLICATIONS PAGE (/admin/applications)
+   ---------------------------------------------------------------------------
+   The Application Review workspace. Matches the Admin Jobs page exactly:
+   same 1460px page cap, 24px vertical rhythm, radius/border weights, admin
+   tokens, toolbar + table + footer pagination composition, plus the
+   right-side detail panel. Self-contained: tokens come only from the admin-*
+   palette set by .admin-shell (light) and html[data-theme="dark"] .admin-shell,
+   plus the shared radius/shadow variables. There is no dependency on any
+   other admin stylesheet.
+   =========================================================================== */
+
+/* ---------- Page proportions (matches Admin Jobs) ----------
+   Two-column grid: the table card stays the flexible dominant area and the
+   ~320px detail panel sits directly beside it, both stretched to the same
+   row height so their top and bottom edges line up. align-content: start
+   keeps the row content-sized, exactly as the Part 1 single-card layout. */
+.admin-page.admin-applications {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-content: start;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  max-width: 1460px;
+  margin-inline: auto;
+}
+
+/* ---------- Buttons (shared language) ---------- */
+.admin-applications-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  margin-top: 14px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.admin-applications-btn:hover {
+  background-color: var(--admin-hover);
+  border-color: var(--admin-text-faint);
+}
+
+.admin-applications-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Table card ---------- */
+.admin-applications-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ---------- Toolbar ----------
+   One aligned row: flexible search, four compact Select filters, and a
+   secondary Clear Filters action hairline-separated on the right. All
+   controls share one 40px height, radius, border color, and padding rhythm
+   with the Admin Jobs toolbar. */
+.admin-applications-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-applications-search {
+  position: relative;
+  flex: 1 1 240px;
+  min-width: 180px;
+}
+
+.admin-applications-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--admin-text-faint);
+  pointer-events: none;
+}
+
+.admin-applications-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 38px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-applications-search-input::placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-applications-search-input:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-applications-search-input:focus {
+  background-color: var(--admin-surface);
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-applications-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background-color: var(--admin-hover);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.admin-applications-search-clear:hover {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-border-strong);
+}
+
+/* The shared Select is reskinned to the admin filter height/border language.
+   The :where() base rules yield to these call-site classes, so the trigger
+   reads exactly like the Jobs filter controls. */
+.admin-applications-filter {
+  width: 158px;
+  flex-shrink: 0;
+}
+
+.admin-applications-filter-select {
+  height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+}
+
+.admin-applications-filter-select:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-applications-filter-select:focus,
+.admin-applications-filter:focus-within .hf-select-trigger {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-applications-filter-select .hf-select-value--placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-applications-filter-select .hf-select-chevron {
+  color: var(--admin-text-faint);
+}
+
+/* Clear Filters - secondary action, hairline-separated to the right. */
+.admin-applications-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  margin-left: 4px;
+  padding: 0 6px 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--admin-border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.admin-applications-clear:hover {
+  color: var(--admin-primary);
+}
+
+.admin-applications-clear:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Table ----------
+   Same density as Admin Jobs (14px cells, semibold muted headers). The
+   Applicant column is the flexible anchor and absorbs viewport slack; the
+   fixed columns are sized for real data so nothing clips and headers always
+   align with their content. */
+.admin-applications-table-scroll {
+  width: 100%;
+  /* Grows to absorb any extra card height so the footer stays pinned to the
+     bottom when the detail panel is the taller of the two columns. No effect
+     while the card is content-sized (Part 1 behavior unchanged). */
+  flex: 1 1 auto;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.admin-applications-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-applications-table th,
+.admin-applications-table td {
+  padding: 0 10px;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-applications-table th {
+  padding: 12px 10px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-applications-table td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin-applications-table thead th:first-child,
+.admin-applications-table tbody td:first-child {
+  padding-left: 16px;
+}
+
+/* Column widths - Applicant flexes, the rest are fixed and relax on very wide
+   screens. */
+.admin-applications-col-applicant {
+  width: auto;
+}
+
+.admin-applications-col-job {
+  width: 200px;
+}
+
+.admin-applications-col-company {
+  width: 150px;
+}
+
+.admin-applications-col-status {
+  width: 110px;
+}
+
+.admin-applications-col-applied {
+  width: 150px;
+}
+
+.admin-applications-col-actions {
+  width: 46px;
+}
+
+@media (max-width: 1439px) {
+  .admin-page.admin-applications {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+
+  .admin-applications-col-job {
+    width: 180px;
+  }
+
+  .admin-applications-col-company {
+    width: 130px;
+  }
+
+  .admin-applications-col-status {
+    width: 100px;
+  }
+
+  .admin-applications-col-applied {
+    width: 138px;
+  }
+
+  .admin-applications-col-actions {
+    width: 44px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .admin-applications-col-job {
+    width: 220px;
+  }
+
+  .admin-applications-col-company {
+    width: 170px;
+  }
+
+  .admin-applications-col-status {
+    width: 120px;
+  }
+
+  .admin-applications-col-applied {
+    width: 162px;
+  }
+
+  .admin-applications-col-actions {
+    width: 50px;
+  }
+}
+
+/* Column alignment - Applicant, Job, Company, and Status stay left-aligned;
+   Applied and Actions are centered. Headers and cells share alignment. */
+.admin-applications-table thead th.admin-applications-col-applicant,
+.admin-applications-table tbody td.admin-applications-col-applicant,
+.admin-applications-table thead th.admin-applications-col-job,
+.admin-applications-table tbody td.admin-applications-col-job,
+.admin-applications-table thead th.admin-applications-col-company,
+.admin-applications-table tbody td.admin-applications-col-company,
+.admin-applications-table thead th.admin-applications-col-status,
+.admin-applications-table tbody td.admin-applications-col-status {
+  text-align: left;
+}
+
+.admin-applications-table thead th.admin-applications-col-actions,
+.admin-applications-table tbody td.admin-applications-col-actions {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* ---------- Rows ---------- */
+.admin-applications-table tbody tr {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.admin-applications-table tbody tr:hover {
+  background-color: var(--admin-hover);
+}
+
+.admin-applications-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Selected row - subtle indigo wash, never saturated, with a quiet left
+   accent matching the Admin Jobs selected state. */
+.admin-applications-table tbody tr.admin-applications-row--selected {
+  background-color: var(--admin-primary-soft);
+  box-shadow: inset 2px 0 0 0 var(--admin-primary);
+}
+
+.admin-applications-table tbody tr.admin-applications-row--selected:hover {
+  background-color: var(--admin-primary-soft);
+}
+
+/* ---------- Applicant cell ----------
+   The primary anchor: 30px circular initials avatar + name/email stack. */
+.admin-applications-applicant {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.admin-applications-applicant-text {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.admin-applications-applicant-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-applications-applicant-email {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--admin-text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 30px circle - initials variant, same neutral language as Jobs avatars. */
+.admin-applications-avatar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.admin-applications-avatar--initials {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-border);
+  user-select: none;
+}
+
+/* ---------- Job / company cells ---------- */
+.admin-applications-job {
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-applications-company {
+  font-weight: 500;
+  color: var(--admin-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Status badge ----------
+   Same badge language as Admin Jobs (dot + soft tint), per-status colors
+   with explicit dark variants - never pure-black fills. */
+.admin-applications-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.admin-applications-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.admin-applications-badge--new {
+  color: #1d4ed8;
+  background-color: #dbeafe;
+}
+
+.admin-applications-badge--reviewing {
+  color: #475569;
+  background-color: #e2e8f0;
+}
+
+.admin-applications-badge--shortlisted {
+  color: #5b21b6;
+  background-color: #ede9fe;
+}
+
+.admin-applications-badge--interview {
+  color: #92400e;
+  background-color: #fef3c7;
+}
+
+.admin-applications-badge--rejected {
+  color: #991b1b;
+  background-color: #fee2e2;
+}
+
+.admin-applications-badge--hired {
+  color: #065f46;
+  background-color: #d1fae5;
+}
+
+html[data-theme="dark"] .admin-applications-badge--new {
+  color: #bfdbfe;
+  background-color: #1e3a8a;
+}
+
+html[data-theme="dark"] .admin-applications-badge--reviewing {
+  color: #cbd5e1;
+  background-color: #1e293b;
+}
+
+html[data-theme="dark"] .admin-applications-badge--shortlisted {
+  color: #ddd6fe;
+  background-color: #2e1065;
+}
+
+html[data-theme="dark"] .admin-applications-badge--interview {
+  color: #fde68a;
+  background-color: #422006;
+}
+
+html[data-theme="dark"] .admin-applications-badge--rejected {
+  color: #fecaca;
+  background-color: #450a0a;
+}
+
+html[data-theme="dark"] .admin-applications-badge--hired {
+  color: #a7f3d0;
+  background-color: #064e3b;
+}
+
+/* ---------- Applied date ---------- */
+.admin-applications-date {
+  font-size: 14px;
+  color: var(--admin-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Footer + pagination ---------- */
+.admin-applications-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-applications-footer-count {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+.admin-applications-footer-count strong {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-applications-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-applications-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.admin-applications-page-btn:hover:not(:disabled) {
+  color: var(--admin-text-strong);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-applications-page-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+.admin-applications-page-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.admin-applications-page-btn--current {
+  color: #ffffff;
+  background-color: var(--admin-primary);
+  border-color: var(--admin-primary);
+}
+
+.admin-applications-page-btn--current:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: var(--admin-primary-hover);
+  border-color: var(--admin-primary-hover);
+}
+
+.admin-applications-page-btn--nav {
+  padding: 0 10px;
+}
+
+.admin-applications-page-gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Empty state ---------- */
+.admin-applications-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.admin-applications-state-title {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-applications-state-text {
+  display: block;
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Row menu (three-dot) ---------- */
+.admin-applications-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-applications-menu-btn:hover,
+.admin-applications-menu-btn--open {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-hover);
+}
+
+.admin-applications-menu-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+/* ---------- Floating row menu (portaled) ----------
+   Rendered on <body> through createPortal, so the card's overflow:hidden can
+   never clip it. Values are spelled out because the portal sits outside
+   .admin-shell; dark variants mirror the admin token palette. */
+.admin-applications-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  padding: 5px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px -8px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(15, 23, 42, 0.06);
+  color: #111827;
+  animation: admin-applications-menu-in 120ms ease-out;
+}
+
+@keyframes admin-applications-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-applications-menu {
+    animation: none;
+  }
+}
+
+html[data-theme="dark"] .admin-applications-menu {
+  background-color: #1a2438;
+  border-color: #334155;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.55);
+  color: #f1f5f9;
+}
+
+.admin-applications-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px 8px;
+}
+
+.admin-applications-menu-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+html[data-theme="dark"] .admin-applications-menu-label {
+  color: #94a3b8;
+}
+
+.admin-applications-menu-subhead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f46e5;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+html[data-theme="dark"] .admin-applications-menu-subhead {
+  color: #a5b4fc;
+}
+
+.admin-applications-menu-subhead:hover {
+  background-color: #eef2ff;
+}
+
+html[data-theme="dark"] .admin-applications-menu-subhead:hover {
+  background-color: rgba(129, 140, 248, 0.12);
+}
+
+.admin-applications-menu-divider {
+  height: 1px;
+  margin: 0 12px 4px;
+  background-color: #e5e7eb;
+}
+
+html[data-theme="dark"] .admin-applications-menu-divider {
+  background-color: #2b3a52;
+}
+
+.admin-applications-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  text-align: left;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+
+html[data-theme="dark"] .admin-applications-menu-item {
+  color: #e2e8f0;
+}
+
+.admin-applications-menu-item:hover:not(:disabled),
+.admin-applications-menu-item--link:hover {
+  color: #111827;
+  background-color: #f3f4f6;
+}
+
+html[data-theme="dark"] .admin-applications-menu-item:hover:not(:disabled),
+html[data-theme="dark"] .admin-applications-menu-item--link:hover {
+  color: #f1f5f9;
+  background-color: rgba(148, 163, 184, 0.08);
+}
+
+.admin-applications-menu-item--selected {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .admin-applications-menu-item--selected {
+  color: #a5b4fc;
+}
+
+.admin-applications-menu-item:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 1px;
+}
+
+html[data-theme="dark"] .admin-applications-menu-item:focus-visible {
+  outline-color: #818cf8;
+}
+
+.admin-applications-menu-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #4f46e5;
+}
+
+html[data-theme="dark"] .admin-applications-menu-check {
+  color: #a5b4fc;
+}
+
+.admin-applications-menu-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-applications-menu-chevron {
+  display: inline-flex;
+  color: #9ca3af;
+}
+
+html[data-theme="dark"] .admin-applications-menu-chevron {
+  color: #64748b;
+}
+
+/* ---------- Right detail panel ----------
+    Contextual inspector beside the table card: same surface, border, and
+    shadow language as the Admin Jobs panel, stretched by the page grid so it
+    matches the table's height. Content scrolls inside the panel. */
+.admin-applications-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.admin-applications-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+/* Empty state - centered both ways, same title/text philosophy as the
+   Admin Jobs "Select a job" state. */
+.admin-applications-panel-state {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+/* ---------- Panel header ---------- */
+.admin-applications-detail-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-applications-detail-avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+}
+
+.admin-applications-detail-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.admin-applications-detail-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1.3;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-applications-detail-email {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--admin-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-applications-detail-location {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Close sits in the upper-right corner, status badge stacked beneath it. */
+.admin-applications-detail-head-side {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.admin-applications-detail-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-applications-detail-close:hover {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-hover);
+}
+
+.admin-applications-detail-close:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+/* ---------- Panel sections ----------
+   Small semibold muted uppercase labels over a two-column label/value list.
+   Hierarchy comes from typography and spacing, not color. */
+.admin-applications-detail-section {
+  margin-top: 18px;
+}
+
+.admin-applications-detail-sub {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+}
+
+.admin-applications-detail-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-applications-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.admin-applications-detail-row dt {
+  flex: 0 0 76px;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-applications-detail-row dd {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text-strong);
+  overflow-wrap: break-word;
+}
+
+/* Small neutral skill pills - same chip language as the Jobs panel. */
+.admin-applications-detail-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-applications-detail-skill {
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ---------- Resume card ---------- */
+.admin-applications-detail-resume {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  background-color: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+}
+
+.admin-applications-detail-resume-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+}
+
+.admin-applications-detail-resume-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-applications-detail-resume-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-applications-detail-resume-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-applications-detail-resume-actions button {
+  padding: 0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-primary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.admin-applications-detail-resume-actions button:hover {
+  text-decoration: underline;
+}
+
+.admin-applications-detail-resume-actions button:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---------- Action area ---------- */
+.admin-applications-detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-applications-detail-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-applications-detail-actions-row .admin-applications-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-top: 0;
+}
+
+/* ---------- Dark-mode contrast tune ----------
+   Mirrors the Admin Jobs page: push faint/muted/text further up the slate
+   ramp so titles, headers, dates, and secondary metadata stay clearly
+   readable on the dark admin surface. */
+html[data-theme="dark"] .admin-page.admin-applications {
+  --admin-text-faint: #8b9ab0;
+  --admin-text-muted: #a3b0c3;
+  --admin-text: #b7c2d2;
+}
+
+/* ---------- Accessibility ---------- */
+.admin-applications-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Responsive ----------
+    Desktop-first. On narrow tables the fixed columns tighten and the table
+    scrolls horizontally inside its container; the toolbar stack keeps the
+    existing Admin Jobs behavior. The detail panel drops below the table so
+    the Part 1 grid is never squeezed. */
+@media (max-width: 1023px) {
+  .admin-page.admin-applications {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-applications-detail {
+    max-height: 420px;
+  }
+
+  .admin-applications-filter {
+    flex: 1 1 158px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-applications-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-applications-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .admin-applications-filter {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
