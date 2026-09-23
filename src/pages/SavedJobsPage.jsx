@@ -113,7 +113,7 @@ export default function SavedJobsPage() {
                       {(job.company || 'C').charAt(0)}
                     </div>
                     <div className="saved-jobs-card-info">
-                      <Link to={`/jobs/${job.id}`} className="saved-jobs-card-title">{job.title}</Link>
+                      <Link to={`/jobs/${job.id}`} state={{ from: 'saved' }} className="saved-jobs-card-title">{job.title}</Link>
                       <span className="saved-jobs-card-company">{job.company}</span>
                       {job.location && !isWorkModeLocationOnly(job) && (
                         <span className="saved-jobs-card-location">
@@ -137,7 +137,7 @@ export default function SavedJobsPage() {
                   </div>
 
                   <div className="saved-jobs-card-actions">
-                    <Link to={`/jobs/${job.id}`} className="btn btn-sm btn-secondary">View job</Link>
+                    <Link to={`/jobs/${job.id}`} state={{ from: 'saved' }} className="btn btn-sm btn-secondary">View job</Link>
                     <button
                       type="button"
                       className="btn btn-sm btn-ghost saved-jobs-remove-btn"

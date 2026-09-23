@@ -15,9 +15,14 @@ export default function JobDetailPage({ onSignInPrompt }) {
   const navigate = useNavigate();
   const location = useLocation();
   const fromApplications = location.state?.from === 'applications';
+  const fromSaved = location.state?.from === 'saved';
   const handleBack = () => {
     if (fromApplications) {
       navigate('/profile?tab=my-applications');
+      return;
+    }
+    if (fromSaved) {
+      navigate('/saved-jobs');
       return;
     }
     const bookmark = getJobsScroll();
@@ -171,7 +176,7 @@ export default function JobDetailPage({ onSignInPrompt }) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          {fromApplications ? 'Back to applications' : 'Back to all jobs'}
+          {fromApplications ? 'Back to applications' : fromSaved ? 'Back to Saved Jobs' : 'Back to all jobs'}
         </button>
 
         <div className="job-detail-layout">

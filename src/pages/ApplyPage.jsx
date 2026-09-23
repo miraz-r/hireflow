@@ -151,6 +151,12 @@ export default function ApplyPage() {
     }
   };
 
+  useEffect(() => {
+    if (!submitted) return;
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    window.scrollTo({ top: 0, left: 0, behavior });
+  }, [submitted]);
+
   const clearFieldError = (name) => {
     if (fieldErrors[name]) {
       setFieldErrors((prev) => {
