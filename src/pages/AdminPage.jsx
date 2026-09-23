@@ -5,6 +5,7 @@ import AdminShell from '../components/admin/AdminShell';
 import AdminOverview from '../components/admin/AdminOverview';
 import AdminJobsPage from '../components/admin/AdminJobsPage';
 import AdminApplicationsPage from '../components/admin/AdminApplicationsPage';
+import AdminRecruitersPage from '../components/admin/AdminRecruitersPage';
 import AdminAccountPage from './AdminAccountPage';
 import './AdminPage.css';
 
@@ -55,6 +56,7 @@ export default function AdminPage() {
         <Route path="jobs" element={<AdminJobsPage />} />
         <Route path="jobs/:jobId" element={<AdminJobsPage />} />
         <Route path="applications" element={<AdminApplicationsPage />} />
+        <Route path="recruiters" element={<AdminRecruitersPage />} />
         <Route path="*" element={<NotFoundPlaceholder />} />
       </Routes>
     </AdminShell>
