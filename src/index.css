@@ -57,12 +57,18 @@
    * Strong:   slightly more present
    * Brand:    for focus rings
    * On-dark:  for use over the deep brand surface
+   * Field:    dedicated border for editable form controls (inputs, selects,
+   *           textareas, search fields and their composite wrappers). Same
+   *           value as Default in light mode, but lifted in dark mode so every
+   *           control keeps a clear yet subtle outline against dark surfaces.
    */
   --color-border-default: #E5E7EB;
   --color-border-strong: #D1D5DB;
   --color-border-focus: #4F46E5;
   --color-border-on-dark: rgba(255, 255, 255, 0.10);
   --color-border-on-dark-strong: rgba(255, 255, 255, 0.16);
+  --color-border-field: #E5E7EB;
+  --color-border-field-hover: #D1D5DB;
 
   /* Focus ring - dedicated color for :focus-visible box-shadow rings.
    * Must stay bright enough to show against both light and dark surfaces. */
@@ -198,6 +204,11 @@
   --color-border-on-dark: rgba(255, 255, 255, 0.10);
   --color-border-on-dark-strong: rgba(255, 255, 255, 0.16);
   --color-focus-ring: #818cf8;
+
+  /* Form-control borders stay clearly visible on dark surfaces (the default
+     border token is too close to the field backgrounds here). */
+  --color-border-field: #3B4A63;
+  --color-border-field-hover: #4E6180;
 
   /* State backgrounds - dark-mode adjusted for contrast */
   --color-success-bg: rgba(16, 185, 129, 0.12);
@@ -355,6 +366,28 @@ input, textarea, select {
   font-family: inherit;
   font-size: inherit;
   color: inherit;
+}
+
+/* ---------- Native <select> global treatment ----------
+ * Any remaining native <select> anywhere in HireFlow (public pages, auth,
+ * dashboards, admin, filters) renders with the shared custom dropdown chrome:
+ * no default browser arrow, consistent padding, and a single clean chevron.
+ * Prefer the reusable <Select> component for new dropdowns; this rule is the
+ * fallback so a missed/plain <select> never looks like a raw OS control.
+ */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  padding-right: var(--space-10);
+  cursor: pointer;
+}
+
+select option {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
 }
 
 /* ---------- Utility Classes ---------- */
@@ -558,7 +591,7 @@ input, textarea, select {
   line-height: var(--line-height-normal);
   color: var(--color-text-primary);
   background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-field);
   border-radius: var(--radius-lg);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -568,7 +601,7 @@ input, textarea, select {
 }
 
 .input:hover {
-  border-color: var(--color-border-strong);
+  border-color: var(--color-border-field-hover);
 }
 
 .input:focus {
@@ -698,9 +731,10 @@ video {
 [data-theme="dark"] .input,
 [data-theme="dark"] input,
 [data-theme="dark"] textarea,
-[data-theme="dark"] select {
+[data-theme="dark"] select,
+[data-theme="dark"] .hf-select {
   background-color: var(--color-bg-elevated);
-  border-color: var(--color-border-default);
+  border-color: var(--color-border-field);
   color: var(--color-text-primary);
 }
 
@@ -713,8 +747,9 @@ video {
 [data-theme="dark"] .input:hover,
 [data-theme="dark"] input:hover,
 [data-theme="dark"] textarea:hover,
-[data-theme="dark"] select:hover {
-  border-color: var(--color-border-strong);
+[data-theme="dark"] select:hover,
+[data-theme="dark"] .hf-select:hover {
+  border-color: var(--color-border-field-hover);
 }
 
 [data-theme="dark"] .input:focus,

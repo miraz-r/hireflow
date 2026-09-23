@@ -1,0 +1,160 @@
+/* =========================================================
+   HIREFLOW SHARED SELECT - the one custom dropdown used across
+   the site (public pages, auth, dashboards, filters). Draws on
+   the global design tokens, so light/dark mode is automatic.
+   Use <Select className="..."> and pass any existing field CSS
+   class (e.g. "input", "contact-select", "rd-filter-select")
+   to the trigger to control padding/height/density - those
+   classes always win over the base styles below.
+   ========================================================= */
+
+.hf-select {
+  position: relative;
+  min-width: 0;
+}
+
+/* Base trigger styles use :where() so the zero-specificity rules never fight
+   call-site classes (`.input`, `.rd-filter-select`, ...) regardless of CSS
+   import order. Call-site classes always win. */
+:where(.hf-select-trigger) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  text-align: left;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.hf-select-trigger:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
+}
+
+.hf-select-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* While the listbox is open, keep the field's focused look even though focus
+   has moved into the portaled menu. */
+.hf-select--open .hf-select-trigger {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 1px var(--color-focus-ring);
+}
+
+.hf-select-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+}
+
+.hf-select-value--placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.hf-select-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.hf-select--open .hf-select-chevron {
+  transform: rotate(180deg);
+}
+
+/* ---------- Portaled listbox ---------- */
+.hf-select-menu {
+  z-index: 1000;
+  min-width: 120px;
+  padding: var(--space-1);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-field);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.hf-select-menu--up {
+  box-shadow: 0 -8px 24px -8px rgba(15, 23, 42, 0.14), 0 -2px 6px -2px rgba(15, 23, 42, 0.06);
+}
+
+.hf-select-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hf-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  text-align: left;
+  color: var(--color-text-primary);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.hf-select-option-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hf-select-option:hover:not(:disabled),
+.hf-select-option:focus {
+  outline: none;
+  background-color: var(--color-bg-tertiary);
+}
+
+.hf-select-option:focus-visible {
+  outline: none;
+  background-color: var(--color-bg-tertiary);
+  box-shadow: inset 0 0 0 2px var(--color-brand-primary);
+}
+
+.hf-select-option--selected {
+  background-color: var(--color-brand-primary-light);
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.hf-select-option--selected:hover:not(:disabled) {
+  background-color: var(--color-brand-primary-light);
+}
+
+.hf-select-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hf-select-check {
+  flex-shrink: 0;
+}
