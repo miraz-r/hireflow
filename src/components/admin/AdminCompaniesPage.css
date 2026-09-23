@@ -1,0 +1,1044 @@
+/* ===========================================================================
+   ADMIN COMPANIES PAGE (/admin/companies)
+   ---------------------------------------------------------------------------
+   The Companies workspace. Matches the Admin Recruiters / Applications / Jobs
+   pages: same 1460px page cap, admin tokens, toolbar + table + footer
+   pagination composition, plus a right-side detail panel for the selected
+   company. Self-contained: tokens come only from the admin-* palette set by
+   .admin-shell (light) and html[data-theme="dark"] .admin-shell, plus the
+   shared radius/shadow variables.
+   =========================================================================== */
+
+/* ---------- Page proportions (matches Admin Recruiters) ----------
+   Two-column grid: the table card stays the flexible dominant area and the
+   ~320px detail panel sits directly beside it, both stretched to the same row
+   height so their top and bottom edges line up. align-content: start keeps
+   the row content-sized. */
+.admin-page.admin-companies {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-content: start;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  max-width: 1460px;
+  margin-inline: auto;
+}
+
+/* ---------- Buttons (shared language) ---------- */
+.admin-companies-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  margin-top: 14px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.admin-companies-btn:hover {
+  background-color: var(--admin-hover);
+  border-color: var(--admin-text-faint);
+}
+
+.admin-companies-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Table card ---------- */
+.admin-companies-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ---------- Toolbar ----------
+   One aligned row: flexible search, three compact Select filters, and a
+   secondary Clear Filters action hairline-separated on the right. Mirrors the
+   Admin Recruiters / Applications toolbar exactly. */
+.admin-companies-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-companies-search {
+  position: relative;
+  flex: 1 1 240px;
+  min-width: 180px;
+}
+
+.admin-companies-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--admin-text-faint);
+  pointer-events: none;
+}
+
+.admin-companies-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 38px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-companies-search-input::placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-companies-search-input:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-companies-search-input:focus {
+  background-color: var(--admin-surface);
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-companies-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background-color: var(--admin-hover);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.admin-companies-search-clear:hover {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-border-strong);
+}
+
+/* The shared Select is reskinned to the admin filter height/border language,
+   exactly like the Recruiters / Applications filters. */
+.admin-companies-filter {
+  width: 158px;
+  flex-shrink: 0;
+}
+
+.admin-companies-filter-select {
+  height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+}
+
+.admin-companies-filter-select:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-companies-filter-select:focus,
+.admin-companies-filter:focus-within .hf-select-trigger {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-companies-filter-select .hf-select-value--placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-companies-filter-select .hf-select-chevron {
+  color: var(--admin-text-faint);
+}
+
+/* Clear Filters - secondary action, hairline-separated to the right. */
+.admin-companies-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  margin-left: 4px;
+  padding: 0 6px 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--admin-border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.admin-companies-clear:hover {
+  color: var(--admin-primary);
+}
+
+.admin-companies-clear:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Table ----------
+   Same density as Admin Recruiters / Applications (14px cells, muted semibold
+   headers). The Company column is the flexible anchor; the fixed columns are
+   sized for real data so nothing clips and headers always align with rows. */
+.admin-companies-table-scroll {
+  width: 100%;
+  flex: 1 1 auto;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.admin-companies-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-companies-table th,
+.admin-companies-table td {
+  padding: 0 10px;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-companies-table th {
+  padding: 12px 10px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-companies-table td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin-companies-table thead th:first-child,
+.admin-companies-table tbody td:first-child {
+  padding-left: 16px;
+}
+
+/* Column widths - Company flexes, the rest are fixed. */
+.admin-companies-col-company {
+  width: auto;
+}
+
+.admin-companies-col-industry {
+  width: 170px;
+}
+
+.admin-companies-col-status {
+  width: 108px;
+}
+
+.admin-companies-col-recruiters {
+  width: 100px;
+}
+
+.admin-companies-col-jobs {
+  width: 72px;
+}
+
+.admin-companies-col-applications {
+  width: 116px;
+}
+
+.admin-companies-col-joined {
+  width: 140px;
+}
+
+.admin-companies-col-actions {
+  width: 46px;
+}
+
+/* Narrower grid under 1440px - the panel shrinks first and the fixed columns
+   tighten so the Company column keeps as much room as possible. */
+@media (max-width: 1439px) {
+  .admin-page.admin-companies {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+
+  .admin-companies-col-industry {
+    width: 150px;
+  }
+
+  .admin-companies-col-status {
+    width: 100px;
+  }
+
+  .admin-companies-col-recruiters {
+    width: 92px;
+  }
+
+  .admin-companies-col-jobs {
+    width: 66px;
+  }
+
+  .admin-companies-col-applications {
+    width: 108px;
+  }
+
+  .admin-companies-col-joined {
+    width: 130px;
+  }
+
+  .admin-companies-col-actions {
+    width: 44px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .admin-companies-col-industry {
+    width: 190px;
+  }
+
+  .admin-companies-col-status {
+    width: 120px;
+  }
+
+  .admin-companies-col-recruiters {
+    width: 110px;
+  }
+
+  .admin-companies-col-applications {
+    width: 126px;
+  }
+
+  .admin-companies-col-joined {
+    width: 152px;
+  }
+
+  .admin-companies-col-actions {
+    width: 50px;
+  }
+}
+
+/* Column alignment - Company, Industry, and Status stay left-aligned;
+   Recruiters, Jobs, Applications, Joined, and Actions are centered. Headers
+   and cells share alignment. */
+.admin-companies-table thead th.admin-companies-col-company,
+.admin-companies-table tbody td.admin-companies-col-company,
+.admin-companies-table thead th.admin-companies-col-industry,
+.admin-companies-table tbody td.admin-companies-col-industry,
+.admin-companies-table thead th.admin-companies-col-status,
+.admin-companies-table tbody td.admin-companies-col-status {
+  text-align: left;
+}
+
+.admin-companies-table thead th.admin-companies-col-actions,
+.admin-companies-table tbody td.admin-companies-col-actions {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* ---------- Rows ---------- */
+.admin-companies-table tbody tr {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.admin-companies-table tbody tr:hover {
+  background-color: var(--admin-hover);
+}
+
+.admin-companies-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Selected row - subtle indigo wash, never saturated, with a quiet left
+   accent matching the existing Admin selected states. */
+.admin-companies-table tbody tr.admin-companies-row--selected {
+  background-color: var(--admin-primary-soft);
+  box-shadow: inset 2px 0 0 0 var(--admin-primary);
+}
+
+.admin-companies-table tbody tr.admin-companies-row--selected:hover {
+  background-color: var(--admin-primary-soft);
+}
+
+/* ---------- Company cell ----------
+   The primary anchor: 30px circular company mark/logo + name/domain stack. */
+.admin-companies-company {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.admin-companies-company-text {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.admin-companies-company-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-companies-company-domain {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--admin-text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 30px circle - company logo mark with per-company muted brand colors. Falls
+   back to the neutral initials language when no brand color is supplied. */
+.admin-companies-mark {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ---------- Industry cell ---------- */
+.admin-companies-industry {
+  font-weight: 500;
+  color: var(--admin-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Status badge ----------
+   Same badge language as Recruiters / Applications (dot + soft tint),
+   per-status colors with explicit dark variants - never pure-black fills. */
+.admin-companies-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.admin-companies-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.admin-companies-badge--active {
+  color: #065f46;
+  background-color: #d1fae5;
+}
+
+.admin-companies-badge--suspended {
+  color: #475569;
+  background-color: #e2e8f0;
+}
+
+.admin-companies-badge--pending {
+  color: #92400e;
+  background-color: #fef3c7;
+}
+
+html[data-theme="dark"] .admin-companies-badge--active {
+  color: #a7f3d0;
+  background-color: #064e3b;
+}
+
+html[data-theme="dark"] .admin-companies-badge--suspended {
+  color: #cbd5e1;
+  background-color: #1e293b;
+}
+
+html[data-theme="dark"] .admin-companies-badge--pending {
+  color: #fde68a;
+  background-color: #422006;
+}
+
+/* ---------- Numeric counts + Joined date ---------- */
+.admin-companies-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-companies-date {
+  font-size: 14px;
+  color: var(--admin-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Footer + pagination ---------- */
+.admin-companies-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-companies-footer-count {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+.admin-companies-footer-count strong {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-companies-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-companies-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.admin-companies-page-btn:hover:not(:disabled) {
+  color: var(--admin-text-strong);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-companies-page-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+.admin-companies-page-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.admin-companies-page-btn--current {
+  color: #ffffff;
+  background-color: var(--admin-primary);
+  border-color: var(--admin-primary);
+}
+
+.admin-companies-page-btn--current:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: var(--admin-primary-hover);
+  border-color: var(--admin-primary-hover);
+}
+
+.admin-companies-page-btn--nav {
+  padding: 0 10px;
+}
+
+.admin-companies-page-gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Empty state ---------- */
+.admin-companies-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.admin-companies-state-title {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-companies-state-text {
+  display: block;
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Right detail panel ----------
+   Contextual inspector beside the table card: same surface, border, and
+   shadow language as the Admin Recruiters / Applications panels, stretched by
+   the page grid so it matches the table's height. Content scrolls inside. */
+.admin-companies-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.admin-companies-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+/* Empty state - centered both ways, same title/text philosophy as the
+   Admin Recruiters / Applications "Select a ..." state. */
+.admin-companies-panel-state {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+/* ---------- Panel header ----------
+   Compact row: 36px circular company mark + name/domain stack. No status
+   pill - status lives in the row badge and the RowMenu. */
+.admin-companies-detail-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-companies-detail-mark {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
+
+.admin-companies-detail-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.admin-companies-detail-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1.3;
+  color: var(--admin-text-strong);
+}
+
+.admin-companies-detail-domain {
+  margin: 3px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--admin-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Panel sections ----------
+   Small semibold muted uppercase labels over a label/value list. Labels stay
+   on the left, values align right so long emails and websites stay readable. */
+.admin-companies-detail-section {
+  margin-top: 18px;
+}
+
+.admin-companies-detail-sub {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+}
+
+.admin-companies-detail-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.admin-companies-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.admin-companies-detail-row dt {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-companies-detail-row dd {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text-strong);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Panel actions ----------
+   One compact row of secondary buttons, hairline-separated from the body. */
+.admin-companies-detail-actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-companies-detail-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-companies-detail-actions-row .admin-companies-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-top: 0;
+}
+
+/* ---------- Row menu (three-dot) ---------- */
+.admin-companies-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-companies-menu-btn:hover,
+.admin-companies-menu-btn--open {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-hover);
+}
+
+.admin-companies-menu-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+/* ---------- Floating row menu (portaled) ----------
+   Rendered on <body> through createPortal, so the card's overflow:hidden can
+   never clip it. Values are spelled out because the portal sits outside
+   .admin-shell; dark variants mirror the admin token palette. */
+.admin-companies-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  padding: 5px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px -8px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(15, 23, 42, 0.06);
+  color: #111827;
+  animation: admin-companies-menu-in 120ms ease-out;
+}
+
+@keyframes admin-companies-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-companies-menu {
+    animation: none;
+  }
+}
+
+html[data-theme="dark"] .admin-companies-menu {
+  background-color: #1a2438;
+  border-color: #334155;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.55);
+  color: #f1f5f9;
+}
+
+.admin-companies-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px 8px;
+}
+
+.admin-companies-menu-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+html[data-theme="dark"] .admin-companies-menu-label {
+  color: #94a3b8;
+}
+
+.admin-companies-menu-subhead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f46e5;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+html[data-theme="dark"] .admin-companies-menu-subhead {
+  color: #a5b4fc;
+}
+
+.admin-companies-menu-subhead:hover {
+  background-color: #eef2ff;
+}
+
+html[data-theme="dark"] .admin-companies-menu-subhead:hover {
+  background-color: rgba(129, 140, 248, 0.12);
+}
+
+.admin-companies-menu-divider {
+  height: 1px;
+  margin: 4px 12px;
+  background-color: #e5e7eb;
+}
+
+html[data-theme="dark"] .admin-companies-menu-divider {
+  background-color: #2b3a52;
+}
+
+.admin-companies-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  text-align: left;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+
+html[data-theme="dark"] .admin-companies-menu-item {
+  color: #e2e8f0;
+}
+
+.admin-companies-menu-item:hover:not(:disabled) {
+  color: #111827;
+  background-color: #f3f4f6;
+}
+
+html[data-theme="dark"] .admin-companies-menu-item:hover:not(:disabled) {
+  color: #f1f5f9;
+  background-color: rgba(148, 163, 184, 0.08);
+}
+
+.admin-companies-menu-item--selected {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .admin-companies-menu-item--selected {
+  color: #a5b4fc;
+}
+
+.admin-companies-menu-item:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 1px;
+}
+
+html[data-theme="dark"] .admin-companies-menu-item:focus-visible {
+  outline-color: #818cf8;
+}
+
+.admin-companies-menu-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #4f46e5;
+}
+
+html[data-theme="dark"] .admin-companies-menu-check {
+  color: #a5b4fc;
+}
+
+.admin-companies-menu-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-companies-menu-chevron {
+  display: inline-flex;
+  color: #9ca3af;
+}
+
+html[data-theme="dark"] .admin-companies-menu-chevron {
+  color: #64748b;
+}
+
+/* ---------- Dark-mode contrast tune ----------
+   Mirrors the Admin Recruiters / Applications pages: push faint/muted/text
+   further up the slate ramp so titles, headers, dates, and secondary metadata
+   stay clearly readable on the dark admin surface. */
+html[data-theme="dark"] .admin-page.admin-companies {
+  --admin-text-faint: #8b9ab0;
+  --admin-text-muted: #a3b0c3;
+  --admin-text: #b7c2d2;
+}
+
+/* ---------- Accessibility ---------- */
+.admin-companies-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Responsive ----------
+   Desktop-first. On narrow tables the fixed columns tighten and the table
+   scrolls horizontally inside its container; the panel drops below the card
+   and caps its height. The toolbar stack keeps the existing Admin behavior. */
+@media (max-width: 1023px) {
+  .admin-page.admin-companies {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-companies-detail {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-companies-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-companies-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .admin-companies-filter {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}

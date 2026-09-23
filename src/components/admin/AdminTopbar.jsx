@@ -57,6 +57,7 @@ function getPageTitle(pathname) {
   if (pathname === '/admin/jobs' || pathname.startsWith('/admin/jobs/')) return 'Jobs';
   if (pathname === '/admin/applications' || pathname.startsWith('/admin/applications/')) return 'Applications';
   if (pathname === '/admin/recruiters' || pathname.startsWith('/admin/recruiters/')) return 'Recruiters';
+  if (pathname === '/admin/companies' || pathname.startsWith('/admin/companies/')) return 'Companies';
   return 'Page not found';
 }
 
