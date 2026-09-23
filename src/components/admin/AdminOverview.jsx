@@ -210,7 +210,7 @@ function AdminRecentApplications({ applications }) {
         </thead>
         <tbody>
           {applications.map((app) => (
-            <tr key={app._id}>
+            <tr key={app.id ?? app._id}>
               <td>
                 <div className="admin-overview-applicant">
                   <span className="admin-overview-applicant-name">{app.applicant?.name || app.fullName || 'Applicant'}</span>
@@ -247,8 +247,8 @@ function AdminRecentActivity({ items }) {
 
   return (
     <div className="admin-activity">
-      {items.map((item) => (
-        <div className="admin-activity-item" key={item._id || item.key}>
+      {items.map((item, index) => (
+        <div className="admin-activity-item" key={`${item.type || 'activity'}-${index}`}>
           <span className={'admin-activity-dot admin-activity-dot--' + (item.kind || 'default')} aria-hidden="true" />
           <div className="admin-activity-body">
             <span className="admin-activity-label">{item.label || item.type}</span>

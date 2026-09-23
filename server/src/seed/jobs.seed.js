@@ -11,9 +11,41 @@ require('dotenv').config();
 const dns = require('dns');
 dns.setServers(['1.1.1.1', '1.0.0.1']);
 
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const env = require('../config/env');
 const Job = require('../models/Job');
+const User = require('../models/User');
+const Profile = require('../models/Profile');
+const Application = require('../models/Application');
+
+// Recruiters used to give catalogue jobs a real owner (visible in the Admin
+// Jobs recruiter column). Created on demand; credentials are random and never
+// exposed, because these are poster identities for seeded listings only.
+const RECRUITER_SEEDS = [
+  { key: 'jane', fullName: 'Jane Doe', jobTitle: 'Talent Acquisition Lead', companyName: 'HireFlow Recruiting', location: 'Metropolis, NY', email: 'jane.doe@hireflow.local', phone: '+1 555 010 0100' },
+  { key: 'marcus', fullName: 'Marcus Chen', jobTitle: 'Technical Recruiter', companyName: 'HireFlow Recruiting', location: 'Austin, TX', email: 'marcus.chen@hireflow.local', phone: '+1 555 010 0101' },
+  { key: 'priya', fullName: 'Priya Sharma', jobTitle: 'Senior Recruiter', companyName: 'HireFlow Recruiting', location: 'New York, NY', email: 'priya.sharma@hireflow.local', phone: '+1 555 010 0102' },
+  { key: 'david', fullName: 'David Okafor', jobTitle: 'Hiring Partner', companyName: 'HireFlow Recruiting', location: 'Seattle, WA', email: 'david.okafor@hireflow.local', phone: '+1 555 010 0103' },
+  { key: 'sofia', fullName: 'Sofia Ramirez', jobTitle: 'People Operations', companyName: 'HireFlow Recruiting', location: 'Remote', email: 'sofia.ramirez@hireflow.local', phone: '+1 555 010 0104' },
+];
+
+// Feature jobs give the Admin Jobs workspace its realistic moderation spread
+// (active / pending / draft / closed) across the reference companies. Each
+// references a recruiter key above for its postedBy owner.
+const FEATURE_JOBS = [
+  { recruiter: 'jane', title: 'Frontend Engineer', company: 'LexCorp', location: 'Metropolis, NY', workType: 'Hybrid', employmentType: 'Full-time', salary: { min: 150000, max: 180000 }, experienceLevel: 'Mid-level', skills: ['React', 'JavaScript', 'TypeScript'], description: 'Build fast, accessible interfaces for millions of users across the LexCorp platform.', category: 'Engineering', status: 'pending' },
+  { recruiter: 'jane', title: 'Senior Product Designer', company: 'Aperture Science', location: 'Cleveland, OH', workType: 'Hybrid', employmentType: 'Full-time', salary: { min: 160000, max: 200000 }, experienceLevel: 'Senior', skills: ['Figma', 'Design Systems', 'Prototyping'], description: 'Own the end-to-end product design practice and shape an industry-leading user experience.', category: 'Design', status: 'active' },
+  { recruiter: 'marcus', title: 'Backend Engineer', company: 'Stark Industries', location: 'Malibu, CA', workType: 'On-site', employmentType: 'Full-time', salary: { min: 165000, max: 210000 }, experienceLevel: 'Senior', skills: ['Node.js', 'PostgreSQL', 'Redis'], description: 'Design and operate high-throughput services powering the Stark Industries platform.', category: 'Engineering', status: 'active' },
+  { recruiter: 'priya', title: 'Product Manager', company: 'Wayne Industries', location: 'Gotham, NJ', workType: 'Hybrid', employmentType: 'Full-time', salary: { min: 140000, max: 175000 }, experienceLevel: 'Senior', skills: ['Product Strategy', 'Roadmapping', 'Agile'], description: 'Lead product definition and delivery for the flagship Wayne Industries suite.', category: 'Product', status: 'draft' },
+  { recruiter: 'priya', title: 'UX Researcher', company: 'Oscorp', location: 'Gotham, NJ', workType: 'Remote', employmentType: 'Contract', salary: { min: 90, max: 120, period: 'hourly' }, experienceLevel: 'Mid-level', skills: ['User Interviews', 'Usability Testing'], description: 'Uncover insights that drive the future of consumer robotics for Oscorp.', category: 'Design', status: 'pending' },
+  { recruiter: 'sofia', title: 'Data Analyst', company: 'Aperture Science', location: 'Remote', workType: 'Remote', employmentType: 'Full-time', salary: { min: 95000, max: 125000 }, experienceLevel: 'Mid-level', skills: ['SQL', 'Tableau', 'Python'], description: 'Turn telemetry from the Aperture Science labs into product decisions.', category: 'Data', status: 'closed' },
+  { recruiter: 'marcus', title: 'Marketing Specialist', company: 'Stark Industries', location: 'Malibu, CA', workType: 'Hybrid', employmentType: 'Full-time', salary: { min: 80000, max: 105000 }, experienceLevel: 'Mid-level', skills: ['Content Marketing', 'Analytics'], description: 'Plan and run campaigns that keep Stark Industries front of mind.', category: 'Marketing', status: 'pending' },
+  { recruiter: 'david', title: 'Customer Success Manager', company: 'LexCorp', location: 'Metropolis, NY', workType: 'On-site', employmentType: 'Full-time', salary: { min: 90000, max: 115000 }, experienceLevel: 'Mid-level', skills: ['Account Management', 'SaaS'], description: 'Help LexCorp’s enterprise customers get maximum value from the platform.', category: 'Customer Success', status: 'active' },
+  { recruiter: 'sofia', title: 'Frontend Development Intern', company: 'Stark Industries', location: 'Remote', workType: 'Remote', employmentType: 'Internship', salary: { min: 30, max: 40, period: 'hourly' }, experienceLevel: 'Entry-level', skills: ['React', 'CSS'], description: 'A paid summer internship building internal tooling at Stark Industries.', category: 'Engineering', status: 'pending' },
+  { recruiter: 'jane', title: 'Creative Design Intern', company: 'Oscorp', location: 'Remote', workType: 'Remote', employmentType: 'Internship', salary: { min: 25, max: 32, period: 'hourly' }, experienceLevel: 'Entry-level', skills: ['Visual Design', 'Figma'], description: 'Support the marketing and product design teams at Oscorp.', category: 'Design', status: 'draft' },
+];
 
 const SEED_JOBS = [
   // ---- Engineering ----
@@ -96,6 +128,81 @@ const SEED_JOBS = [
   { title: 'Talent Acquisition Partner', company: 'TalentBridge', location: 'Remote', workType: 'Remote', employmentType: 'Full-time', salary: { min: 90000, max: 120000 }, experienceLevel: 'Mid-level', skills: ['Sourcing', 'Interviewing'], description: 'Build pipelines for hard-to-fill technical roles.', category: 'Human Resources' },
 ];
 
+// Target application volume per seeded job (company + title keys into
+// SEED_JOBS/FEATURE_JOBS). Counts stay modest and realistic; every application
+// is backed by a real jobseeker user so none are fabricated values.
+const APPLICATION_PLAN = [
+  { company: 'Stellar Labs', title: 'Senior Frontend Engineer', count: 12 },
+  { company: 'CloudForge', title: 'Backend Engineer', count: 7 },
+  { company: 'Scale Systems', title: 'DevOps Engineer', count: 4 },
+  { company: 'DataSphere', title: 'Data Engineer', count: 9 },
+  { company: 'DataSphere', title: 'Machine Learning Engineer', count: 4 },
+  { company: 'AppCraft Studio', title: 'Mobile Engineer', count: 3 },
+  { company: 'Canvas Digital', title: 'Product Designer', count: 6 },
+  { company: 'Nexus Health', title: 'Product Manager', count: 8 },
+  { company: 'ClearView Capital', title: 'Finance Analyst', count: 2 },
+  { company: 'SupportPro', title: 'Customer Success Manager', count: 1 },
+  { company: 'CyberShield', title: 'Security Engineer', count: 5 },
+  { company: 'Bolt Financial', title: 'Frontend Engineer', count: 7 },
+  { company: 'CloudScale', title: 'Solutions Engineer', count: 3 },
+  { company: 'Stark Industries', title: 'Backend Engineer', count: 11 },
+  { company: 'Aperture Science', title: 'Senior Product Designer', count: 10 },
+  { company: 'LexCorp', title: 'Customer Success Manager', count: 6 },
+];
+
+// Create applications from real jobseeker users toward each plan target.
+// Re-running is safe: existing applications are counted and never duplicated
+// (jobId+userId is unique at the DB level, and candidates already applied are
+// skipped). Returns the number of newly created rows.
+const seedApplications = async () => {
+  const users = await User.find({ role: 'jobseeker' })
+    .select('_id email')
+    .lean();
+  if (!users.length) return 0;
+
+  const profiles = await Profile.find({ role: 'jobseeker' })
+    .select('userId fullName')
+    .lean();
+  const fullNames = new Map(
+    profiles.map((profile) => [profile.userId.toString(), profile.fullName])
+  );
+
+  let created = 0;
+  for (const plan of APPLICATION_PLAN) {
+    const job = await Job.findOne({
+      company: plan.company,
+      title: plan.title,
+    }).lean();
+    if (!job) continue;
+
+    const existing = await Application.countDocuments({ jobId: job._id });
+    let needed = plan.count - existing;
+    if (needed <= 0) continue;
+
+    const applicants = await Application.distinct('userId', { jobId: job._id });
+    const applied = new Set(applicants.map((id) => id.toString()));
+
+    for (const user of users) {
+      if (needed <= 0) break;
+      const key = user._id.toString();
+      if (applied.has(key)) continue;
+      try {
+        await Application.create({
+          jobId: job._id,
+          userId: user._id,
+          fullName: fullNames.get(key) || '',
+          email: user.email,
+        });
+        created += 1;
+        needed -= 1;
+      } catch (err) {
+        if (err.code !== 11000) throw err;
+      }
+    }
+  }
+  return created;
+};
+
 (async () => {
   try {
     await mongoose.connect(env.mongoUri, {
@@ -104,6 +211,37 @@ const SEED_JOBS = [
     });
     console.log(`[seed] Connected to ${mongoose.connection.host}/${mongoose.connection.name}`);
 
+    // 1. Recruiters (idempotent by email). Credentials are random so these are
+    //    owner identities for listings only — never login accounts.
+    const recruiterIds = {};
+    for (const seed of RECRUITER_SEEDS) {
+      let user = await User.findOne({ email: seed.email });
+      if (!user) {
+        const passwordHash = await bcrypt.hash(
+          crypto.randomBytes(24).toString('hex'),
+          4
+        );
+        user = await User.create({ email: seed.email, passwordHash, role: 'recruiter' });
+        try {
+          await Profile.create({
+            userId: user._id,
+            role: 'recruiter',
+            fullName: seed.fullName,
+            phone: seed.phone,
+            location: seed.location,
+            jobTitle: seed.jobTitle,
+            companyName: seed.companyName,
+          });
+        } catch (profileErr) {
+          await User.findByIdAndDelete(user._id).catch(() => {});
+          throw profileErr;
+        }
+        console.log(`[seed] Created recruiter: ${seed.email}`);
+      }
+      recruiterIds[seed.key] = user._id;
+    }
+
+    // 2. Starter catalogue jobs (unchanged, idempotent by company + title).
     let inserted = 0;
     let skipped = 0;
 
@@ -115,6 +253,42 @@ const SEED_JOBS = [
       }
       await Job.create(job);
       inserted += 1;
+    }
+
+    // 3. Give every job without an owner a real posting recruiter, round-robin
+    //    across the seeded recruiters so the Admin Jobs table is meaningful.
+    const recruiters = Object.values(recruiterIds);
+    const unowned = await Job.find({
+      $or: [{ postedBy: { $exists: false } }, { postedBy: null }],
+    });
+    if (recruiters.length > 0 && unowned.length > 0) {
+      await Promise.all(
+        unowned.map((job, index) =>
+          Job.updateOne({ _id: job._id }, { $set: { postedBy: recruiters[index % recruiters.length] } })
+        )
+      );
+      console.log(`[seed] Assigned owners to ${unowned.length} unowned jobs`);
+    }
+
+    // 4. Feature jobs (active/pending/draft/closed) referenced by the Admin
+    //    Jobs workspace. Same idempotency rule as the starter catalogue.
+    for (const feature of FEATURE_JOBS) {
+      const existing = await Job.findOne({ company: feature.company, title: feature.title });
+      if (existing) {
+        skipped += 1;
+        continue;
+      }
+      const { recruiter, ...jobPayload } = feature;
+      await Job.create({ ...jobPayload, postedBy: recruiterIds[recruiter] });
+      inserted += 1;
+    }
+
+    // 5. Seed a realistic volume of applications onto open jobs so the Admin
+    //    Jobs workspace shows real counts. Additive and idempotent: each job
+    //    is topped up toward its target only while it has fewer applications.
+    const applicationCreated = await seedApplications();
+    if (applicationCreated > 0) {
+      console.log(`[seed] Created ${applicationCreated} applications`);
     }
 
     console.log(`[seed] Done. inserted=${inserted} skipped=${skipped} total=${await Job.countDocuments()}`);

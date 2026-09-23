@@ -13,6 +13,8 @@
   --admin-canvas: #f7f8fa;
   --admin-border: #e5e7eb;
   --admin-border-strong: #d1d5db;
+  --admin-border-field: #e5e7eb;
+  --admin-border-field-hover: #d1d5db;
   --admin-text-strong: #111827;
   --admin-text: #4b5563;
   --admin-text-muted: #6b7280;
@@ -43,6 +45,8 @@ html[data-theme="dark"] .admin-shell {
   --admin-canvas: #0c1222;
   --admin-border: #1e293b;
   --admin-border-strong: #334155;
+  --admin-border-field: #3b4a63;
+  --admin-border-field-hover: #4e6180;
   --admin-text-strong: #f1f5f9;
   --admin-text: #94a3b8;
   --admin-text-muted: #8290a5;

@@ -49,8 +49,8 @@ const jobSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Employment type is required'],
       enum: {
-        values: ['Full-time', 'Part-time', 'Contract'],
-        message: 'Employment type must be Full-time, Part-time, or Contract',
+        values: ['Full-time', 'Part-time', 'Contract', 'Internship'],
+        message: 'Employment type must be Full-time, Part-time, Contract, or Internship',
       },
     },
     salary: { type: salarySchema, default: {} },
@@ -92,11 +92,13 @@ const jobSchema = new mongoose.Schema(
 
     // Lifecycle state. Expired is independent of manual closure: closing a job
     // explicitly sets closedAt; an expired job is never mutated into closed.
+    // Pending marks a job awaiting admin approval; draft is an unpublished
+    // workspace owned by a recruiter. Neither is visible to the public list.
     status: {
       type: String,
       enum: {
-        values: ['active', 'closed', 'expired'],
-        message: 'Status must be active, closed, or expired',
+        values: ['active', 'pending', 'closed', 'draft', 'expired'],
+        message: 'Status must be active, pending, closed, draft, or expired',
       },
       default: 'active',
       index: true,

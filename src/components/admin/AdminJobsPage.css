@@ -1,0 +1,1432 @@
+/* ===========================================================================
+   ADMIN JOBS PAGE (/admin/jobs)
+   ---------------------------------------------------------------------------
+   The Job Moderation workspace. Matches the Admin Overview proportions:
+   same 1460px page cap, same 24px vertical rhythm, same radius/border
+   weights, same admin tokens. Self-contained: tokens come only from the
+   admin-* palette set by .admin-shell (light) and
+   html[data-theme="dark"] .admin-shell, plus the shared radius/shadow
+   variables. There is no dependency on any other admin stylesheet.
+   =========================================================================== */
+
+/* ---------- Page proportions (matches Admin Overview) ---------- */
+.admin-page.admin-jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  max-width: 1460px;
+  margin-inline: auto;
+}
+
+/* ---------- Buttons (shared language) ---------- */
+.admin-jobs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.admin-jobs-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+.admin-jobs-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.admin-jobs-btn--primary {
+  color: #ffffff;
+  background-color: var(--admin-primary);
+  border: 1px solid transparent;
+}
+
+.admin-jobs-btn--primary:hover:not(:disabled) {
+  background-color: var(--admin-primary-hover);
+}
+
+.admin-jobs-btn--secondary {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+}
+
+.admin-jobs-btn--secondary:hover:not(:disabled) {
+  background-color: var(--admin-hover);
+  border-color: var(--admin-text-faint);
+}
+
+.admin-jobs-btn--ghost {
+  color: var(--admin-text);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+}
+
+.admin-jobs-btn--ghost:hover:not(:disabled) {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-hover);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-jobs-btn--active {
+  color: var(--admin-primary);
+  border-color: var(--admin-primary);
+}
+
+.admin-jobs-btn--active:hover:not(:disabled) {
+  background-color: var(--admin-primary-soft);
+}
+
+/* ---------- Workspace: table + side panel ---------- */
+.admin-jobs-workspace {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-jobs-card {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ---------- Toolbar ----------
+   One aligned row: flexible search, three compact integrated filters, and a
+   secondary Clear Filters action separated by a hairline. All controls share
+   one 40px height, radius, border color, and internal padding rhythm. */
+.admin-jobs-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-jobs-search {
+  position: relative;
+  flex: 1 1 180px;
+  min-width: 170px;
+}
+
+.admin-jobs-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--admin-text-faint);
+  pointer-events: none;
+}
+
+.admin-jobs-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 38px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-jobs-search-input::placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-jobs-search-input:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-jobs-search-input:focus {
+  background-color: var(--admin-surface);
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-jobs-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background-color: var(--admin-hover);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.admin-jobs-search-clear:hover {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-border-strong);
+}
+
+/* Integrated select: a visual-only trigger renders the custom chrome (label +
+   value + chevron) and opens the portal dropdown. A hidden native <select>
+   remains as the true form field so the control carries a real id/name,
+   participates in autofill semantics, and never looks like a raw OS dropdown. */
+.admin-jobs-filter {
+  position: relative;
+  display: inline-flex;
+}
+
+.admin-jobs-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 12px;
+  font-family: inherit;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+  color: var(--admin-text-faint);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), color var(--transition-fast);
+}
+
+.admin-jobs-filter-trigger:hover {
+  background-color: var(--admin-hover);
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-jobs-filter-trigger:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+.admin-jobs-filter-trigger--open,
+.admin-jobs-filter-trigger--open:hover {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-jobs-filter-head {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  min-width: 0;
+  text-align: left;
+}
+
+.admin-jobs-filter-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-faint);
+}
+
+.admin-jobs-filter-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  white-space: nowrap;
+}
+
+.admin-jobs-filter-chevron {
+  display: inline-flex;
+  color: var(--admin-text-faint);
+  transition: transform var(--transition-fast);
+}
+
+.admin-jobs-filter-trigger--open .admin-jobs-filter-chevron {
+  transform: rotate(180deg);
+}
+
+/* Hidden native select - carries the form value (id/name above) but is never
+   interactively rendered, so no browser-default dropdown can ever appear. */
+.admin-jobs-filter-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Clear Filters - secondary action, hairline-separated to the right. */
+.admin-jobs-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  margin-left: 4px;
+  padding: 0 6px 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--admin-border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.admin-jobs-clear:hover {
+  color: var(--admin-primary);
+}
+
+.admin-jobs-clear:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Table ----------
+   Density matches the Overview table (14px rows, 11px uppercase headers).
+   Row height lands around 56-58px with the two-line job cell. Column widths
+   are driven by the .admin-jobs-col-* classes so each header and control
+   always has room - nothing clips and the fixed layout absorbs the rest into
+   the flexible Job column. */
+.admin-jobs-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.admin-jobs-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-jobs-table th,
+.admin-jobs-table td {
+  padding: 0 10px;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobs-table th {
+  padding: 12px 10px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-faint);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-jobs-table td {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin-jobs-table thead th:first-child,
+.admin-jobs-table tbody td:first-child {
+  padding-left: 16px;
+}
+
+/* Column widths - deliberate fixed/flexible system. Every content column is
+   wide enough to show its real data (full company name, full recruiter name,
+   full date, full Applications header); the Job column absorbs whatever the
+   viewport leaves and long titles wrap inside it instead of being clipped. */
+.admin-jobs-col-job {
+  width: auto;
+}
+
+.admin-jobs-col-company {
+  width: 124px;
+}
+
+.admin-jobs-col-recruiter {
+  width: 144px;
+}
+
+.admin-jobs-col-status {
+  width: 100px;
+}
+
+.admin-jobs-col-apps {
+  width: 104px;
+}
+
+.admin-jobs-col-posted {
+  width: 110px;
+}
+
+.admin-jobs-col-actions {
+  width: 46px;
+}
+
+/* Narrower grid under 1440px - the panel shrinks first and the fixed columns
+   tighten so the Job column keeps as much room as possible before the table
+   scrolls on genuinely narrow screens. */
+@media (max-width: 1439px) {
+  .admin-jobs-col-company {
+    width: 110px;
+  }
+
+  .admin-jobs-col-recruiter {
+    width: 128px;
+  }
+
+  .admin-jobs-col-status {
+    width: 92px;
+  }
+
+  .admin-jobs-col-apps {
+    width: 96px;
+  }
+
+  .admin-jobs-col-posted {
+    width: 100px;
+  }
+
+  .admin-jobs-col-actions {
+    width: 44px;
+  }
+}
+
+/* Wide screens - fixed columns relax toward their target sizes so full names
+   and dates always have comfortable breathing room. */
+@media (min-width: 1600px) {
+  .admin-jobs-col-company {
+    width: 148px;
+  }
+
+  .admin-jobs-col-recruiter {
+    width: 176px;
+  }
+
+  .admin-jobs-col-apps {
+    width: 112px;
+  }
+
+  .admin-jobs-col-posted {
+    width: 120px;
+  }
+
+  .admin-jobs-col-actions {
+    width: 50px;
+  }
+}
+
+/* Column alignment - Job, Company, and Recruiter stay left-aligned (leading
+   content); Status, Applications, Posted, and Actions are centered. Headers
+   and cells share the same alignment per column. */
+.admin-jobs-table thead th.admin-jobs-col-job,
+.admin-jobs-table tbody td.admin-jobs-col-job,
+.admin-jobs-table thead th.admin-jobs-col-company,
+.admin-jobs-table tbody td.admin-jobs-col-company,
+.admin-jobs-table thead th.admin-jobs-col-recruiter,
+.admin-jobs-table tbody td.admin-jobs-col-recruiter {
+  text-align: left;
+}
+
+.admin-jobs-table thead th.admin-jobs-col-actions,
+.admin-jobs-table tbody td.admin-jobs-col-actions {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* ---------- Rows ---------- */
+.admin-jobs-table tbody tr {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.admin-jobs-table tbody tr:hover {
+  background-color: var(--admin-hover);
+}
+
+.admin-jobs-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Selected row - subtle indigo wash, never saturated, with a quiet left
+   accent matching the Overview KPI hairline. Browsable in dark mode via the
+   primary-soft token, so it never becomes a blocked-out band. */
+.admin-jobs-table tbody tr.admin-jobs-row--selected {
+  background-color: var(--admin-primary-soft);
+  box-shadow: inset 2px 0 0 0 var(--admin-primary);
+}
+
+.admin-jobs-table tbody tr.admin-jobs-row--selected:hover {
+  background-color: var(--admin-primary-soft);
+}
+
+/* ---------- Job cell ---------- */
+.admin-jobs-job {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.admin-jobs-job-text {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Compact neutral briefcase anchor before each job title - a quiet 28px tile
+   with a muted icon, matching the recruiter avatar footprint so the Job
+   column reads as one clean, aligned unit. */
+.admin-jobs-job-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--admin-text-faint);
+  background-color: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  line-height: 1;
+}
+
+.admin-jobs-job-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: break-word;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--admin-text-strong);
+}
+
+.admin-jobs-job-meta {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--admin-text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobs-company {
+  font-weight: 500;
+  color: var(--admin-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Recruiter cell + compact circular avatar ----------
+   Single-line identity: 28px avatar + name, vertically centered together. */
+.admin-jobs-recruiter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.admin-jobs-recruiter-name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobs-recruiter-none {
+  color: var(--admin-text-faint);
+}
+
+/* Always a tight 28px circle: images are cropped to cover (never stretched,
+   never a rectangle), the initials variant is a filled circle. Vertical
+   alignment handled by the flex parent. */
+.admin-jobs-avatar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.admin-jobs-avatar--img {
+  object-fit: cover;
+  background-color: var(--admin-hover);
+}
+
+.admin-jobs-avatar--initials {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-border);
+  user-select: none;
+}
+
+/* ---------- Status badge ----------
+   Same badge language as the Overview (dot + soft tint), per-status colors
+   with explicit dark variants - never pure-black fills. */
+.admin-jobs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.admin-jobs-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.admin-jobs-badge--active {
+  color: #065f46;
+  background-color: #d1fae5;
+}
+
+.admin-jobs-badge--pending {
+  color: #92400e;
+  background-color: #fef3c7;
+}
+
+.admin-jobs-badge--closed {
+  color: #475569;
+  background-color: #e2e8f0;
+}
+
+.admin-jobs-badge--draft {
+  color: #4338ca;
+  background-color: #e0e7ff;
+}
+
+html[data-theme="dark"] .admin-jobs-badge--active {
+  color: #a7f3d0;
+  background-color: #064e3b;
+}
+
+html[data-theme="dark"] .admin-jobs-badge--pending {
+  color: #fde68a;
+  background-color: #422006;
+}
+
+html[data-theme="dark"] .admin-jobs-badge--closed {
+  color: #cbd5e1;
+  background-color: #1e293b;
+}
+
+html[data-theme="dark"] .admin-jobs-badge--draft {
+  color: #c7d2fe;
+  background-color: #312e81;
+}
+
+/* ---------- Applications count ---------- */
+.admin-jobs-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+/* ---------- Footer + pagination ---------- */
+.admin-jobs-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-jobs-footer-count {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+.admin-jobs-footer-count strong {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-jobs-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-jobs-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.admin-jobs-page-btn:hover:not(:disabled) {
+  color: var(--admin-text-strong);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-jobs-page-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+.admin-jobs-page-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.admin-jobs-page-btn--current {
+  color: #ffffff;
+  background-color: var(--admin-primary);
+  border-color: var(--admin-primary);
+}
+
+.admin-jobs-page-btn--current:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: var(--admin-primary-hover);
+  border-color: var(--admin-primary-hover);
+}
+
+.admin-jobs-page-btn--nav {
+  padding: 0 10px;
+}
+
+.admin-jobs-page-gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Table states (loading / empty / error) ----------
+   Breathing room without swallowing the card: 40px bands, centred text. */
+.admin-jobs-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.admin-jobs-state-title {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-jobs-state-text {
+  display: block;
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-faint);
+}
+
+.admin-jobs-state .admin-jobs-btn {
+  margin-top: 14px;
+}
+
+/* ---------- Row menu (three-dot) ---------- */
+.admin-jobs-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-jobs-menu-btn:hover,
+.admin-jobs-menu-btn--open {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-hover);
+}
+
+.admin-jobs-menu-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+/* ---------- Floating dropdowns (portal menus) ----------
+   Rendered on <body> through createPortal so the card's overflow:hidden can
+   never clip them. Values are spelled out here because the portal sits outside
+   .admin-shell; dark variants mirror the admin token palette. */
+.admin-jobs-floating {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  padding: 5px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px -8px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(15, 23, 42, 0.06);
+  color: #111827;
+  animation: admin-jobs-menu-in 120ms ease-out;
+}
+
+@keyframes admin-jobs-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-jobs-floating {
+    animation: none;
+  }
+}
+
+html[data-theme="dark"] .admin-jobs-floating {
+  background-color: #1a2438;
+  border-color: #334155;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.55);
+  color: #f1f5f9;
+}
+
+.admin-jobs-floating-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px 8px;
+}
+
+.admin-jobs-floating-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-label {
+  color: #94a3b8;
+}
+
+.admin-jobs-floating-subhead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f46e5;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-subhead {
+  color: #a5b4fc;
+}
+
+.admin-jobs-floating-subhead:hover {
+  background-color: #eef2ff;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-subhead:hover {
+  background-color: rgba(129, 140, 248, 0.12);
+}
+
+.admin-jobs-floating-divider {
+  height: 1px;
+  margin: 0 12px 4px;
+  background-color: #e5e7eb;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-divider {
+  background-color: #2b3a52;
+}
+
+.admin-jobs-floating-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  text-align: left;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-item {
+  color: #e2e8f0;
+}
+
+.admin-jobs-floating-item:hover:not(:disabled),
+.admin-jobs-floating-item--link:hover {
+  color: #111827;
+  background-color: #f3f4f6;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-item:hover:not(:disabled),
+html[data-theme="dark"] .admin-jobs-floating-item--link:hover {
+  color: #f1f5f9;
+  background-color: rgba(148, 163, 184, 0.08);
+}
+
+.admin-jobs-floating-item:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.admin-jobs-floating-item--selected {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-item--selected {
+  color: #a5b4fc;
+}
+
+.admin-jobs-floating-item--danger {
+  color: #b91c1c;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-item--danger {
+  color: #fca5a5;
+}
+
+.admin-jobs-floating-item--danger:hover:not(:disabled) {
+  color: #b91c1c;
+  background-color: #fef2f2;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-item--danger:hover:not(:disabled) {
+  color: #fecaca;
+  background-color: rgba(248, 113, 113, 0.12);
+}
+
+.admin-jobs-floating-item:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 1px;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-item:focus-visible {
+  outline-color: #818cf8;
+}
+
+.admin-jobs-floating-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #4f46e5;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-check {
+  color: #a5b4fc;
+}
+
+.admin-jobs-floating-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobs-floating-chevron {
+  display: inline-flex;
+  color: #9ca3af;
+}
+
+html[data-theme="dark"] .admin-jobs-floating-chevron {
+  color: #64748b;
+}
+
+/* ---------- Right detail panel ----------
+   320px inspection panel that mirrors the table card exactly: same surface,
+   border, radius, and shadow, stretched to the card's full height so both
+   stay aligned at the top and bottom. Content scrolls inside the panel while
+   the outer edges line up with the table section. */
+.admin-jobs-panel {
+  flex: 0 0 320px;
+  width: 320px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+@media (max-width: 1439px) {
+  .admin-jobs-panel {
+    flex-basis: 300px;
+    width: 300px;
+  }
+}
+
+.admin-jobs-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.admin-jobs-panel-state {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 48px 24px;
+  text-align: center;
+  overflow-y: auto;
+}
+
+/* ---------- Detail panel header ---------- */
+.admin-jobs-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-jobs-detail-titles {
+  min-width: 0;
+}
+
+.admin-jobs-detail-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1.3;
+  color: var(--admin-text-strong);
+}
+
+.admin-jobs-detail-company {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--admin-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobs-detail-employment {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-jobs-detail-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-jobs-detail-close:hover {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-hover);
+}
+
+.admin-jobs-detail-close:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+/* Status row: badge + a single status-aware primary action
+   (Approve for pending, View posting for active; change status below). */
+.admin-jobs-detail-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* Metadata in a clean two-column grid, bounded by hairlines as the divider
+   after the status row and before the body sections. */
+.admin-jobs-detail-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+  margin: 18px 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--admin-border);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-jobs-detail-meta-item {
+  min-width: 0;
+}
+
+.admin-jobs-detail-meta dt {
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-faint);
+}
+
+.admin-jobs-detail-meta dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--admin-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Body sections */
+.admin-jobs-detail-section + .admin-jobs-detail-section {
+  margin-top: 18px;
+}
+
+.admin-jobs-detail-sub {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+}
+
+.admin-jobs-detail-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--admin-text-muted);
+  white-space: pre-line;
+}
+
+.admin-jobs-detail-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.admin-jobs-detail-list li {
+  margin-bottom: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-muted);
+}
+
+.admin-jobs-detail-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-jobs-detail-chip {
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+}
+
+/* Recruiter card - a quiet inset canvas surface, not a loud block. */
+.admin-jobs-detail-recruiter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+}
+
+.admin-jobs-detail-recruiter-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-jobs-detail-recruiter-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobs-detail-recruiter-role {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-jobs-detail-recruiter-mail {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-primary);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobs-detail-recruiter-mail:hover {
+  text-decoration: underline;
+}
+
+/* Footer administrative actions */
+.admin-jobs-detail-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-jobs-detail-actions .admin-jobs-btn {
+  align-self: stretch;
+  justify-content: center;
+}
+
+.admin-jobs-detail-closed {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Skeleton ---------- */
+.admin-jobs-skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    100deg,
+    var(--admin-hover) 35%,
+    var(--admin-primary-soft) 55%,
+    var(--admin-hover) 100%
+  );
+  background-size: 220% 100%;
+  animation: admin-jobs-shimmer 1.3s linear infinite;
+}
+
+@keyframes admin-jobs-shimmer {
+  to {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-jobs-skeleton {
+    animation: none;
+  }
+}
+
+.admin-jobs-skeleton--check {
+  width: 15px;
+  height: 15px;
+}
+
+.admin-jobs-skeleton--title {
+  width: 60%;
+  height: 14px;
+}
+
+.admin-jobs-skeleton--line {
+  width: 90%;
+  height: 12px;
+}
+
+.admin-jobs-skeleton--badge {
+  width: 72px;
+  height: 22px;
+  border-radius: 999px;
+}
+
+.admin-jobs-skeleton--avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.admin-jobs-skeleton--block {
+  width: 100%;
+  height: 110px;
+}
+
+.admin-jobs-skeleton:not(:first-child) {
+  margin-top: 6px;
+}
+
+/* ---------- Dark-mode contrast tune ----------
+   The jobs page pushes muted/faint text further up the slate ramp so titles,
+   headers, dates, and secondary metadata stay clearly readable on the dark
+   admin surface. Values keep the existing hierarchy
+   (faint < muted < text < strong) using the shared admin palette tones. */
+html[data-theme="dark"] .admin-page.admin-jobs {
+  --admin-text-faint: #8b9ab0;
+  --admin-text-muted: #a3b0c3;
+  --admin-text: #b7c2d2;
+}
+
+/* ---------- Accessibility ---------- */
+.admin-jobs-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Responsive ---------- */
+/* < 1024px: the panel drops below the table and takes the full width so the
+   table keeps its grid on tablets. */
+@media (max-width: 1023px) {
+  .admin-jobs-workspace {
+    flex-direction: column-reverse;
+  }
+
+  .admin-jobs-panel {
+    position: static;
+    flex: 1 1 0;
+    width: 100%;
+    max-height: none;
+  }
+
+  .admin-jobs-detail {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-jobs-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-jobs-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .admin-jobs-filter {
+    flex: 1 1 100%;
+  }
+
+  .admin-jobs-filter-trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

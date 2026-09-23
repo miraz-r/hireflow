@@ -48,6 +48,17 @@ const listJobs = async (req, res, next) => {
     if (experienceLevel) filter.experienceLevel = experienceLevel;
     if (minSalary) filter['salary.min'] = { $gte: Number(minSalary) };
 
+    // Only live jobs are ever part of the public catalogue. Pending/draft
+    // jobs await moderation, and closed/expired jobs are no longer open to
+    // applications. Legacy docs without a status field are live by default.
+    const liveOnly = { $or: [{ status: 'active' }, { status: { $exists: false } }] };
+    if (filter.$or) {
+      filter.$and = [{ $or: filter.$or }, liveOnly];
+      delete filter.$or;
+    } else {
+      Object.assign(filter, liveOnly);
+    }
+
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 100);
     const skip = (page - 1) * limit;
@@ -76,7 +87,13 @@ const listJobs = async (req, res, next) => {
 // ---------------------------------------------------------------------------
 const getJob = async (req, res, next) => {
   try {
-    const job = await Job.findById(req.params.id);
+    // The public catalogue only surfaces live jobs. A job that is pending,
+    // closed, draft, or expired is not open for applications and must not be
+    // reachable through the public single-job endpoint either.
+    const job = await Job.findOne({
+      _id: req.params.id,
+      $or: [{ status: 'active' }, { status: { $exists: false } }],
+    });
     if (!job) {
       return res.status(404).json({ error: 'Job not found' });
     }

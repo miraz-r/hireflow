@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
-import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AdminShell from '../components/admin/AdminShell';
+import AdminOverview from '../components/admin/AdminOverview';
+import AdminJobsPage from '../components/admin/AdminJobsPage';
 import AdminAccountPage from './AdminAccountPage';
 import './AdminPage.css';
 
@@ -14,9 +16,8 @@ import './AdminPage.css';
  *   jobseeker → /
  *   guest     → /login
  *
- * Phase 1A renders only the reusable Admin Shell plus minimal placeholders to
- * prove routing works. The real Overview / Jobs / Job Detail pages arrive in
- * Phase 1B / 1C / 1D.
+ * Phase 1C wires /admin/jobs to the Jobs workspace (Job Moderation). The
+ * :jobId detail is handled by the same workspace view.
  */
 export default function AdminPage() {
   const { user, loading: authLoading } = useAuth();
@@ -48,10 +49,10 @@ export default function AdminPage() {
   return (
     <AdminShell>
       <Routes>
-        <Route index element={<OverviewPlaceholder />} />
+        <Route index element={<AdminOverview />} />
         <Route path="account" element={<AdminAccountPage />} />
-        <Route path="jobs" element={<JobsManagementPlaceholder />} />
-        <Route path="jobs/:jobId" element={<JobDetailPlaceholder />} />
+        <Route path="jobs" element={<AdminJobsPage />} />
+        <Route path="jobs/:jobId" element={<AdminJobsPage />} />
         <Route path="*" element={<NotFoundPlaceholder />} />
       </Routes>
     </AdminShell>
@@ -59,7 +60,8 @@ export default function AdminPage() {
 }
 
 /* ======================================================================= */
-/* Phase 1A placeholders - minimal, internal, proof of routing only.       */
+/* Fallback - only rendered for routes outside /admin, /admin/account,      */
+/* /admin/jobs.                                                             */
 /* ======================================================================= */
 
 function AdminPlaceholder({ kicker, title, text, route }) {
@@ -72,40 +74,6 @@ function AdminPlaceholder({ kicker, title, text, route }) {
         <code className="admin-placeholder-route">{route}</code>
       </div>
     </div>
-  );
-}
-
-function OverviewPlaceholder() {
-  return (
-    <AdminPlaceholder
-      kicker="Phase 1B · Next"
-      title="Overview"
-      text="The full Admin Overview dashboard will be built in Phase 1B. This placeholder verifies that /admin routes through the Admin Shell correctly."
-      route="/admin"
-    />
-  );
-}
-
-function JobsManagementPlaceholder() {
-  return (
-    <AdminPlaceholder
-      kicker="Phase 1C · Next"
-      title="Jobs"
-      text="Jobs Management - the list, filters and actions - will be built in Phase 1C. This placeholder verifies that /admin/jobs routes through the Admin Shell correctly."
-      route="/admin/jobs"
-    />
-  );
-}
-
-function JobDetailPlaceholder() {
-  const { jobId } = useParams();
-  return (
-    <AdminPlaceholder
-      kicker="Phase 1D · Next"
-      title="Job Detail"
-      text="The administrative job detail page will be built in Phase 1D. The :jobId URL parameter is being read correctly and passed through the shell."
-      route={`/admin/jobs/${jobId}`}
-    />
   );
 }
 

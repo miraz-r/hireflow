@@ -1,0 +1,83 @@
+/* Admin Overview — KPI cards.
+   Each card carries one clearly distinct hue (indigo / amber / sky / emerald)
+   so the four KPIs separate at a glance, with a matching accent for the label
+   and the hairline top edge. In dark mode every card falls back to the single
+   admin surface token the rest of the site uses — no per-card tints — and only
+   the accent keeps its own brighter hue so the four KPIs still read apart. */
+.admin-kpi-card {
+  --tone-accent: var(--admin-primary);
+  --tone-bg: #fbfbff;
+  background-color: var(--tone-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.admin-kpi-tone-indigo  { --tone-accent: #4f46e5; --tone-bg: #e0e7ff; }
+.admin-kpi-tone-amber   { --tone-accent: #d97706; --tone-bg: #fef3c7; }
+.admin-kpi-tone-sky     { --tone-accent: #0284c7; --tone-bg: #e0f2fe; }
+.admin-kpi-tone-emerald { --tone-accent: #059669; --tone-bg: #d1fae5; }
+
+html[data-theme="dark"] .admin-kpi-card { --tone-bg: var(--admin-surface); }
+html[data-theme="dark"] .admin-kpi-tone-indigo  { --tone-accent: #818cf8; }
+html[data-theme="dark"] .admin-kpi-tone-amber   { --tone-accent: #fbbf24; }
+html[data-theme="dark"] .admin-kpi-tone-sky     { --tone-accent: #38bdf8; }
+html[data-theme="dark"] .admin-kpi-tone-emerald { --tone-accent: #34d399; }
+
+/* A quiet hover: the card lifts two pixels and the hairline edges switch to
+   that card's accent, so the KPI responds without turning into a bouncy
+   machine. */
+.admin-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--tone-accent);
+  box-shadow: 0 10px 22px -12px rgba(16, 24, 40, 0.18);
+}
+
+.admin-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tone-accent);
+}
+
+.admin-kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-kpi-delta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--admin-text-muted);
+}
+
+.admin-kpi-hint {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-kpi-general {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-kpi-up { color: var(--admin-primary); }
+.admin-kpi-neutral { color: var(--admin-text-faint); }
+.admin-kpi-down { color: var(--admin-text-muted); }
+
+html[data-theme="dark"] .admin-kpi-card:hover {
+  box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.5);
+}
