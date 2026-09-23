@@ -5,9 +5,9 @@ import { apiGet, apiPatch } from '../utils/api';
 import { STATUS_LABELS } from '../constants/applicationStatus';
 import { useAuth } from '../context/AuthContext';
 import Select from './ui/Select';
+import Avatar from './Avatar';
+import { avatarFallback, resolveMediaUrl } from '../lib/media';
 import './RecruiterDashboard.css';
-
-const AVATAR_BASE = 'http://localhost:5000';
 
 const PIPELINE = ['applied', 'under-review', 'interview', 'offer', 'hired'];
 
@@ -214,9 +214,6 @@ export default function RecruiterDashboard() {
     setDetailData(null);
     setDetailError('');
   };
-
-  const resolveAvatar = (url) =>
-    url ? (url.startsWith('http') ? url : `${AVATAR_BASE}${url}`) : null;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
@@ -573,17 +570,15 @@ export default function RecruiterDashboard() {
                         <tr key={app.id}>
                           <td className="rd-cell-candidate">
                             <div className="rd-candidate">
-                              {app.applicant?.avatarUrl ? (
-                                <span className="rd-candidate-avatar">
-                                  <img className="rd-candidate-avatar-img" src={resolveAvatar(app.applicant.avatarUrl)} alt="" />
-                                </span>
-                              ) : (
-                                <span className="rd-candidate-avatar">
-                                  <span className="rd-candidate-avatar-ph" aria-hidden="true">
-                                    {(app.applicant?.fullName || 'A').charAt(0).toUpperCase()}
-                                  </span>
-                                </span>
-                              )}
+                              <span className="rd-candidate-avatar">
+                                <Avatar
+                                  src={resolveMediaUrl(app.applicant?.avatarUrl)}
+                                  fallbackSrc={avatarFallback(app.applicant?.fullName, app.applicant?.email)}
+                                  imgClassName="rd-candidate-avatar-img"
+                                  placeholderClassName="rd-candidate-avatar-ph"
+                                  imgAlt=""
+                                />
+                              </span>
                               <div className="rd-candidate-meta">
                                 <span className="rd-candidate-name">{app.applicant?.fullName || 'Applicant'}</span>
                                 <span className="rd-candidate-title">{app.applicant?.headline || 'Candidate'}</span>
@@ -697,17 +692,15 @@ export default function RecruiterDashboard() {
                       <tr key={app.id}>
                         <td className="rd-cell-candidate">
                           <div className="rd-candidate">
-                            {app.applicant?.avatarUrl ? (
-                              <span className="rd-candidate-avatar">
-                                <img className="rd-candidate-avatar-img" src={resolveAvatar(app.applicant.avatarUrl)} alt="" />
-                              </span>
-                            ) : (
-                              <span className="rd-candidate-avatar">
-                                <span className="rd-candidate-avatar-ph" aria-hidden="true">
-                                  {(app.applicant?.fullName || 'A').charAt(0).toUpperCase()}
-                                </span>
-                              </span>
-                            )}
+                            <span className="rd-candidate-avatar">
+                              <Avatar
+                                src={resolveMediaUrl(app.applicant?.avatarUrl)}
+                                fallbackSrc={avatarFallback(app.applicant?.fullName, app.applicant?.email)}
+                                imgClassName="rd-candidate-avatar-img"
+                                placeholderClassName="rd-candidate-avatar-ph"
+                                imgAlt=""
+                              />
+                            </span>
                             <div className="rd-candidate-meta">
                               <span className="rd-candidate-name">{app.applicant?.fullName || 'Applicant'}</span>
                               <span className="rd-candidate-title">{app.applicant?.headline || 'Candidate'}</span>
@@ -858,8 +851,6 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
 
   if (!open) return null;
 
-  const resolveMediaUrl = (url) => (url ? (url.startsWith('http') ? url : `${AVATAR_BASE}${url}`) : '');
-
   const fmtDate = (dateStr) => {
     const d = new Date(dateStr);
     if (Number.isNaN(d.getTime())) return '';
@@ -913,11 +904,14 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
           <div className="rd-detail-body">
             <div className="rd-detail-identity">
               <div className="rd-detail-avatar" aria-hidden="true">
-                {applicant?.avatarUrl ? (
-                  <img className="rd-detail-avatar-img" src={resolveMediaUrl(applicant.avatarUrl)} alt="" />
-                ) : (
-                  <span className="rd-detail-avatar-ph">{(applicant?.fullName || 'A').charAt(0).toUpperCase()}</span>
-                )}
+                <Avatar
+                  src={resolveMediaUrl(applicant?.avatarUrl)}
+                  fallbackSrc={avatarFallback(applicant?.fullName, email)}
+                  imgClassName="rd-detail-avatar-img"
+                  placeholderClassName="rd-detail-avatar-ph"
+                  imgAlt=""
+                  iconSize={20}
+                />
               </div>
               <div className="rd-detail-identity-text">
                 <span className="rd-detail-name">{applicant?.fullName || 'Applicant'}</span>

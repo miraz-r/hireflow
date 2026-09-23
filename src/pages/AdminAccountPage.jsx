@@ -5,9 +5,8 @@ import Avatar from '../components/Avatar';
 import EmailField from '../components/EmailField';
 import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
+import { resolveMediaUrl } from '../lib/media';
 import './AdminAccountPage.css';
-
-const AVATAR_BASE = 'http://localhost:5000';
 
 const CAMERA_ICON = (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -176,11 +175,7 @@ export default function AdminAccountPage() {
     );
   }
 
-  const avatarSrc = profile?.avatarUrl
-    ? `${AVATAR_BASE}${profile.avatarUrl}`
-    : user?.avatarUrl
-      ? `${AVATAR_BASE}${user.avatarUrl}`
-      : null;
+  const avatarSrc = resolveMediaUrl(profile?.avatarUrl || user?.avatarUrl);
 
   const fieldError = (name) =>
     fieldErrors[name] ? (

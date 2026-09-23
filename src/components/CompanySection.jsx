@@ -1,4 +1,5 @@
 import './CompanySection.css';
+import CompanyLogo from './CompanyLogo';
 
 export default function CompanySection({ companies }) {
   return (
@@ -11,9 +12,12 @@ export default function CompanySection({ companies }) {
         <div className="companies-grid">
           {companies.map(company => (
             <article key={company.id} className="company-card">
-              <div className="company-logo" aria-hidden="true">
-                {company.name.split(' ').map(w => w[0]).slice(0, 2).join('')}
-              </div>
+              <CompanyLogo
+                name={company.name}
+                domain={company.domain}
+                imgClassName="company-logo"
+                initialsClassName="company-logo"
+              />
               <div className="company-details">
                 <h3 className="company-name">{company.name}</h3>
                 <p className="company-industry">{company.industry}</p>

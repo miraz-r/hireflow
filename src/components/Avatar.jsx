@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 /**
  * Avatar - renders a user's profile picture when one exists, otherwise a
  * neutral person-silhouette default that makes clear no picture is set.
@@ -7,7 +9,9 @@
  * layout (profile header, navbar account trigger, mobile drawer).
  *
  * Props:
- *   - src: the resolved image URL (falsy → default avatar)
+ *   - src: the resolved image URL (falsy → fallback/default avatar)
+ *   - fallbackSrc: optional online image (e.g. pravatar.cc) used when `src`
+ *     is missing; if it also fails to load, the default silhouette is shown
  *   - imgAlt: alt text for the <img>
  *   - imgClassName: class for the real-image <img>
  *   - placeholderClassName: class for the default-avatar wrapper (kept because
@@ -17,13 +21,39 @@
  */
 export default function Avatar({
   src,
+  fallbackSrc,
   imgAlt = '',
   imgClassName,
   placeholderClassName,
   iconSize = 16,
 }) {
-  if (src) {
-    return <img src={src} alt={imgAlt} className={imgClassName} />;
+  // 0 = try the real uploaded src, 1 = try fallbackSrc, 2 = default silhouette
+  const [failedCount, setFailedCount] = useState(0);
+
+  useEffect(() => {
+    setFailedCount(0);
+  }, [src, fallbackSrc]);
+
+  if (src && failedCount === 0) {
+    return (
+      <img
+        src={src}
+        alt={imgAlt}
+        className={imgClassName}
+        onError={() => setFailedCount(1)}
+      />
+    );
+  }
+
+  if (fallbackSrc && failedCount < 2) {
+    return (
+      <img
+        src={fallbackSrc}
+        alt={imgAlt}
+        className={imgClassName}
+        onError={() => setFailedCount(2)}
+      />
+    );
   }
 
   return (

@@ -5,9 +5,8 @@ import { useTheme } from '../../hooks/useTheme';
 import Avatar from '../Avatar';
 import AdminProfileMenu from './AdminProfileMenu';
 import useDismissible from '../../hooks/useDismissible';
+import { resolveMediaUrl } from '../../lib/media';
 import './AdminTopbar.css';
-
-const AVATAR_BASE = 'http://localhost:5000';
 
 const MENU_ICON = (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -171,7 +170,7 @@ function TopbarProfileControl() {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
   const closeMenu = useCallback(() => setOpen(false), []);
-  const avatarSrc = user?.avatarUrl ? `${AVATAR_BASE}${user.avatarUrl}` : null;
+  const avatarSrc = resolveMediaUrl(user?.avatarUrl);
 
   useDismissible(open, wrapRef, closeMenu);
 

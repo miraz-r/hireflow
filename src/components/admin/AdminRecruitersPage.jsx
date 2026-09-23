@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import Select from '../ui/Select';
 import Toast from '../Toast';
+import Avatar from '../Avatar';
+import { avatarFallback } from '../../lib/media';
 import './AdminRecruitersPage.css';
 
 const PAGE_SIZE = 10;
@@ -90,8 +93,6 @@ const MOCK_RECRUITERS = [
   { id: '15', name: 'Ethan Brooks', email: 'ethan.brooks@stark.com', phone: '+1 (404) 555-0172', location: 'Atlanta, GA', company: 'Stark Industries', status: 'active', jobs: 13, applications: 96, joinedAt: '2026-03-11T10:00:00.000Z' },
 ];
 
-const initialOf = (name) => (name || '?').trim().charAt(0).toUpperCase();
-
 const formatJoinedDate = (iso) => {
   if (!iso) return '—';
   const date = new Date(iso);
@@ -122,12 +123,31 @@ const getPageItems = (page, totalPages) => {
  * data for now; status changes stay local for the current session.
  */
 export default function AdminRecruitersPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [recruiters, setRecruiters] = useState(MOCK_RECRUITERS);
   const [searchInput, setSearchInput] = useState('');
   const [status, setStatus] = useState('all');
   const [company, setCompany] = useState('all');
   const [dateRange, setDateRange] = useState('');
-  const [page, setPage] = useState(1);
+
+  // The current page lives in the URL (?page=N) so a browser refresh or a
+  // Back/Forward step restores the exact page instead of falling back to 1.
+  // Anything but a positive whole number is treated as page 1.
+  const pageParam = Number.parseInt(searchParams.get('page') || '', 10);
+  const pageInvalid = !(Number.isInteger(pageParam) && pageParam > 0);
+  const page = pageInvalid ? 1 : pageParam;
+
+  const goToPage = useCallback(
+    (next, { replace = false } = {}) => {
+      const clamped = Math.max(1, Number.isInteger(next) ? next : 1);
+      const params = new URLSearchParams(searchParams);
+      if (clamped <= 1) params.delete('page');
+      else params.set('page', String(clamped));
+      if (params.toString() === searchParams.toString()) return;
+      setSearchParams(params, { replace });
+    },
+    [searchParams, setSearchParams]
+  );
 
   const [selectedId, setSelectedId] = useState(null);
   const [activeMenuId, setActiveMenuId] = useState(null);
@@ -139,10 +159,20 @@ export default function AdminRecruitersPage() {
   }, []);
 
   // Any filter or search change jumps back to page 1 and clears the selection
-  // so it never points at a row that left the visible page.
+  // so it never points at a row that left the visible page. Only reacts to an
+  // actual filter change, so a refresh with ?page=N never drops the param.
+  const prevFiltersRef = useRef(`${searchInput}|${status}|${company}|${dateRange}`);
   useEffect(() => {
-    setPage(1);
+    const filtersKey = `${searchInput}|${status}|${company}|${dateRange}`;
+    if (filtersKey === prevFiltersRef.current) return;
+    prevFiltersRef.current = filtersKey;
     setSelectedId(null);
+    if (searchParams.has('page')) {
+      const params = new URLSearchParams(searchParams);
+      params.delete('page');
+      setSearchParams(params, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, status, company, dateRange]);
 
   const uniqueCompanies = useMemo(
@@ -206,6 +236,13 @@ export default function AdminRecruitersPage() {
   const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
   const listStart = total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
   const listEnd = Math.min(safePage * PAGE_SIZE, total);
+
+  // An invalid or out-of-range ?page=N (e.g. after a refresh with stale data)
+  // is repaired to a valid page instead of silently showing an empty one.
+  useEffect(() => {
+    if (pageInvalid) goToPage(1, { replace: true });
+    else if (page > totalPages) goToPage(totalPages, { replace: true });
+  }, [page, pageInvalid, totalPages, goToPage]);
 
   // Read the selection straight from the live list so a status change lands in
   // both the table row and the detail panel on the same render.
@@ -336,9 +373,14 @@ export default function AdminRecruitersPage() {
                     >
                       <td className="admin-recruiters-col-recruiter">
                         <span className="admin-recruiters-recruiter">
-                          <span className="admin-recruiters-avatar admin-recruiters-avatar--initials" aria-hidden="true">
-                            {initialOf(recruiter.name)}
-                          </span>
+                          <Avatar
+                            src={null}
+                            fallbackSrc={avatarFallback(recruiter.name, recruiter.email)}
+                            imgClassName="admin-recruiters-avatar"
+                            placeholderClassName="admin-recruiters-avatar admin-recruiters-avatar--initials"
+                            imgAlt=""
+                            iconSize={14}
+                          />
                           <span className="admin-recruiters-recruiter-text">
                             <span className="admin-recruiters-recruiter-name">{recruiter.name}</span>
                             <span className="admin-recruiters-recruiter-email">{recruiter.email}</span>
@@ -392,7 +434,7 @@ export default function AdminRecruitersPage() {
               <button
                 type="button"
                 className="admin-recruiters-page-btn admin-recruiters-page-btn--nav"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => goToPage(Math.max(1, page - 1))}
                 disabled={safePage <= 1}
               >
                 {ARROW_LEFT}
@@ -408,7 +450,7 @@ export default function AdminRecruitersPage() {
                     key={item}
                     type="button"
                     className={`admin-recruiters-page-btn${item === safePage ? ' admin-recruiters-page-btn--current' : ''}`}
-                    onClick={() => setPage(item)}
+                    onClick={() => goToPage(item)}
                     aria-label={`Go to page ${item}`}
                     aria-current={item === safePage ? 'page' : undefined}
                   >
@@ -419,7 +461,7 @@ export default function AdminRecruitersPage() {
               <button
                 type="button"
                 className="admin-recruiters-page-btn admin-recruiters-page-btn--nav"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => goToPage(Math.min(totalPages, page + 1))}
                 disabled={safePage >= totalPages}
               >
                 Next
@@ -606,12 +648,14 @@ function DetailPanel({ recruiter, notify }) {
   return (
     <div className="admin-recruiters-detail">
       <header className="admin-recruiters-detail-head">
-        <span
-          className="admin-recruiters-avatar admin-recruiters-avatar--initials admin-recruiters-detail-avatar"
-          aria-hidden="true"
-        >
-          {initialOf(recruiter.name)}
-        </span>
+        <Avatar
+          src={null}
+          fallbackSrc={avatarFallback(recruiter.name, recruiter.email)}
+          imgClassName="admin-recruiters-avatar admin-recruiters-detail-avatar"
+          placeholderClassName="admin-recruiters-avatar admin-recruiters-avatar--initials admin-recruiters-detail-avatar"
+          imgAlt=""
+          iconSize={16}
+        />
         <div className="admin-recruiters-detail-titles">
           <h2 className="admin-recruiters-detail-name">{recruiter.name}</h2>
           <p className="admin-recruiters-detail-email">{recruiter.email}</p>

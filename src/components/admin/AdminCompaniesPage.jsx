@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import Select from '../ui/Select';
 import Toast from '../Toast';
+import CompanyLogo from '../CompanyLogo';
 import './AdminCompaniesPage.css';
 
 const PAGE_SIZE = 10;
@@ -76,13 +78,6 @@ const MOCK_COMPANIES = [
   { id: '12', name: 'Sirius Cybernetics', domain: 'siriuscybernetics.com', industry: 'AI & Software', status: 'active', recruiters: 2, jobs: 6, applications: 33, joinedAt: '2026-01-20T10:00:00.000Z', location: 'London, UK', contact: 'Trillian Astra', email: 'trillian@siriuscybernetics.com', phone: '+44 (0) 555 0127', mark: { bg: '#e0e7ff', fg: '#4338ca' } },
 ];
 
-const companyInitials = (name) => {
-  const words = (name || '').replace(/[^A-Za-z0-9 ]/g, ' ').trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return '?';
-  if (words.length === 1) return words[0].charAt(0).toUpperCase();
-  return words.slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join('');
-};
-
 const formatJoinedDate = (iso) => {
   if (!iso) return '—';
   const date = new Date(iso);
@@ -113,12 +108,31 @@ const getPageItems = (page, totalPages) => {
  * A right-side detail panel is planned for Part 2.
  */
 export default function AdminCompaniesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [companies, setCompanies] = useState(MOCK_COMPANIES);
   const [searchInput, setSearchInput] = useState('');
   const [status, setStatus] = useState('all');
   const [industry, setIndustry] = useState('all');
   const [dateRange, setDateRange] = useState('');
-  const [page, setPage] = useState(1);
+
+  // The current page lives in the URL (?page=N) so a browser refresh or a
+  // Back/Forward step restores the exact page instead of falling back to 1.
+  // Anything but a positive whole number is treated as page 1.
+  const pageParam = Number.parseInt(searchParams.get('page') || '', 10);
+  const pageInvalid = !(Number.isInteger(pageParam) && pageParam > 0);
+  const page = pageInvalid ? 1 : pageParam;
+
+  const goToPage = useCallback(
+    (next, { replace = false } = {}) => {
+      const clamped = Math.max(1, Number.isInteger(next) ? next : 1);
+      const params = new URLSearchParams(searchParams);
+      if (clamped <= 1) params.delete('page');
+      else params.set('page', String(clamped));
+      if (params.toString() === searchParams.toString()) return;
+      setSearchParams(params, { replace });
+    },
+    [searchParams, setSearchParams]
+  );
 
   const [selectedId, setSelectedId] = useState(null);
   const [activeMenuId, setActiveMenuId] = useState(null);
@@ -130,10 +144,20 @@ export default function AdminCompaniesPage() {
   }, []);
 
   // Any filter or search change jumps back to page 1 and clears the selection
-  // so it never points at a row that left the visible page.
+  // so it never points at a row that left the visible page. Only reacts to an
+  // actual filter change, so a refresh with ?page=N never drops the param.
+  const prevFiltersRef = useRef(`${searchInput}|${status}|${industry}|${dateRange}`);
   useEffect(() => {
-    setPage(1);
+    const filtersKey = `${searchInput}|${status}|${industry}|${dateRange}`;
+    if (filtersKey === prevFiltersRef.current) return;
+    prevFiltersRef.current = filtersKey;
     setSelectedId(null);
+    if (searchParams.has('page')) {
+      const params = new URLSearchParams(searchParams);
+      params.delete('page');
+      setSearchParams(params, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, status, industry, dateRange]);
 
   const uniqueIndustries = useMemo(
@@ -197,6 +221,13 @@ export default function AdminCompaniesPage() {
   const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
   const listStart = total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
   const listEnd = Math.min(safePage * PAGE_SIZE, total);
+
+  // An invalid or out-of-range ?page=N (e.g. after a refresh with stale data)
+  // is repaired to a valid page instead of silently showing an empty one.
+  useEffect(() => {
+    if (pageInvalid) goToPage(1, { replace: true });
+    else if (page > totalPages) goToPage(totalPages, { replace: true });
+  }, [page, pageInvalid, totalPages, goToPage]);
 
   // Read the selection straight from the live list so a status change lands in
   // both the table row and the detail panel on the same render.
@@ -329,13 +360,14 @@ export default function AdminCompaniesPage() {
                     >
                       <td className="admin-companies-col-company">
                         <span className="admin-companies-company">
-                          <span
-                            className="admin-companies-mark"
-                            aria-hidden="true"
-                            style={{ backgroundColor: company.mark?.bg, color: company.mark?.fg }}
-                          >
-                            {companyInitials(company.name)}
-                          </span>
+                          <CompanyLogo
+                            name={company.name}
+                            domain={company.domain}
+                            color={company.mark?.bg}
+                            initialsStyle={{ backgroundColor: company.mark?.bg, color: company.mark?.fg }}
+                            imgClassName="admin-companies-mark"
+                            initialsClassName="admin-companies-mark"
+                          />
                           <span className="admin-companies-company-text">
                             <span className="admin-companies-company-name">{company.name}</span>
                             <span className="admin-companies-company-domain">{company.domain}</span>
@@ -392,7 +424,7 @@ export default function AdminCompaniesPage() {
               <button
                 type="button"
                 className="admin-companies-page-btn admin-companies-page-btn--nav"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => goToPage(Math.max(1, page - 1))}
                 disabled={safePage <= 1}
               >
                 {ARROW_LEFT}
@@ -408,7 +440,7 @@ export default function AdminCompaniesPage() {
                     key={item}
                     type="button"
                     className={`admin-companies-page-btn${item === safePage ? ' admin-companies-page-btn--current' : ''}`}
-                    onClick={() => setPage(item)}
+                    onClick={() => goToPage(item)}
                     aria-label={`Go to page ${item}`}
                     aria-current={item === safePage ? 'page' : undefined}
                   >
@@ -419,7 +451,7 @@ export default function AdminCompaniesPage() {
               <button
                 type="button"
                 className="admin-companies-page-btn admin-companies-page-btn--nav"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => goToPage(Math.min(totalPages, page + 1))}
                 disabled={safePage >= totalPages}
               >
                 Next
@@ -605,13 +637,14 @@ function DetailPanel({ company, notify }) {
   return (
     <div className="admin-companies-detail">
       <header className="admin-companies-detail-head">
-        <span
-          className="admin-companies-mark admin-companies-detail-mark"
-          aria-hidden="true"
-          style={{ backgroundColor: company.mark?.bg, color: company.mark?.fg }}
-        >
-          {companyInitials(company.name)}
-        </span>
+        <CompanyLogo
+          name={company.name}
+          domain={company.domain}
+          color={company.mark?.bg}
+          initialsStyle={{ backgroundColor: company.mark?.bg, color: company.mark?.fg }}
+          imgClassName="admin-companies-mark admin-companies-detail-mark"
+          initialsClassName="admin-companies-mark admin-companies-detail-mark"
+        />
         <div className="admin-companies-detail-titles">
           <h2 className="admin-companies-detail-name">{company.name}</h2>
           <p className="admin-companies-detail-domain">{company.domain}</p>

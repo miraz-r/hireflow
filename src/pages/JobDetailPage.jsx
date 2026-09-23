@@ -7,6 +7,7 @@ import { getJobsScroll } from '../utils/jobsScrollState';
 import api from '../utils/api';
 import { formatSalary } from '../utils/salary';
 import { STATUS_LABELS } from '../constants/applicationStatus';
+import CompanyLogo from '../components/CompanyLogo';
 import './JobDetailPage.css';
 
 export default function JobDetailPage({ onSignInPrompt }) {
@@ -184,9 +185,12 @@ export default function JobDetailPage({ onSignInPrompt }) {
             <header className="job-detail-header">
               <div className="job-detail-header-top">
                 <div className="job-detail-company-info">
-                  <div className="job-detail-avatar" aria-hidden="true">
-                    {job.company.charAt(0)}
-                  </div>
+                  <CompanyLogo
+                    name={job.company}
+                    domain={job.domain}
+                    imgClassName="job-detail-avatar"
+                    initialsClassName="job-detail-avatar"
+                  />
                   <div className="job-detail-heading">
                     <h1 className="job-detail-title">{job.title}</h1>
                     <div className="job-detail-company-row">

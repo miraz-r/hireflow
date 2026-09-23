@@ -1,9 +1,8 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../Avatar';
+import { resolveMediaUrl } from '../../lib/media';
 import './AdminSidebar.css';
-
-const AVATAR_BASE = 'http://localhost:5000';
 
 const mk = (children, size = 18, extraClassName) => (
   <svg
@@ -206,7 +205,7 @@ export default function AdminSidebar({ drawerRef, closeBtnRef, onClose, onNaviga
  */
 function SidebarProfileFooter() {
   const { user } = useAuth();
-  const avatarSrc = user?.avatarUrl ? `${AVATAR_BASE}${user.avatarUrl}` : null;
+  const avatarSrc = resolveMediaUrl(user?.avatarUrl);
 
   return (
     <div className="admin-sidebar-profile">

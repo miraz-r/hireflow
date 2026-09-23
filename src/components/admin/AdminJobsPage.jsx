@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getAdminJobs, getAdminJob, updateAdminJobStatus } from '../../utils/adminApi';
 import Toast from '../Toast';
+import Avatar from '../Avatar';
 import { formatSalary } from '../../utils/salary';
+import { avatarFallback, resolveMediaUrl } from '../../lib/media';
 import './AdminJobsPage.css';
 
-const AVATAR_BASE = 'http://localhost:5000';
 const PAGE_SIZE = 10;
 
 const STATUS_META = {
@@ -95,9 +96,6 @@ const hexToRgba = (hex, alpha) => {
   return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
 };
 
-const resolveAvatar = (url) =>
-  url ? (url.startsWith('http') ? url : `${AVATAR_BASE}${url}`) : null;
-
 const formatPostedDate = (iso) => {
   if (!iso) return '—';
   const date = new Date(iso);
@@ -109,8 +107,6 @@ const appCountLabel = (count) => {
   const n = Number(count);
   return Number.isFinite(n) ? String(n) : '0';
 };
-
-const initialOf = (name) => (name || '?').trim().charAt(0).toUpperCase();
 
 const getPageItems = (page, totalPages) => {
   if (totalPages <= 7) {
@@ -138,13 +134,32 @@ const getPageItems = (page, totalPages) => {
 export default function AdminJobsPage() {
   const { jobId: urlJobId } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchInput, setSearchInput] = useState('');
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('all');
   const [employmentType, setEmploymentType] = useState('all');
   const [postedDays, setPostedDays] = useState('');
-  const [page, setPage] = useState(1);
+
+  // The current page lives in the URL (?page=N) so a browser refresh or a
+  // Back/Forward step restores the exact page instead of falling back to 1.
+  // Anything but a positive whole number is treated as page 1.
+  const pageParam = Number.parseInt(searchParams.get('page') || '', 10);
+  const pageInvalid = !(Number.isInteger(pageParam) && pageParam > 0);
+  const page = pageInvalid ? 1 : pageParam;
+
+  const goToPage = useCallback(
+    (next, { replace = false } = {}) => {
+      const clamped = Math.max(1, Number.isInteger(next) ? next : 1);
+      const params = new URLSearchParams(searchParams);
+      if (clamped <= 1) params.delete('page');
+      else params.set('page', String(clamped));
+      if (params.toString() === searchParams.toString()) return;
+      setSearchParams(params, { replace });
+    },
+    [searchParams, setSearchParams]
+  );
 
   const [list, setList] = useState(null);
   const [error, setError] = useState(null);
@@ -175,9 +190,14 @@ export default function AdminJobsPage() {
   useEffect(() => {
     if (lastFilterKeyRef.current === filterKey) return;
     lastFilterKeyRef.current = filterKey;
-    setPage(1);
+    if (searchParams.has('page')) {
+      const params = new URLSearchParams(searchParams);
+      params.delete('page');
+      setSearchParams(params, { replace: true });
+    }
     setDetailDismissed(false);
     if (!urlJobId) setSelectedId(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterKey, urlJobId]);
 
   const loadList = useCallback(async () => {
@@ -210,9 +230,10 @@ export default function AdminJobsPage() {
       setSelectedId(id);
       setActiveMenuId(null);
       setDetailDismissed(false);
-      navigate(`/admin/jobs/${id}`, { replace: true });
+      const search = searchParams.toString();
+      navigate(`/admin/jobs/${id}${search ? `?${search}` : ''}`, { replace: true });
     },
-    [navigate]
+    [navigate, searchParams]
   );
 
   const loadSelected = useCallback(async (id) => {
@@ -243,8 +264,9 @@ export default function AdminJobsPage() {
     setDetailDismissed(true);
     setSelectedId(null);
     setActiveMenuId(null);
-    navigate('/admin/jobs', { replace: true });
-  }, [navigate]);
+    const search = searchParams.toString();
+    navigate(`/admin/jobs${search ? `?${search}` : ''}`, { replace: true });
+  }, [navigate, searchParams]);
 
   const applyStatus = useCallback(
     async (id, nextStatus) => {
@@ -297,9 +319,17 @@ export default function AdminJobsPage() {
 
   const total = list?.total || 0;
   const totalPages = list?.totalPages || 0;
-  const listStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const listEnd = Math.min(page * PAGE_SIZE, total);
+  const safePage = totalPages > 0 ? Math.min(page, totalPages) : page;
+  const listStart = total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const listEnd = Math.min(safePage * PAGE_SIZE, total);
   const hasJobs = !loading && !error && total > 0;
+
+  // An invalid or out-of-range ?page=N (e.g. a refresh with stale data) is
+  // repaired to a valid page once the server reports the real page count.
+  useEffect(() => {
+    if (pageInvalid) goToPage(1, { replace: true });
+    else if (totalPages > 0 && page > totalPages) goToPage(totalPages, { replace: true });
+  }, [page, pageInvalid, totalPages, goToPage]);
 
   return (
     <div className="admin-page admin-jobs">
@@ -514,13 +544,13 @@ export default function AdminJobsPage() {
                 <button
                   type="button"
                   className="admin-jobs-page-btn admin-jobs-page-btn--nav"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
+                  onClick={() => goToPage(Math.max(1, page - 1))}
+                  disabled={safePage <= 1}
                 >
                   {ARROW_LEFT}
                   Previous
                 </button>
-                {getPageItems(page, totalPages).map((item, index) =>
+                {getPageItems(safePage, totalPages).map((item, index) =>
                   item === '…' ? (
                     <span key={`gap-${index}`} className="admin-jobs-page-gap">
                       {item}
@@ -529,10 +559,10 @@ export default function AdminJobsPage() {
                     <button
                       key={item}
                       type="button"
-                      className={`admin-jobs-page-btn${item === page ? ' admin-jobs-page-btn--current' : ''}`}
-                      onClick={() => setPage(item)}
+                      className={`admin-jobs-page-btn${item === safePage ? ' admin-jobs-page-btn--current' : ''}`}
+                      onClick={() => goToPage(item)}
                       aria-label={`Go to page ${item}`}
-                      aria-current={item === page ? 'page' : undefined}
+                      aria-current={item === safePage ? 'page' : undefined}
                     >
                       {item}
                     </button>
@@ -541,8 +571,8 @@ export default function AdminJobsPage() {
                 <button
                   type="button"
                   className="admin-jobs-page-btn admin-jobs-page-btn--nav"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
+                  onClick={() => goToPage(Math.min(totalPages, page + 1))}
+                  disabled={safePage >= totalPages}
                 >
                   Next
                   {ARROW_RIGHT}
@@ -764,22 +794,15 @@ function FloatingMenu({ open, anchorRef, excludeRef, onClose, children, role, la
 }
 
 function RecruiterAvatar({ recruiter }) {
-  const src = resolveAvatar(recruiter?.avatarUrl);
-  const name = recruiter?.name || '';
-  if (src) {
-    return (
-      <img
-        className="admin-jobs-avatar admin-jobs-avatar--img"
-        src={src}
-        alt={`${name} avatar`}
-        loading="lazy"
-      />
-    );
-  }
   return (
-    <span className="admin-jobs-avatar admin-jobs-avatar--initials" aria-hidden="true">
-      {initialOf(name)}
-    </span>
+    <Avatar
+      src={resolveMediaUrl(recruiter?.avatarUrl)}
+      fallbackSrc={avatarFallback(recruiter?.name, recruiter?.email)}
+      imgClassName="admin-jobs-avatar admin-jobs-avatar--img"
+      placeholderClassName="admin-jobs-avatar admin-jobs-avatar--initials"
+      imgAlt=""
+      iconSize={14}
+    />
   );
 }
 

@@ -3,11 +3,11 @@ import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
+import { resolveMediaUrl } from '../lib/media';
 import './Navbar.css';
 import { useTheme } from '../hooks/useTheme';
 
 const LOGOUT_VISIBLE_MS = 750;
-const AVATAR_BASE = 'http://localhost:5000';
 
 const MOON_ICON = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -337,7 +337,7 @@ export default function Navbar() {
         ? 'Recruiter'
         : 'Jobseeker';
   const switchLabel = user?.role === 'recruiter' ? 'Switch to Jobseeker' : 'Switch to Recruiter';
-  const avatarSrc = user?.avatarUrl ? `${AVATAR_BASE}${user.avatarUrl}` : null;
+  const avatarSrc = resolveMediaUrl(user?.avatarUrl);
 
   return (
     <header className="navbar">

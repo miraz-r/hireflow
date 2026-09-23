@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import Select from '../ui/Select';
 import Toast from '../Toast';
+import Avatar from '../Avatar';
+import { avatarFallback } from '../../lib/media';
 import './AdminApplicationsPage.css';
 
 const PAGE_SIZE = 10;
@@ -93,25 +96,23 @@ const MOCK_APPLICATIONS = [
   { id: '6', name: 'Tom Becker', email: 'tom.becker@email.com', job: 'DevOps Engineer', company: 'Umbrella Corp', recruiter: 'Sofia Marchetti', status: 'rejected', appliedAt: daysAgo(4), location: 'Denver, CO', experience: '7 years', skills: ['AWS', 'Kubernetes', 'CI/CD'], phone: '(303) 661-4408', resume: 'Resume.pdf' },
   { id: '7', name: 'Priya Patel', email: 'priya.patel@email.com', job: 'Marketing Manager', company: 'Wayne Enterprises', recruiter: 'James Kowalski', status: 'new', appliedAt: daysAgo(5), location: 'Seattle, WA', experience: '4 years', skills: ['SEO', 'Content Strategy', 'Analytics'], phone: '(206) 349-7715', resume: 'Resume.pdf' },
   { id: '8', name: 'Daniel Lopez', email: 'daniel.lopez@email.com', job: 'QA Engineer', company: 'Initech', recruiter: 'Elena Petrova', status: 'reviewing', appliedAt: daysAgo(6), location: 'Miami, FL', experience: '3 years', skills: ['Selenium', 'Cypress', 'Test Planning'], phone: '(305) 228-6194', resume: 'Resume.pdf' },
-  { id: '9', name: 'Hannah Kim', email: 'hannah.kim@email.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'interview', appliedAt: daysAgo(7), location: 'Los Angeles, CA', experience: '6 years', skills: ['Figma', 'Design Systems', 'Wireframing'], phone: '(213) 907-5528', resume: 'Resume.pdf' },
+  { id: '9', name: 'Hannah Kim', email: 'hannah.kim@stark.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'interview', appliedAt: daysAgo(7), location: 'Los Angeles, CA', experience: '6 years', skills: ['Figma', 'Design Systems', 'Wireframing'], phone: '(213) 907-5528', resume: 'Resume.pdf' },
   { id: '10', name: 'Oliver Smith', email: 'oliver.smith@email.com', job: 'Backend Engineer', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'hired', appliedAt: daysAgo(8), location: 'New York, NY', experience: '8 years', skills: ['Node.js', 'GraphQL', 'AWS'], phone: '(917) 640-2287', resume: 'Resume.pdf' },
   { id: '11', name: 'Fatima Noor', email: 'fatima.noor@email.com', job: 'Data Analyst', company: 'Hooli', recruiter: 'Daniel Cho', status: 'shortlisted', appliedAt: daysAgo(9), location: 'Portland, OR', experience: '4 years', skills: ['SQL', 'Python', 'dbt'], phone: '(503) 712-9930', resume: 'Resume.pdf' },
   { id: '12', name: 'Ryan O Connor', email: 'ryan.oconnor@email.com', job: 'Frontend Developer', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'reviewing', appliedAt: daysAgo(10), location: 'Philadelphia, PA', experience: '2 years', skills: ['React', 'JavaScript', 'Tailwind'], phone: '(215) 337-4401', resume: 'Resume.pdf' },
   { id: '13', name: 'Grace Liu', email: 'grace.liu@email.com', job: 'DevOps Engineer', company: 'Umbrella Corp', recruiter: 'Sofia Marchetti', status: 'interview', appliedAt: daysAgo(12), location: 'San Jose, CA', experience: '5 years', skills: ['Terraform', 'AWS', 'Kubernetes'], phone: '(408) 559-6623', resume: 'Resume.pdf' },
   { id: '14', name: 'Victor Almeida', email: 'victor.almeida@email.com', job: 'Marketing Manager', company: 'Wayne Enterprises', recruiter: 'James Kowalski', status: 'rejected', appliedAt: daysAgo(14), location: 'Atlanta, GA', experience: '6 years', skills: ['Email Marketing', 'SEO', 'Copywriting'], phone: '(404) 781-2246', resume: 'Resume.pdf' },
   { id: '15', name: 'Nina Petrova', email: 'nina.petrova@email.com', job: 'QA Engineer', company: 'Initech', recruiter: 'Elena Petrova', status: 'new', appliedAt: daysAgo(15), location: 'Charlotte, NC', experience: '4 years', skills: ['Cypress', 'Playwright', 'API Testing'], phone: '(704) 553-8821', resume: 'Resume.pdf' },
-  { id: '16', name: 'Ethan Brooks', email: 'ethan.brooks@email.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'new', appliedAt: daysAgo(17), location: 'Nashville, TN', experience: '3 years', skills: ['Figma', 'Illustration', 'Prototyping'], phone: '(615) 428-3370', resume: 'Resume.pdf' },
+  { id: '16', name: 'Ethan Brooks', email: 'ethan.brooks@stark.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'new', appliedAt: daysAgo(17), location: 'Nashville, TN', experience: '3 years', skills: ['Figma', 'Illustration', 'Prototyping'], phone: '(615) 428-3370', resume: 'Resume.pdf' },
   { id: '17', name: 'Maya Singh', email: 'maya.singh@email.com', job: 'Backend Engineer', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'reviewing', appliedAt: daysAgo(19), location: 'San Diego, CA', experience: '5 years', skills: ['Node.js', 'Python', 'Redis'], phone: '(619) 507-1142', resume: 'Resume.pdf' },
   { id: '18', name: 'Lucas Meyer', email: 'lucas.meyer@email.com', job: 'Data Analyst', company: 'Hooli', recruiter: 'Daniel Cho', status: 'hired', appliedAt: daysAgo(21), location: 'Phoenix, AZ', experience: '7 years', skills: ['Python', 'SQL', 'Machine Learning'], phone: '(602) 844-9915', resume: 'Resume.pdf' },
   { id: '19', name: 'Zoe Carter', email: 'zoe.carter@email.com', job: 'Frontend Developer', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'shortlisted', appliedAt: daysAgo(24), location: 'Minneapolis, MN', experience: '4 years', skills: ['React', 'TypeScript', 'Next.js'], phone: '(612) 339-7724', resume: 'Resume.pdf' },
-  { id: '20', name: 'Adrian Foster', email: 'adrian.foster@email.com', job: 'DevOps Engineer', company: 'Umbrella Corp', recruiter: 'Sofia Marchetti', status: 'new', appliedAt: daysAgo(27), location: 'Salt Lake City, UT', experience: '6 years', skills: ['Docker', 'Jenkins', 'AWS'], phone: '(801) 557-2208', resume: 'Resume.pdf' },
+  { id: '20', name: 'Adrian Foster', email: 'adrian.foster@aperture.com', job: 'DevOps Engineer', company: 'Umbrella Corp', recruiter: 'Sofia Marchetti', status: 'new', appliedAt: daysAgo(27), location: 'Salt Lake City, UT', experience: '6 years', skills: ['Docker', 'Jenkins', 'AWS'], phone: '(801) 557-2208', resume: 'Resume.pdf' },
   { id: '21', name: 'Natalia Reyes', email: 'natalia.reyes@email.com', job: 'Marketing Manager', company: 'Wayne Enterprises', recruiter: 'James Kowalski', status: 'reviewing', appliedAt: daysAgo(30), location: 'San Antonio, TX', experience: '5 years', skills: ['Social Media', 'Content Strategy', 'SEO'], phone: '(210) 664-3391', resume: 'Resume.pdf' },
   { id: '22', name: 'Marcus Hill', email: 'marcus.hill@email.com', job: 'QA Engineer', company: 'Initech', recruiter: 'Elena Petrova', status: 'shortlisted', appliedAt: daysAgo(34), location: 'Detroit, MI', experience: '5 years', skills: ['Selenium', 'JUnit', 'Regression Testing'], phone: '(313) 771-5580', resume: 'Resume.pdf' },
   { id: '23', name: 'Isabella Rossi', email: 'isabella.rossi@email.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'interview', appliedAt: daysAgo(41), location: 'Boston, MA', experience: '6 years', skills: ['Figma', 'UX Research', 'Prototyping'], phone: '(617) 292-4413', resume: 'Resume.pdf' },
   { id: '24', name: 'Jordan Fields', email: 'jordan.fields@email.com', job: 'Backend Engineer', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'rejected', appliedAt: daysAgo(55), location: 'Houston, TX', experience: '4 years', skills: ['Node.js', 'PostgreSQL', 'REST APIs'], phone: '(713) 448-9927', resume: 'Resume.pdf' },
 ];
-
-const initialOf = (name) => (name || '?').trim().charAt(0).toUpperCase();
 
 const formatAppliedDate = (iso) => {
   if (!iso) return '—';
@@ -144,13 +145,32 @@ const getPageItems = (page, totalPages) => {
  * workspace needs.
  */
 export default function AdminApplicationsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState(MOCK_APPLICATIONS);
   const [searchInput, setSearchInput] = useState('');
   const [status, setStatus] = useState('all');
   const [job, setJob] = useState('all');
   const [recruiter, setRecruiter] = useState('all');
   const [dateRange, setDateRange] = useState('');
-  const [page, setPage] = useState(1);
+
+  // The current page lives in the URL (?page=N) so a browser refresh or a
+  // Back/Forward step restores the exact page instead of falling back to 1.
+  // Anything but a positive whole number is treated as page 1.
+  const pageParam = Number.parseInt(searchParams.get('page') || '', 10);
+  const pageInvalid = !(Number.isInteger(pageParam) && pageParam > 0);
+  const page = pageInvalid ? 1 : pageParam;
+
+  const goToPage = useCallback(
+    (next, { replace = false } = {}) => {
+      const clamped = Math.max(1, Number.isInteger(next) ? next : 1);
+      const params = new URLSearchParams(searchParams);
+      if (clamped <= 1) params.delete('page');
+      else params.set('page', String(clamped));
+      if (params.toString() === searchParams.toString()) return;
+      setSearchParams(params, { replace });
+    },
+    [searchParams, setSearchParams]
+  );
 
   const [selectedId, setSelectedId] = useState(null);
   const [activeMenuId, setActiveMenuId] = useState(null);
@@ -162,10 +182,20 @@ export default function AdminApplicationsPage() {
   }, []);
 
   // Any filter or search change jumps back to page 1 and clears the selection
-  // so it never points at a row that left the visible page.
+  // so it never points at a row that left the visible page. Only reacts to an
+  // actual filter change, so a refresh with ?page=N never drops the param.
+  const prevFiltersRef = useRef(`${searchInput}|${status}|${job}|${recruiter}|${dateRange}`);
   useEffect(() => {
-    setPage(1);
+    const filtersKey = `${searchInput}|${status}|${job}|${recruiter}|${dateRange}`;
+    if (filtersKey === prevFiltersRef.current) return;
+    prevFiltersRef.current = filtersKey;
     setSelectedId(null);
+    if (searchParams.has('page')) {
+      const params = new URLSearchParams(searchParams);
+      params.delete('page');
+      setSearchParams(params, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, status, job, recruiter, dateRange]);
 
   const uniqueJobs = useMemo(
@@ -235,6 +265,13 @@ export default function AdminApplicationsPage() {
   const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
   const listStart = total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
   const listEnd = Math.min(safePage * PAGE_SIZE, total);
+
+  // An invalid or out-of-range ?page=N (e.g. after a refresh with stale data)
+  // is repaired to a valid page instead of silently showing an empty one.
+  useEffect(() => {
+    if (pageInvalid) goToPage(1, { replace: true });
+    else if (page > totalPages) goToPage(totalPages, { replace: true });
+  }, [page, pageInvalid, totalPages, goToPage]);
 
   // Read the selection straight from the live list so a status change lands in
   // both the table row and the detail panel on the same render.
@@ -374,9 +411,14 @@ export default function AdminApplicationsPage() {
                     >
                       <td className="admin-applications-col-applicant">
                         <span className="admin-applications-applicant">
-                          <span className="admin-applications-avatar admin-applications-avatar--initials" aria-hidden="true">
-                            {initialOf(app.name)}
-                          </span>
+                          <Avatar
+                            src={null}
+                            fallbackSrc={avatarFallback(app.name, app.email)}
+                            imgClassName="admin-applications-avatar"
+                            placeholderClassName="admin-applications-avatar admin-applications-avatar--initials"
+                            imgAlt=""
+                            iconSize={14}
+                          />
                           <span className="admin-applications-applicant-text">
                             <span className="admin-applications-applicant-name">{app.name}</span>
                             <span className="admin-applications-applicant-email">{app.email}</span>
@@ -428,7 +470,7 @@ export default function AdminApplicationsPage() {
               <button
                 type="button"
                 className="admin-applications-page-btn admin-applications-page-btn--nav"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => goToPage(Math.max(1, page - 1))}
                 disabled={safePage <= 1}
               >
                 {ARROW_LEFT}
@@ -444,7 +486,7 @@ export default function AdminApplicationsPage() {
                     key={item}
                     type="button"
                     className={`admin-applications-page-btn${item === safePage ? ' admin-applications-page-btn--current' : ''}`}
-                    onClick={() => setPage(item)}
+                    onClick={() => goToPage(item)}
                     aria-label={`Go to page ${item}`}
                     aria-current={item === safePage ? 'page' : undefined}
                   >
@@ -455,7 +497,7 @@ export default function AdminApplicationsPage() {
               <button
                 type="button"
                 className="admin-applications-page-btn admin-applications-page-btn--nav"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => goToPage(Math.min(totalPages, page + 1))}
                 disabled={safePage >= totalPages}
               >
                 Next
@@ -651,12 +693,14 @@ function DetailPanel({ app, onClose, notify }) {
   return (
     <div className="admin-applications-detail">
       <header className="admin-applications-detail-head">
-        <span
-          className="admin-applications-avatar admin-applications-avatar--initials admin-applications-detail-avatar"
-          aria-hidden="true"
-        >
-          {initialOf(app.name)}
-        </span>
+        <Avatar
+          src={null}
+          fallbackSrc={avatarFallback(app.name, app.email)}
+          imgClassName="admin-applications-avatar admin-applications-detail-avatar"
+          placeholderClassName="admin-applications-avatar admin-applications-avatar--initials admin-applications-detail-avatar"
+          imgAlt=""
+          iconSize={16}
+        />
         <div className="admin-applications-detail-titles">
           <h2 className="admin-applications-detail-name">{app.name}</h2>
           <p className="admin-applications-detail-email">{app.email}</p>

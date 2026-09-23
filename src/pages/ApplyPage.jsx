@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { fetchJobById } from '../utils/jobsApi';
 import { PHONE_CHARS_RE } from '../utils/phone';
 import api from '../utils/api';
+import CompanyLogo from '../components/CompanyLogo';
 import './ApplyPage.css';
 
 export default function ApplyPage() {
@@ -257,9 +258,12 @@ export default function ApplyPage() {
 
         <div className="apply-card">
           <header className="apply-job-header">
-            <div className="apply-job-avatar" aria-hidden="true">
-              {job.company.charAt(0)}
-            </div>
+            <CompanyLogo
+              name={job.company}
+              domain={job.domain}
+              imgClassName="apply-job-avatar"
+              initialsClassName="apply-job-avatar"
+            />
             <div className="apply-job-info">
               <h1 className="apply-job-title">Apply for {job.title}</h1>
               <span className="apply-job-company">

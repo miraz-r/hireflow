@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import './JobCard.css';
 import { saveJobsScroll } from '../utils/jobsScrollState';
 import { formatSalary } from '../utils/salary';
+import CompanyLogo from './CompanyLogo';
 
 export default function JobCard({ job, isSaved, onSave, showSave = true }) {
   const location = useLocation();
@@ -28,9 +29,12 @@ export default function JobCard({ job, isSaved, onSave, showSave = true }) {
       >
         <div className="job-header">
           <div className="job-company">
-            <div className="company-avatar" aria-hidden="true">
-              {job.company.charAt(0)}
-            </div>
+            <CompanyLogo
+              name={job.company}
+              domain={job.domain}
+              imgClassName="company-avatar"
+              initialsClassName="company-avatar"
+            />
             <div className="company-info">
               <h3 className="company-name">{job.company}</h3>
               <p className="job-posted">{job.postedAt}</p>

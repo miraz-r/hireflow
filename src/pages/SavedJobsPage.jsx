@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiGet, apiDelete } from '../utils/api';
 import ProfileTabs from '../components/ProfileTabs';
+import CompanyLogo from '../components/CompanyLogo';
 import { formatSalary } from '../utils/salary';
 import './SavedJobsPage.css';
 
@@ -109,9 +110,12 @@ export default function SavedJobsPage() {
               {savedJobs.map((job) => (
                 <div className="saved-jobs-card" key={job.id}>
                   <div className="saved-jobs-card-main">
-                    <div className="saved-jobs-card-avatar" aria-hidden="true">
-                      {(job.company || 'C').charAt(0)}
-                    </div>
+                    <CompanyLogo
+                      name={job.company}
+                      domain={job.domain}
+                      imgClassName="saved-jobs-card-avatar"
+                      initialsClassName="saved-jobs-card-avatar"
+                    />
                     <div className="saved-jobs-card-info">
                       <Link to={`/jobs/${job.id}`} state={{ from: 'saved' }} className="saved-jobs-card-title">{job.title}</Link>
                       <span className="saved-jobs-card-company">{job.company}</span>

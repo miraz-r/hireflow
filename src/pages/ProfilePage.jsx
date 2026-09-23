@@ -6,13 +6,13 @@ import { categories, workTypes, employmentTypes, experienceLevels } from '../dat
 import { STATUS_LABELS } from '../constants/applicationStatus';
 import Toast from '../components/Toast';
 import Avatar from '../components/Avatar';
+import CompanyLogo from '../components/CompanyLogo';
 import ConfirmModal from '../components/ConfirmModal';
 import ProfileTabs from '../components/ProfileTabs';
 import EmailField from '../components/EmailField';
 import Select from '../components/ui/Select';
+import { resolveMediaUrl } from '../lib/media';
 import './ProfilePage.css';
-
-const AVATAR_BASE = 'http://localhost:5000';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -405,7 +405,7 @@ function ProfileTab({ user }) {
     return <div className="app-loading" aria-busy="true" />;
   }
 
-  const avatarSrc = form.avatarUrl ? `${AVATAR_BASE}${form.avatarUrl}` : null;
+  const avatarSrc = resolveMediaUrl(form.avatarUrl);
 
   const fieldError = (name) =>
     fieldErrors[name] ? (
@@ -633,7 +633,7 @@ function ProfileTab({ user }) {
                     </span>
                     <div>
                       <strong>{form.resumeName || 'Resume'}</strong>
-                      <a href={`${AVATAR_BASE}${form.resumeUrl}`} target="_blank" rel="noreferrer" className="profile-link-url">View / download</a>
+                      <a href={resolveMediaUrl(form.resumeUrl)} target="_blank" rel="noreferrer" className="profile-link-url">View / download</a>
                     </div>
                   </div>
                 ) : (
@@ -1059,9 +1059,12 @@ function JobseekerApplicationsTab() {
           {applications.map((app) => (
             <article className="app-card" key={app.id}>
               <div className="app-card-main">
-                <div className="app-card-avatar" aria-hidden="true">
-                  {(app.job?.company || 'C').charAt(0)}
-                </div>
+                <CompanyLogo
+                  name={app.job?.company}
+                  domain={app.job?.domain}
+                  imgClassName="app-card-avatar"
+                  initialsClassName="app-card-avatar"
+                />
                 <div className="app-card-info">
                   <h3 className="app-card-title">{app.job?.title || 'Job'}</h3>
                   <p className="app-card-company">
