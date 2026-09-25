@@ -1,0 +1,1179 @@
+/* ===========================================================================
+   ADMIN JOBSEEKERS PAGE (/admin/jobseekers)
+   ---------------------------------------------------------------------------
+   The Jobseekers workspace. Matches the Admin Recruiters / Applications
+   pages: same 1460px page cap, admin tokens, toolbar + table + footer
+   pagination composition. Self-contained: tokens come only from the admin-*
+   palette set by .admin-shell (light) and html[data-theme="dark"] .admin-shell,
+   plus the shared radius/shadow variables.
+   =========================================================================== */
+
+/* ---------- Page proportions (matches Admin Recruiters) ----------
+   Two-column grid: the table card stays the flexible dominant area and the
+   ~320px detail panel sits directly beside it, both stretched to the same row
+   height so their top and bottom edges line up. */
+.admin-page.admin-jobseekers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-content: start;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  max-width: 1460px;
+  margin-inline: auto;
+}
+
+/* ---------- Buttons (shared language) ---------- */
+.admin-jobseekers-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  margin-top: 14px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.admin-jobseekers-btn:hover {
+  background-color: var(--admin-hover);
+  border-color: var(--admin-text-faint);
+}
+
+.admin-jobseekers-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Table card ---------- */
+.admin-jobseekers-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ---------- Toolbar ----------
+   One aligned row: flexible search, three compact Select filters, and a
+   secondary Clear filters action hairline-separated on the right. */
+.admin-jobseekers-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-jobseekers-search {
+  position: relative;
+  flex: 1 1 240px;
+  min-width: 180px;
+}
+
+.admin-jobseekers-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--admin-text-faint);
+  pointer-events: none;
+}
+
+.admin-jobseekers-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 38px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-jobseekers-search-input::placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-jobseekers-search-input:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-jobseekers-search-input:focus {
+  background-color: var(--admin-surface);
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-jobseekers-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background-color: var(--admin-hover);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.admin-jobseekers-search-clear:hover {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-border-strong);
+}
+
+/* The shared Select is reskinned to the admin filter height/border language,
+   exactly like the Recruiters/Applications filters. */
+.admin-jobseekers-filter {
+  width: 158px;
+  flex-shrink: 0;
+}
+
+.admin-jobseekers-filter-select {
+  height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+}
+
+.admin-jobseekers-filter-select:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-jobseekers-filter-select:focus,
+.admin-jobseekers-filter:focus-within .hf-select-trigger {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-jobseekers-filter-select .hf-select-value--placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-jobseekers-filter-select .hf-select-chevron {
+  color: var(--admin-text-faint);
+}
+
+/* Clear filters - secondary action, hairline-separated to the right. */
+.admin-jobseekers-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  margin-left: 4px;
+  padding: 0 6px 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--admin-border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.admin-jobseekers-clear:hover {
+  color: var(--admin-primary);
+}
+
+.admin-jobseekers-clear:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Table ----------
+   Same density as Admin Recruiters (14px cells, muted semibold headers, subtle
+   row separators). The Jobseeker column is the flexible anchor; the fixed
+   columns are sized for real data so nothing clips and headers always align
+   with their rows. */
+.admin-jobseekers-table-scroll {
+  width: 100%;
+  /* Grows to absorb any extra card height so the footer stays pinned to the
+     bottom when the detail panel is the taller of the two columns. */
+  flex: 1 1 auto;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.admin-jobseekers-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-jobseekers-table th,
+.admin-jobseekers-table td {
+  padding: 0 10px;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobseekers-table th {
+  padding: 12px 10px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-jobseekers-table td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin-jobseekers-table thead th:first-child,
+.admin-jobseekers-table tbody td:first-child {
+  padding-left: 16px;
+}
+
+/* Column widths - Jobseeker flexes, the rest are fixed. */
+.admin-jobseekers-col-jobseeker {
+  width: auto;
+}
+
+.admin-jobseekers-col-location {
+  width: 150px;
+}
+
+.admin-jobseekers-col-status {
+  width: 108px;
+}
+
+.admin-jobseekers-col-applications {
+  width: 116px;
+}
+
+.admin-jobseekers-col-saved {
+  width: 104px;
+}
+
+.admin-jobseekers-col-joined {
+  width: 140px;
+}
+
+.admin-jobseekers-col-actions {
+  width: 46px;
+}
+
+/* Narrower grid under 1440px - the panel shrinks first and the fixed columns
+   tighten so the Jobseeker column keeps as much room as possible. */
+@media (max-width: 1439px) {
+  .admin-page.admin-jobseekers {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+
+  .admin-jobseekers-col-location {
+    width: 132px;
+  }
+
+  .admin-jobseekers-col-status {
+    width: 100px;
+  }
+
+  .admin-jobseekers-col-applications {
+    width: 108px;
+  }
+
+  .admin-jobseekers-col-saved {
+    width: 96px;
+  }
+
+  .admin-jobseekers-col-joined {
+    width: 130px;
+  }
+
+  .admin-jobseekers-col-actions {
+    width: 44px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .admin-jobseekers-col-location {
+    width: 170px;
+  }
+
+  .admin-jobseekers-col-status {
+    width: 120px;
+  }
+
+  .admin-jobseekers-col-applications {
+    width: 126px;
+  }
+
+  .admin-jobseekers-col-saved {
+    width: 112px;
+  }
+
+  .admin-jobseekers-col-joined {
+    width: 152px;
+  }
+
+  .admin-jobseekers-col-actions {
+    width: 50px;
+  }
+}
+
+/* Column alignment - Jobseeker, Location, and Status stay left-aligned;
+   Applications, Saved Jobs, Joined, and Actions are centered. Headers and
+   cells share alignment. */
+.admin-jobseekers-table thead th.admin-jobseekers-col-jobseeker,
+.admin-jobseekers-table tbody td.admin-jobseekers-col-jobseeker,
+.admin-jobseekers-table thead th.admin-jobseekers-col-location,
+.admin-jobseekers-table tbody td.admin-jobseekers-col-location,
+.admin-jobseekers-table thead th.admin-jobseekers-col-status,
+.admin-jobseekers-table tbody td.admin-jobseekers-col-status {
+  text-align: left;
+}
+
+.admin-jobseekers-table thead th.admin-jobseekers-col-actions,
+.admin-jobseekers-table tbody td.admin-jobseekers-col-actions {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* ---------- Rows ---------- */
+.admin-jobseekers-table tbody tr {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.admin-jobseekers-table tbody tr:hover {
+  background-color: var(--admin-hover);
+}
+
+.admin-jobseekers-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Selected row - subtle indigo wash, never saturated, with a quiet left
+   accent matching the Admin Recruiters/Applications/Jobs selected state. */
+.admin-jobseekers-table tbody tr.admin-jobseekers-row--selected {
+  background-color: var(--admin-primary-soft);
+  box-shadow: inset 2px 0 0 0 var(--admin-primary);
+}
+
+.admin-jobseekers-table tbody tr.admin-jobseekers-row--selected:hover {
+  background-color: var(--admin-primary-soft);
+}
+
+/* ---------- Jobseeker cell ----------
+   The primary anchor: 30px circular avatar + name/email stack. */
+.admin-jobseekers-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.admin-jobseekers-person-text {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.admin-jobseekers-person-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobseekers-person-email {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--admin-text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 30px circle - shared Avatar sizing; the placeholder keeps the same neutral
+   language as the other Admin tables. */
+.admin-jobseekers-avatar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.admin-jobseekers-avatar--initials {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-border);
+  user-select: none;
+}
+
+/* ---------- Location cell ---------- */
+.admin-jobseekers-location {
+  font-weight: 500;
+  color: var(--admin-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Status badge ----------
+   Same badge language as Recruiters/Applications (dot + soft tint). The three
+   tones are reused from the existing admin badge palette so no new status
+   color is introduced here, with explicit dark variants - never pure-black
+   fills. */
+.admin-jobseekers-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.admin-jobseekers-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.admin-jobseekers-badge--active {
+  color: #065f46;
+  background-color: #d1fae5;
+}
+
+.admin-jobseekers-badge--inactive {
+  color: #475569;
+  background-color: #e2e8f0;
+}
+
+.admin-jobseekers-badge--suspended {
+  color: #991b1b;
+  background-color: #fee2e2;
+}
+
+html[data-theme="dark"] .admin-jobseekers-badge--active {
+  color: #a7f3d0;
+  background-color: #064e3b;
+}
+
+html[data-theme="dark"] .admin-jobseekers-badge--inactive {
+  color: #cbd5e1;
+  background-color: #1e293b;
+}
+
+html[data-theme="dark"] .admin-jobseekers-badge--suspended {
+  color: #fecaca;
+  background-color: #450a0a;
+}
+
+/* ---------- Numeric counts + Joined date ----------
+   Plain tabular numerals, no KPI or card treatment. */
+.admin-jobseekers-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-jobseekers-date {
+  font-size: 14px;
+  color: var(--admin-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Footer + pagination ---------- */
+.admin-jobseekers-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-jobseekers-footer-count {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+.admin-jobseekers-footer-count strong {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-jobseekers-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-jobseekers-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.admin-jobseekers-page-btn:hover:not(:disabled) {
+  color: var(--admin-text-strong);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-jobseekers-page-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+.admin-jobseekers-page-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.admin-jobseekers-page-btn--current {
+  color: #ffffff;
+  background-color: var(--admin-primary);
+  border-color: var(--admin-primary);
+}
+
+.admin-jobseekers-page-btn--current:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: var(--admin-primary-hover);
+  border-color: var(--admin-primary-hover);
+}
+
+.admin-jobseekers-page-btn--nav {
+  padding: 0 10px;
+}
+
+.admin-jobseekers-page-gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Empty state ---------- */
+.admin-jobseekers-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.admin-jobseekers-state-title {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-jobseekers-state-text {
+  display: block;
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Right detail panel ----------
+   Contextual inspector beside the table card: same surface, border, and
+   shadow language as the Admin Recruiters/Companies panels, stretched by
+   the page grid so it matches the table's height. Content scrolls inside. */
+.admin-jobseekers-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.admin-jobseekers-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+/* Empty state - centered both ways, same title/text philosophy as the
+   Admin Recruiters/Applications "Select a ..." state. */
+.admin-jobseekers-panel-state {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+/* ---------- Panel header ----------
+   Compact row: 32px circular avatar with name, email, and location stacked
+   beside it. No status badge - that already lives on the table row. */
+.admin-jobseekers-detail-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-jobseekers-detail-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.admin-jobseekers-detail-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.admin-jobseekers-detail-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1.3;
+  color: var(--admin-text-strong);
+}
+
+.admin-jobseekers-detail-email {
+  margin: 3px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--admin-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.admin-jobseekers-detail-location {
+  margin: 1px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Panel sections ----------
+   Small semibold muted uppercase labels over a label/value list. Labels stay
+   on the left, values align right so long emails stay readable. */
+.admin-jobseekers-detail-section {
+  margin-top: 18px;
+}
+
+.admin-jobseekers-detail-sub {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+}
+
+.admin-jobseekers-detail-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.admin-jobseekers-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.admin-jobseekers-detail-row dt {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-jobseekers-detail-row dd {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text-strong);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.admin-jobseekers-detail-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Recent applications ----------
+   A short hairline-separated list, not a second table: job title over a
+   company + status line, with the status dot carrying the tone. */
+.admin-jobseekers-recent {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-jobseekers-recent-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-jobseekers-recent-item:first-child {
+  padding-top: 0;
+}
+
+.admin-jobseekers-recent-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.admin-jobseekers-recent-job {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--admin-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobseekers-recent-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-jobseekers-recent-company {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--admin-text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobseekers-recent-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-jobseekers-recent-status::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Same six tones the Admin Applications badges use, as text + dot so the list
+   stays compact inside the narrow panel. */
+.admin-jobseekers-recent-status--new {
+  color: #1d4ed8;
+}
+
+.admin-jobseekers-recent-status--reviewing {
+  color: #475569;
+}
+
+.admin-jobseekers-recent-status--shortlisted {
+  color: #5b21b6;
+}
+
+.admin-jobseekers-recent-status--interview {
+  color: #92400e;
+}
+
+.admin-jobseekers-recent-status--rejected {
+  color: #991b1b;
+}
+
+.admin-jobseekers-recent-status--hired {
+  color: #065f46;
+}
+
+html[data-theme="dark"] .admin-jobseekers-recent-status--new {
+  color: #93c5fd;
+}
+
+html[data-theme="dark"] .admin-jobseekers-recent-status--reviewing {
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-jobseekers-recent-status--shortlisted {
+  color: #c4b5fd;
+}
+
+html[data-theme="dark"] .admin-jobseekers-recent-status--interview {
+  color: #fcd34d;
+}
+
+html[data-theme="dark"] .admin-jobseekers-recent-status--rejected {
+  color: #fca5a5;
+}
+
+html[data-theme="dark"] .admin-jobseekers-recent-status--hired {
+  color: #6ee7b7;
+}
+
+/* ---------- Panel actions ----------
+   One compact secondary button, hairline-separated from the body. */
+.admin-jobseekers-detail-actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-jobseekers-detail-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-jobseekers-detail-actions-row .admin-jobseekers-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-top: 0;
+}
+
+/* ---------- Row menu (three-dot) ---------- */
+.admin-jobseekers-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--admin-text-faint);
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.admin-jobseekers-menu-btn:hover,
+.admin-jobseekers-menu-btn--open {
+  color: var(--admin-text-strong);
+  background-color: var(--admin-hover);
+}
+
+.admin-jobseekers-menu-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+/* ---------- Floating row menu (portaled) ----------
+   Rendered on <body> through createPortal, so the card's overflow:hidden can
+   never clip it. Values are spelled out because the portal sits outside
+   .admin-shell; dark variants mirror the admin token palette. */
+.admin-jobseekers-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  padding: 5px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px -8px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(15, 23, 42, 0.06);
+  color: #111827;
+  animation: admin-jobseekers-menu-in 120ms ease-out;
+}
+
+@keyframes admin-jobseekers-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-jobseekers-menu {
+    animation: none;
+  }
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu {
+  background-color: #1a2438;
+  border-color: #334155;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.55);
+  color: #f1f5f9;
+}
+
+.admin-jobseekers-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px 8px;
+}
+
+.admin-jobseekers-menu-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-label {
+  color: #94a3b8;
+}
+
+.admin-jobseekers-menu-subhead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f46e5;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-subhead {
+  color: #a5b4fc;
+}
+
+.admin-jobseekers-menu-subhead:hover {
+  background-color: #eef2ff;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-subhead:hover {
+  background-color: rgba(129, 140, 248, 0.12);
+}
+
+.admin-jobseekers-menu-divider {
+  height: 1px;
+  margin: 0 12px 4px;
+  background-color: #e5e7eb;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-divider {
+  background-color: #2b3a52;
+}
+
+.admin-jobseekers-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  text-align: left;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-item {
+  color: #e2e8f0;
+}
+
+.admin-jobseekers-menu-item:hover:not(:disabled) {
+  color: #111827;
+  background-color: #f3f4f6;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-item:hover:not(:disabled) {
+  color: #f1f5f9;
+  background-color: rgba(148, 163, 184, 0.08);
+}
+
+.admin-jobseekers-menu-item--selected {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-item--selected {
+  color: #a5b4fc;
+}
+
+.admin-jobseekers-menu-item:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 1px;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-item:focus-visible {
+  outline-color: #818cf8;
+}
+
+.admin-jobseekers-menu-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #4f46e5;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-check {
+  color: #a5b4fc;
+}
+
+.admin-jobseekers-menu-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-jobseekers-menu-chevron {
+  display: inline-flex;
+  color: #9ca3af;
+}
+
+html[data-theme="dark"] .admin-jobseekers-menu-chevron {
+  color: #64748b;
+}
+
+/* ---------- Dark-mode contrast tune ----------
+   Mirrors the Admin Recruiters/Applications pages: push faint/muted/text
+   further up the slate ramp so names, headers, dates, and secondary metadata
+   stay clearly readable on the dark admin surface. */
+html[data-theme="dark"] .admin-page.admin-jobseekers {
+  --admin-text-faint: #8b9ab0;
+  --admin-text-muted: #a3b0c3;
+  --admin-text: #b7c2d2;
+}
+
+/* ---------- Accessibility ---------- */
+.admin-jobseekers-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Responsive ----------
+   Desktop-first. On narrow tables the fixed columns tighten and the table
+   scrolls horizontally inside its container; the toolbar stack keeps the
+   existing Admin Recruiters behavior. */
+@media (max-width: 1023px) {
+  .admin-page.admin-jobseekers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-jobseekers-panel,
+  .admin-jobseekers-detail {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-jobseekers-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-jobseekers-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .admin-jobseekers-filter {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}

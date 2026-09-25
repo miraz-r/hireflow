@@ -112,6 +112,18 @@ const MOCK_APPLICATIONS = [
   { id: '22', name: 'Marcus Hill', email: 'marcus.hill@email.com', job: 'QA Engineer', company: 'Initech', recruiter: 'Elena Petrova', status: 'shortlisted', appliedAt: daysAgo(34), location: 'Detroit, MI', experience: '5 years', skills: ['Selenium', 'JUnit', 'Regression Testing'], phone: '(313) 771-5580', resume: 'Resume.pdf' },
   { id: '23', name: 'Isabella Rossi', email: 'isabella.rossi@email.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'interview', appliedAt: daysAgo(41), location: 'Boston, MA', experience: '6 years', skills: ['Figma', 'UX Research', 'Prototyping'], phone: '(617) 292-4413', resume: 'Resume.pdf' },
   { id: '24', name: 'Jordan Fields', email: 'jordan.fields@email.com', job: 'Backend Engineer', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'rejected', appliedAt: daysAgo(55), location: 'Houston, TX', experience: '4 years', skills: ['Node.js', 'PostgreSQL', 'REST APIs'], phone: '(713) 448-9927', resume: 'Resume.pdf' },
+  // The next four people are also listed on the Admin Jobseekers page, where
+  // their recent applications are shown in the detail panel. These rows mirror
+  // those entries so "View Applications" lands on real results instead of an
+  // empty list, and both workspaces tell the same story.
+  { id: '25', name: 'Marcus Chen', email: 'marcus.chen@outlook.com', job: 'DevOps Engineer', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'new', appliedAt: daysAgo(0), location: 'San Francisco, CA', experience: '6 years', skills: ['AWS', 'Kubernetes', 'CI/CD'], phone: '+1 (415) 555-0164', resume: 'Resume.pdf' },
+  { id: '26', name: 'Priya Sharma', email: 'priya.sharma@gmail.com', job: 'QA Engineer', company: 'Umbrella Corp.', recruiter: 'Sofia Marchetti', status: 'new', appliedAt: daysAgo(1), location: 'Chicago, IL', experience: '3 years', skills: ['Selenium', 'Cypress', 'Test Planning'], phone: '+1 (312) 555-0158', resume: 'Resume.pdf' },
+  { id: '27', name: 'David Okafor', email: 'david.okafor@yahoo.com', job: 'Business Analyst', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'shortlisted', appliedAt: daysAgo(2), location: 'Seattle, WA', experience: '7 years', skills: ['SQL', 'Requirements', 'Process Mapping'], phone: '+1 (206) 555-0183', resume: 'Resume.pdf' },
+  { id: '28', name: 'Marcus Chen', email: 'marcus.chen@outlook.com', job: 'Backend Engineer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'reviewing', appliedAt: daysAgo(3), location: 'San Francisco, CA', experience: '5 years', skills: ['Node.js', 'PostgreSQL', 'Docker'], phone: '+1 (415) 555-0164', resume: 'Resume.pdf' },
+  { id: '29', name: 'David Okafor', email: 'david.okafor@yahoo.com', job: 'Data Analyst', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'hired', appliedAt: daysAgo(4), location: 'Seattle, WA', experience: '8 years', skills: ['SQL', 'Python', 'Tableau'], phone: '+1 (206) 555-0183', resume: 'Resume.pdf' },
+  { id: '30', name: 'Priya Sharma', email: 'priya.sharma@gmail.com', job: 'Customer Success Manager', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'reviewing', appliedAt: daysAgo(5), location: 'Chicago, IL', experience: '4 years', skills: ['Onboarding', 'Retention', 'CRM'], phone: '+1 (312) 555-0158', resume: 'Resume.pdf' },
+  { id: '31', name: 'Sofia Ramirez', email: 'sofia.ramirez@gmail.com', job: 'Marketing Manager', company: 'OmniCorp', recruiter: 'Elena Petrova', status: 'rejected', appliedAt: daysAgo(6), location: 'Austin, TX', experience: '3 years', skills: ['SEO', 'Content Strategy', 'Analytics'], phone: '+1 (512) 555-0127', resume: 'Resume.pdf' },
+  { id: '32', name: 'Priya Sharma', email: 'priya.sharma@gmail.com', job: 'Product Designer', company: 'OmniCorp', recruiter: 'Elena Petrova', status: 'rejected', appliedAt: daysAgo(8), location: 'Chicago, IL', experience: '2 years', skills: ['Figma', 'Prototyping', 'UX Research'], phone: '+1 (312) 555-0158', resume: 'Resume.pdf' },
 ];
 
 const formatAppliedDate = (iso) => {
@@ -147,7 +159,11 @@ const getPageItems = (page, totalPages) => {
 export default function AdminApplicationsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState(MOCK_APPLICATIONS);
-  const [searchInput, setSearchInput] = useState('');
+  // Seeded from ?search= so another Admin workspace can deep-link a person's
+  // applications (the Jobseekers panel's "View Applications"). The existing
+  // search already matches applicant name and email, and the param stays in
+  // the URL so a refresh or Back/Forward step keeps the same applicant.
+  const [searchInput, setSearchInput] = useState(() => searchParams.get('search') || '');
   const [status, setStatus] = useState('all');
   const [job, setJob] = useState('all');
   const [recruiter, setRecruiter] = useState('all');

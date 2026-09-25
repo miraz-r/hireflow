@@ -106,7 +106,7 @@ const NAV_SECTIONS = [
       { id: 'applications', label: 'Applications', to: '/admin/applications', icon: ICON_APPLICATIONS },
       { id: 'recruiters', label: 'Recruiters', to: '/admin/recruiters', icon: ICON_RECRUITERS },
       { id: 'companies', label: 'Companies', to: '/admin/companies', icon: ICON_COMPANIES },
-      { id: 'jobseekers', label: 'Jobseekers', icon: ICON_JOBSEEKERS, disabled: true },
+      { id: 'jobseekers', label: 'Jobseekers', to: '/admin/jobseekers', icon: ICON_JOBSEEKERS },
     ],
   },
   {
