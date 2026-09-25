@@ -8,6 +8,8 @@ import AdminApplicationsPage from '../components/admin/AdminApplicationsPage';
 import AdminRecruitersPage from '../components/admin/AdminRecruitersPage';
 import AdminCompaniesPage from '../components/admin/AdminCompaniesPage';
 import AdminJobseekersPage from '../components/admin/AdminJobseekersPage';
+import AdminAnalyticsPage from '../components/admin/AdminAnalyticsPage';
+import AdminActivityPage from '../components/admin/AdminActivityPage';
 import AdminAccountPage from './AdminAccountPage';
 import './AdminPage.css';
 
@@ -61,6 +63,8 @@ export default function AdminPage() {
         <Route path="recruiters" element={<AdminRecruitersPage />} />
         <Route path="companies" element={<AdminCompaniesPage />} />
         <Route path="jobseekers" element={<AdminJobseekersPage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
+        <Route path="activity" element={<AdminActivityPage />} />
         <Route path="*" element={<NotFoundPlaceholder />} />
       </Routes>
     </AdminShell>

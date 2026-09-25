@@ -1,0 +1,681 @@
+/* ===========================================================================
+   ADMIN ANALYTICS PAGE (/admin/analytics)
+   ---------------------------------------------------------------------------
+   Dense reporting grid built on the existing admin tokens: neutral card
+   surfaces, hairline borders, 8-12px radii, restrained indigo accents, compact
+   but readable type. Same 1460px page cap and 12px/18px card rhythm as the
+   Overview, Jobs, Applications, Recruiters, Companies and Jobseekers pages.
+   Self-contained: the Overview stylesheet is not loaded on this route.
+   =========================================================================== */
+
+/* ---------- Page proportions ----------
+   Full workspace width below the cap, centered above it. The two-class
+   selector always outranks the public .admin-page 840px cap regardless of CSS
+   bundle order, exactly like .admin-page.admin-overview. */
+.admin-page.admin-analytics {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  max-width: 1460px;
+  margin-inline: auto;
+}
+
+/* ---------- Card ---------- */
+.admin-analytics-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 18px 20px 20px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-analytics-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.admin-analytics-card-headings {
+  min-width: 0;
+}
+
+.admin-analytics-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--admin-text-strong);
+}
+
+.admin-analytics-card-sub {
+  margin: 3px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--admin-text-muted);
+}
+
+/* ---------- Toolbar ----------
+   One compact row: the date range on the left, the Export action pushed to the
+   right. Both are reskinned to the same height/border language as the existing
+   Admin filter controls, so nothing here reads as a new control family. */
+.admin-analytics-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-analytics-range {
+  width: 168px;
+  flex-shrink: 0;
+}
+
+.admin-analytics-range-select {
+  height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+}
+
+.admin-analytics-range-select:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-analytics-range-select:focus,
+.admin-analytics-range:focus-within .hf-select-trigger {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-analytics-range-select .hf-select-chevron {
+  color: var(--admin-text-faint);
+}
+
+.admin-analytics-export {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 36px;
+  margin-left: auto;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.admin-analytics-export:hover {
+  color: var(--admin-primary);
+  background-color: var(--admin-hover);
+  border-color: var(--admin-primary);
+}
+
+.admin-analytics-export:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- KPI row ---------- */
+.admin-analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-analytics-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 15px 18px 16px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-analytics-kpi-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+}
+
+.admin-analytics-kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: var(--letter-spacing-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-analytics-kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: 12px;
+}
+
+/* The one green moment on the page: a small upward caret with the delta. */
+.admin-analytics-kpi-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #059669;
+}
+
+.admin-analytics-kpi-delta svg {
+  flex-shrink: 0;
+}
+
+.admin-analytics-kpi-compare {
+  color: var(--admin-text-faint);
+}
+
+html[data-theme="dark"] .admin-analytics-kpi-delta {
+  color: #34d399;
+}
+
+/* ---------- Main chart row ----------
+   The line chart takes the dominant share; the donut card holds a fixed,
+   comfortable measure beside it. */
+.admin-analytics-row-main {
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(300px, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* ---------- Equal two-up row ---------- */
+.admin-analytics-row-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* ---------- Platform insights ----------
+   Three equal compact cards. */
+.admin-analytics-row-insights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* ---------- Legends ---------- */
+.admin-analytics-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-analytics-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  white-space: nowrap;
+}
+
+/* Line series key: a short 14px stroke, dashed for Jobs Posted so it mirrors
+   the chart without a second swatch shape. */
+.admin-analytics-legend-line {
+  width: 14px;
+  height: 0;
+  border-top: 2px solid var(--admin-primary);
+  flex-shrink: 0;
+}
+
+.admin-analytics-legend-line--jobs {
+  border-top-style: dashed;
+  border-top-color: #7c3aed;
+}
+
+html[data-theme="dark"] .admin-analytics-legend-line--jobs {
+  border-top-color: #a78bfa;
+}
+
+/* Status keys: a small colour chip plus the value, in two columns so the donut
+   card never grows taller than the chart card beside it. */
+.admin-analytics-legend--status {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 14px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-analytics-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.admin-analytics-legend-dot--new { background-color: #4f46e5; }
+.admin-analytics-legend-dot--reviewing { background-color: #8b5cf6; }
+.admin-analytics-legend-dot--shortlisted { background-color: #0ea5e9; }
+.admin-analytics-legend-dot--interview { background-color: #f59e0b; }
+.admin-analytics-legend-dot--hired { background-color: #10b981; }
+.admin-analytics-legend-dot--rejected { background-color: #94a3b8; }
+
+html[data-theme="dark"] .admin-analytics-legend-dot--new { background-color: #818cf8; }
+html[data-theme="dark"] .admin-analytics-legend-dot--reviewing { background-color: #a78bfa; }
+html[data-theme="dark"] .admin-analytics-legend-dot--shortlisted { background-color: #38bdf8; }
+html[data-theme="dark"] .admin-analytics-legend-dot--interview { background-color: #fbbf24; }
+html[data-theme="dark"] .admin-analytics-legend-dot--hired { background-color: #34d399; }
+html[data-theme="dark"] .admin-analytics-legend-dot--rejected { background-color: #64748b; }
+
+.admin-analytics-legend-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-analytics-legend-value {
+  margin-left: auto;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+/* ---------- Horizontal bar breakdowns ----------
+   Label, track, value on one line. The track is the full remaining space so the
+   bars align in a single column across both cards in the row. */
+.admin-analytics-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-analytics-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.admin-analytics-bar-label {
+  flex: 0 0 104px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--admin-text);
+}
+
+.admin-analytics-bar-track {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 8px;
+  background-color: var(--admin-bar-track);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.admin-analytics-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background-color: var(--admin-primary);
+}
+
+.admin-analytics-bar-value {
+  flex: 0 0 auto;
+  min-width: 34px;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+/* ---------- Ranked lists (insight cards) ---------- */
+.admin-analytics-ranked {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-analytics-ranked-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.admin-analytics-ranked-row + .admin-analytics-ranked-row {
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-analytics-ranked-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background-color: var(--admin-primary-soft);
+  color: var(--admin-primary);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-analytics-ranked-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--admin-text);
+}
+
+.admin-analytics-ranked-value {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-analytics-ranked-unit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Hiring funnel ----------
+   Stage bars are sized against the top of the funnel, so the narrowing widths
+   carry the progression without extra chrome. */
+.admin-analytics-funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-analytics-funnel-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.admin-analytics-funnel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.admin-analytics-funnel-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--admin-text);
+}
+
+.admin-analytics-funnel-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.admin-analytics-funnel-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-analytics-funnel-rate {
+  min-width: 38px;
+  text-align: right;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-faint);
+}
+
+.admin-analytics-funnel-track {
+  height: 7px;
+  background-color: var(--admin-bar-track);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+/* A restrained step through the brand family, ending on the emerald that the
+   hired state already uses across the admin tables. */
+.admin-analytics-funnel-stage:nth-child(1) .admin-analytics-funnel-fill { background-color: #6366f1; }
+.admin-analytics-funnel-stage:nth-child(2) .admin-analytics-funnel-fill { background-color: #4f46e5; }
+.admin-analytics-funnel-stage:nth-child(3) .admin-analytics-funnel-fill { background-color: #7c3aed; }
+.admin-analytics-funnel-stage:nth-child(4) .admin-analytics-funnel-fill { background-color: #10b981; }
+
+html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(1) .admin-analytics-funnel-fill { background-color: #818cf8; }
+html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(2) .admin-analytics-funnel-fill { background-color: #6366f1; }
+html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(3) .admin-analytics-funnel-fill { background-color: #a78bfa; }
+html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(4) .admin-analytics-funnel-fill { background-color: #34d399; }
+
+/* ---------- Recent platform activity table ----------
+   Fixed layout plus a colgroup so the header and every row stay locked to the
+   same three columns and nothing overflows the card horizontally. */
+.admin-analytics-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.admin-analytics-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-analytics-table th,
+.admin-analytics-table td {
+  text-align: left;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-analytics-table th {
+  padding: 0 12px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-faint);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-analytics-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin-analytics-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-analytics-table tbody tr:hover {
+  background-color: var(--admin-hover);
+}
+
+.admin-analytics-table thead th:first-child,
+.admin-analytics-table tbody td:first-child {
+  padding-left: 0;
+}
+
+.admin-analytics-table thead th:last-child,
+.admin-analytics-table tbody td:last-child {
+  padding-right: 0;
+}
+
+.admin-analytics-cell-activity {
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+/* Column widths - Activity takes the remaining space, the last two are fixed. */
+.admin-analytics-col-activity {
+  width: auto;
+}
+
+.admin-analytics-col-user {
+  width: 220px;
+}
+
+.admin-analytics-col-date {
+  width: 108px;
+}
+
+/* ---------- Secondary action link ---------- */
+.admin-analytics-link {
+  padding: 0;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--admin-primary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.admin-analytics-link:hover {
+  color: var(--admin-primary-hover);
+  text-decoration: underline;
+}
+
+.admin-analytics-link:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Local tokens ----------
+   The bar/funnel tracks need a faint indigo wash rather than the neutral hover
+   grey, so it is derived from the existing primary-soft token. */
+.admin-page.admin-analytics {
+  --admin-bar-track: #eceffb;
+}
+
+html[data-theme="dark"] .admin-page.admin-analytics {
+  --admin-bar-track: rgba(129, 140, 248, 0.14);
+}
+
+/* ---------- Responsive ----------
+   Desktop keeps the reference composition: a dominant chart beside the donut,
+   then two equal breakdowns, then three equal insight cards. Everything stacks
+   in the same order as the columns collapse, and the table is fixed-layout so
+   narrow screens shorten cells instead of scrolling sideways. */
+@media (max-width: 1279px) {
+  .admin-analytics-row-main {
+    grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
+  }
+
+  .admin-analytics-col-user {
+    width: 180px;
+  }
+
+  .admin-analytics-col-date {
+    width: 96px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .admin-analytics-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-analytics-row-main,
+  .admin-analytics-row-split,
+  .admin-analytics-row-insights {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-analytics-col-user {
+    width: 160px;
+  }
+}
+
+@media (max-width: 639px) {
+  .admin-analytics-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-analytics-range {
+    flex: 1 1 140px;
+    width: auto;
+  }
+
+  .admin-analytics-export {
+    margin-left: 0;
+  }
+
+  .admin-analytics-bar-label {
+    flex-basis: 88px;
+  }
+
+  .admin-analytics-col-user {
+    width: 44%;
+  }
+
+  .admin-analytics-col-date {
+    width: 76px;
+  }
+}

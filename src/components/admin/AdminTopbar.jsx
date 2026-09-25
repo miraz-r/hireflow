@@ -58,6 +58,8 @@ function getPageTitle(pathname) {
   if (pathname === '/admin/recruiters' || pathname.startsWith('/admin/recruiters/')) return 'Recruiters';
   if (pathname === '/admin/companies' || pathname.startsWith('/admin/companies/')) return 'Companies';
   if (pathname === '/admin/jobseekers' || pathname.startsWith('/admin/jobseekers/')) return 'Jobseekers';
+  if (pathname === '/admin/analytics' || pathname.startsWith('/admin/analytics/')) return 'Analytics';
+  if (pathname === '/admin/activity' || pathname.startsWith('/admin/activity/')) return 'Activity';
   return 'Page not found';
 }
 

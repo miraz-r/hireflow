@@ -1,0 +1,252 @@
+/* ===========================================================================
+   ADMIN ANALYTICS CHARTS
+   ---------------------------------------------------------------------------
+   Chart paints for the Analytics page. Recharts is already the project's chart
+   library (see AdminActivityChart), so this sheet reuses the same approach:
+   every colour reads the live admin design tokens, because SVG presentation
+   attributes cannot resolve CSS custom properties. Self-contained on the
+   admin-* palette so light and dark themes both work on this route alone.
+   =========================================================================== */
+
+/* ---------- Shared plot box ---------- */
+.admin-analytics-chart-plot {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-analytics-donut-plot {
+  position: relative;
+  width: 100%;
+  height: 176px;
+  min-width: 0;
+}
+
+/* Chart focus border suppression.
+   Recharts v3 marks its <svg class="recharts-surface"> as focusable
+   (tabindex="0" + role="application"), and the app's global :focus-visible rule
+   in src/index.css then paints a rectangular outline around the whole plot when
+   it takes focus. That global rule outranks any plain scoped rule, so it is
+   suppressed with !important inside the chart only. Every selector is a
+   descendant of the chart wrapper, so focus indicators on buttons, links and
+   inputs anywhere else are untouched, and keyboard chart navigation plus
+   tooltips keep working. Mirrors AdminActivityChart.css. */
+.admin-analytics-chart,
+.admin-analytics-chart *,
+.admin-analytics-donut,
+.admin-analytics-donut * {
+  outline: none !important;
+}
+
+.admin-analytics-chart:focus,
+.admin-analytics-chart:focus-visible,
+.admin-analytics-chart:focus-within,
+.admin-analytics-chart *:focus,
+.admin-analytics-chart *:focus-visible,
+.admin-analytics-chart *:focus-within,
+.admin-analytics-donut:focus,
+.admin-analytics-donut:focus-visible,
+.admin-analytics-donut:focus-within,
+.admin-analytics-donut *:focus,
+.admin-analytics-donut *:focus-visible,
+.admin-analytics-donut *:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Line chart ---------- */
+
+/* Grid - hairline, extremely subtle. */
+.admin-analytics-chart .recharts-cartesian-grid-horizontal line {
+  stroke: var(--admin-text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  stroke-opacity: 0.45;
+}
+
+/* Axes - muted and readable, no tick marks. */
+.admin-analytics-chart .recharts-cartesian-axis-line {
+  stroke: var(--admin-border-strong);
+  stroke-width: 1;
+}
+
+.admin-analytics-chart .recharts-cartesian-axis-tick-value {
+  fill: var(--admin-text-faint);
+  font-size: 11px;
+}
+
+/* Applications - HireFlow indigo, the primary series. Jobs Posted is the same
+   indigo family one step lighter and dashed, so two indigo lines stay readable
+   apart without pulling in a second loud hue. Recharts puts the Line's className
+   on the wrapping <g> and hard-codes the curve's own class, so the stroke is
+   themed through the group. */
+.admin-analytics-chart .recharts-line-curve {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.admin-analytics-chart .an-series-applications .recharts-line-curve {
+  stroke: var(--admin-primary);
+}
+
+.admin-analytics-chart .an-series-jobs .recharts-line-curve {
+  stroke: #7c3aed;
+}
+
+html[data-theme="dark"] .admin-analytics-chart .an-series-jobs .recharts-line-curve {
+  stroke: #a78bfa;
+}
+
+/* Hover cursor + active dot - clean, theme-aware. Each series keeps its own
+   dot colour so the hovered point always matches its line. */
+.admin-analytics-chart .recharts-tooltip-cursor {
+  stroke: var(--admin-primary);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  stroke-opacity: 0.4;
+}
+
+.admin-analytics-chart .recharts-active-dot .recharts-dot {
+  fill: var(--admin-surface);
+  stroke-width: 2.5;
+}
+
+.admin-analytics-chart .an-series-applications .recharts-active-dot .recharts-dot {
+  stroke: var(--admin-primary);
+}
+
+.admin-analytics-chart .an-series-jobs .recharts-active-dot .recharts-dot {
+  stroke: #7c3aed;
+}
+
+html[data-theme="dark"] .admin-analytics-chart .an-series-jobs .recharts-active-dot .recharts-dot {
+  stroke: #a78bfa;
+}
+
+/* ---------- Donut ---------- */
+
+/* A surface-coloured hairline between slices keeps the ring legible without a
+   gap, and follows the card surface in both themes. */
+.admin-analytics-slice {
+  stroke: var(--admin-surface);
+  stroke-width: 2;
+}
+
+.admin-analytics-slice--new { fill: #4f46e5; }
+.admin-analytics-slice--reviewing { fill: #8b5cf6; }
+.admin-analytics-slice--shortlisted { fill: #0ea5e9; }
+.admin-analytics-slice--interview { fill: #f59e0b; }
+.admin-analytics-slice--hired { fill: #10b981; }
+.admin-analytics-slice--rejected { fill: #94a3b8; }
+
+html[data-theme="dark"] .admin-analytics-slice--new { fill: #818cf8; }
+html[data-theme="dark"] .admin-analytics-slice--reviewing { fill: #a78bfa; }
+html[data-theme="dark"] .admin-analytics-slice--shortlisted { fill: #38bdf8; }
+html[data-theme="dark"] .admin-analytics-slice--interview { fill: #fbbf24; }
+html[data-theme="dark"] .admin-analytics-slice--hired { fill: #34d399; }
+html[data-theme="dark"] .admin-analytics-slice--rejected { fill: #64748b; }
+
+/* Centre total - a plain overlay rather than a Recharts label, so it inherits
+   the page's own typography and stays centred at every card width. */
+.admin-analytics-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.admin-analytics-donut-total {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: var(--letter-spacing-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-analytics-donut-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Tooltips ----------
+   A compact card with a restrained indigo edge, matching the Overview tooltip
+   language without sharing its stylesheet. */
+.admin-analytics-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+  padding: 9px 12px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-left: 3px solid var(--admin-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-analytics-tooltip-date {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+}
+
+.admin-analytics-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--admin-text-muted);
+}
+
+.admin-analytics-tooltip-row strong {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+/* Donut tooltip swatches. The slice row reuses the legend's per-status colour
+   classes so a hovered slice and its legend entry can never disagree; the
+   count row gets a neutral marker purely so both rows' labels stay aligned. */
+.admin-analytics-tooltip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.admin-analytics-tooltip-dot--count {
+  background-color: var(--admin-border-strong);
+}
+
+.admin-analytics-tooltip-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.admin-analytics-tooltip-swatch--applications {
+  background-color: var(--admin-primary);
+}
+
+.admin-analytics-tooltip-swatch--jobs {
+  background-color: #7c3aed;
+}
+
+html[data-theme="dark"] .admin-analytics-tooltip-swatch--jobs {
+  background-color: #a78bfa;
+}

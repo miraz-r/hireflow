@@ -112,8 +112,8 @@ const NAV_SECTIONS = [
   {
     label: 'Insights',
     items: [
-      { id: 'analytics', label: 'Analytics', icon: ICON_ANALYTICS, disabled: true },
-      { id: 'activity', label: 'Activity', icon: ICON_ACTIVITY, disabled: true },
+      { id: 'analytics', label: 'Analytics', to: '/admin/analytics', icon: ICON_ANALYTICS },
+      { id: 'activity', label: 'Activity', to: '/admin/activity', icon: ICON_ACTIVITY },
     ],
   },
   {

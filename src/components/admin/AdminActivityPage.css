@@ -1,0 +1,185 @@
+/* ===========================================================================
+   ADMIN ACTIVITY
+   ---------------------------------------------------------------------------
+   The /admin/activity workspace. Intentionally a thin sheet: the page is one
+   read-only card, so it only needs the card surface and the same three-column
+   table language the Analytics page already uses. Colours come from the shared
+   admin tokens, so light and dark themes both work without extra rules.
+   =========================================================================== */
+
+/* ---------- Card ---------- */
+.admin-activity-card {
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 18px 20px 20px;
+}
+
+.admin-activity-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-activity-card-headings {
+  min-width: 0;
+}
+
+.admin-activity-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--admin-text-strong);
+}
+
+.admin-activity-card-sub {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--admin-text-faint);
+}
+
+/* Back to Analytics - a real <Link>, so it stays keyboard reachable, opens in a
+   new tab on middle click, and is announced as a link rather than a button. */
+.admin-activity-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--admin-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.admin-activity-back:hover {
+  color: var(--admin-primary-hover);
+  text-decoration: underline;
+}
+
+.admin-activity-back:focus-visible {
+  outline: 2px solid var(--admin-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ---------- Table ----------
+   Fixed layout plus a colgroup so the header and every row stay locked to the
+   same three columns and nothing overflows the card horizontally. */
+.admin-activity-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.admin-activity-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-activity-table th,
+.admin-activity-table td {
+  text-align: left;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-activity-table th {
+  padding: 0 12px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-text-faint);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-activity-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin-activity-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-activity-table tbody tr:hover {
+  background-color: var(--admin-hover);
+}
+
+.admin-activity-table thead th:first-child,
+.admin-activity-table tbody td:first-child {
+  padding-left: 0;
+}
+
+.admin-activity-table thead th:last-child,
+.admin-activity-table tbody td:last-child {
+  padding-right: 0;
+}
+
+.admin-activity-cell-activity {
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+/* Column widths - Activity takes the remaining space, the last two are fixed. */
+.admin-activity-col-activity {
+  width: auto;
+}
+
+.admin-activity-col-user {
+  width: 220px;
+}
+
+.admin-activity-col-date {
+  width: 108px;
+}
+
+/* ---------- Footer ---------- */
+.admin-activity-foot {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-activity-foot-count {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+.admin-activity-foot-count strong {
+  color: var(--admin-text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Narrow viewports ---------- */
+@media (max-width: 640px) {
+  .admin-activity-card {
+    padding: 16px;
+  }
+
+  .admin-activity-card-head {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .admin-activity-col-user {
+    width: 150px;
+  }
+
+  .admin-activity-col-date {
+    width: 84px;
+  }
+}
