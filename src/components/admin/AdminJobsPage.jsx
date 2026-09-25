@@ -173,7 +173,6 @@ export default function AdminJobsPage() {
   const [toast, setToast] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [activeMenuId, setActiveMenuId] = useState(null);
-  const [detailDismissed, setDetailDismissed] = useState(false);
 
   const showToast = useCallback((message) => {
     setToast(message);
@@ -195,7 +194,6 @@ export default function AdminJobsPage() {
       params.delete('page');
       setSearchParams(params, { replace: true });
     }
-    setDetailDismissed(false);
     if (!urlJobId) setSelectedId(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterKey, urlJobId]);
@@ -229,7 +227,6 @@ export default function AdminJobsPage() {
     (id) => {
       setSelectedId(id);
       setActiveMenuId(null);
-      setDetailDismissed(false);
       const search = searchParams.toString();
       navigate(`/admin/jobs/${id}${search ? `?${search}` : ''}`, { replace: true });
     },
@@ -261,7 +258,6 @@ export default function AdminJobsPage() {
   }, [selectedId, loadSelected]);
 
   const closePanel = useCallback(() => {
-    setDetailDismissed(true);
     setSelectedId(null);
     setActiveMenuId(null);
     const search = searchParams.toString();
@@ -294,17 +290,9 @@ export default function AdminJobsPage() {
     [selectedId, showToast]
   );
 
-  // Auto-select the first job once a page loads and nothing is selected yet.
-  // Filter/search changes reset the selection (above), so the freshest result
-  // set always populates the panel. Deliberate row clicks and deep links are
-  // never overridden, and a dismissed panel stays dismissed until the user
-  // acts again.
+  // Nothing is auto-selected: the detail panel keeps its empty state until the
+  // user picks a row or arrives on a deep link (/admin/jobs/:id).
   const visibleJobs = list?.jobs || [];
-  useEffect(() => {
-    if (detailDismissed) return;
-    if (loading || !list?.jobs?.length || selectedId) return;
-    setSelectedId(String(list.jobs[0].id));
-  }, [list, loading, selectedId, detailDismissed]);
 
   const filtersActive =
     q !== '' || status !== 'all' || employmentType !== 'all' || postedDays !== '';
