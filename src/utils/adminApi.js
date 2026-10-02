@@ -127,7 +127,34 @@ export async function updateAdminApplicationStatus(id, status) {
 
 // An applicant's full profile, for the "View Profile" action. `userId` is the
 // applicant's account id (Application.userId), not an application id.
+// Always returns the JOBSEEKER workspace profile, independently of whichever
+// workspace the account is currently active in.
 export async function getAdminJobseeker(userId) {
   const res = await api.get(`/admin/jobseekers/${userId}`);
+  return res.data;
+}
+
+// The Admin Jobseekers workspace list. Search, location, date range, ordering
+// and paging all happen on the server, so the page holds no second copy of the
+// list to filter locally.
+//
+// Sourced from each account's jobseeker workspace profile, so a person whose
+// account is currently active in the recruiter workspace still appears, with
+// `activeWorkspace` telling the admin which workspace they are in.
+//
+// There is deliberately no `status` filter: the User model has no status field,
+// so no activity state can be reported without inventing one.
+export async function getAdminJobseekers({
+  page = 1,
+  limit = 10,
+  q = '',
+  location = 'all',
+  dateRange = '',
+} = {}) {
+  const params = { page, limit };
+  if (q && q.trim()) params.q = q.trim();
+  if (location && location !== 'all') params.location = location;
+  if (dateRange) params.dateRange = dateRange;
+  const res = await api.get('/admin/jobseekers', { params });
   return res.data;
 }

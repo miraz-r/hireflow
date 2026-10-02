@@ -181,6 +181,37 @@ const jobseekerIdParamValidators = [
   runValidation,
 ];
 
+// ---------------------------------------------------------------------------
+// GET /api/admin/jobseekers — the Admin Jobseekers workspace list.
+//
+// Every filter is optional. `{ values: 'falsy' }` is used throughout so an
+// empty dropdown selection ("Any location", "Any date") is treated as absent
+// rather than failing validation.
+const adminJobseekerQueryValidators = [
+  query('page')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1 })
+    .withMessage('page must be a positive integer'),
+  query('limit')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1, max: 50 })
+    .withMessage('limit must be between 1 and 50'),
+  query('q')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('q must be at most 200 characters'),
+  query('location')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 160 })
+    .withMessage('location must be at most 160 characters'),
+  dateRangeValidator,
+  runValidation,
+];
+
 module.exports = {
   createValidators,
   jobIdParamValidators,
@@ -188,5 +219,6 @@ module.exports = {
   statusUpdateValidators,
   adminApplicationQueryValidators,
   jobseekerIdParamValidators,
+  adminJobseekerQueryValidators,
   runValidation,
 };

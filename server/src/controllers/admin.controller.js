@@ -96,6 +96,154 @@ const getApplicationsTrend = async (req, res, next) => {
   }
 };
 
+// Count documents of `model` grouped by `userId` for the given accounts.
+// Same shape as applicationCountsByJob, keyed on the account instead of the job.
+const countsByUser = async (model, userIds) => {
+  if (!userIds.length) return new Map();
+  const rows = await model.aggregate([
+    { $match: { userId: { $in: userIds } } },
+    { $group: { _id: '$userId', count: { $sum: 1 } } },
+  ]);
+  return new Map(rows.map((row) => [String(row._id), row.count]));
+};
+
+// ---------------------------------------------------------------------------
+// GET /api/admin/jobseekers?page=1&limit=10&q=&location=&dateRange=
+//
+// The Admin Jobseekers workspace list.
+//
+// SOURCED FROM THE JOBSEEKER PROFILE, NOT THE ACCOUNT'S ACTIVE WORKSPACE.
+// `User.role` is only which workspace an account is currently in, so someone
+// who registered as a jobseeker and later opened the recruiter workspace still
+// has a real jobseeker profile. Matching on `Profile.role === 'jobseeker'`
+// therefore lists exactly the jobseekers, whatever workspace their account
+// happens to be active in.
+//
+// INNER-JOINED TO THE OWNING ACCOUNT, and deliberately so: a profile whose
+// account has been deleted is not a jobseeker, and listing it would render a
+// row that GET /api/admin/jobseekers/:userId could never resolve. List and
+// detail therefore agree on the same set of accounts.
+//
+// COUNTS are aggregated from Application and SavedJob rather than invented, and
+// `activeWorkspace` reports the account's real current workspace so an admin can
+// see at a glance that a jobseeker is currently hiring instead.
+//
+// NOTE ON `status`: the User model has no status field, so this endpoint
+// deliberately exposes none. An account's activity state cannot be derived from
+// existing data, and inventing one would be a fabrication.
+// ---------------------------------------------------------------------------
+const listAdminJobseekers = async (req, res, next) => {
+  try {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 50);
+    const skip = (page - 1) * limit;
+
+    const filter = { role: 'jobseeker' };
+
+    const { q, location, dateRange } = req.query;
+
+    if (location && location.trim()) {
+      filter.location = location.trim();
+    }
+
+    if (dateRange) {
+      const start = new Date();
+      if (dateRange === 'today') {
+        start.setHours(0, 0, 0, 0);
+      } else {
+        const days = Math.min(Math.max(parseInt(dateRange, 10) || 7, 1), 365);
+        start.setDate(start.getDate() - days);
+      }
+      filter.createdAt = { $gte: start };
+    }
+
+    // Search spans the profile name and the account email. The name lives on
+    // Profile and the email on User, so the email arm matches the joined
+    // account below.
+    const searchRegex =
+      q && q.trim() ? new RegExp(escapeRegex(q.trim()), 'i') : null;
+
+    // Joined to the owning account so that only rows backed by a real account
+    // are counted and returned. An orphaned profile (its User deleted) is not a
+    // jobseeker account, and listing it would produce a row that the detail
+    // endpoint could never load. `$unwind` drops those, and dropping them here
+    // — before paging — keeps `total` and `totalPages` accurate.
+    const pipeline = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: User.collection.name,
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'account',
+        },
+      },
+      { $unwind: '$account' },
+    ];
+
+    if (searchRegex) {
+      pipeline.push({
+        $match: {
+          $or: [{ fullName: searchRegex }, { 'account.email': searchRegex }],
+        },
+      });
+    }
+
+    pipeline.push({ $sort: { createdAt: -1 } });
+    pipeline.push({
+      $facet: {
+        rows: [{ $skip: skip }, { $limit: limit }],
+        total: [{ $count: 'count' }],
+      },
+    });
+
+    const [result] = await Profile.aggregate(pipeline);
+    const profiles = result.rows || [];
+    const total = result.total.length ? result.total[0].count : 0;
+
+    const userIds = profiles.map((p) => p.userId);
+
+    const [applicationCounts, savedJobCounts] = await Promise.all([
+      countsByUser(Application, userIds),
+      countsByUser(SavedJob, userIds),
+    ]);
+
+    const jobseekers = profiles.map((profile) => {
+      const key = String(profile.userId);
+      const email = (profile.account && profile.account.email) || '';
+      return {
+        id: profile.userId,
+        name: profile.fullName || email,
+        email,
+        phone: profile.phone || '',
+        location: profile.location || '',
+        avatarUrl: profile.avatarUrl || '',
+        headline: profile.headline || '',
+        applications: applicationCounts.get(key) || 0,
+        savedJobs: savedJobCounts.get(key) || 0,
+        // The profile's own creation date: when this workspace was set up.
+        joinedAt: profile.createdAt,
+        // Where the account is right now (navigation), which is independent of
+        // whether it holds a jobseeker profile.
+        activeWorkspace: (profile.account && profile.account.role) || '',
+      };
+    });
+
+    return res.status(200).json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      jobseekers,
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid filter id' });
+    }
+    return next(err);
+  }
+};
+
 // ---------------------------------------------------------------------------
 // GET /api/admin/jobseekers/:userId
 //
@@ -103,27 +251,32 @@ const getApplicationsTrend = async (req, res, next) => {
 // Profile" action. This exists because there is no other way to read someone
 // else's profile: GET /api/profile is scoped to the authenticated caller.
 //
-// WHY THE GUARD IS "HAS APPLICATIONS", NOT "ACTIVE WORKSPACE IS jobseeker"
-// An account keeps one Profile per workspace and its User.role is only the
-// *active* workspace. Someone who registered as a jobseeker, applied to jobs,
-// and later opened the recruiter workspace is a perfectly normal applicant
-// whose active workspace is now 'recruiter'. Guarding on the active workspace
-// made "View Profile" fail for exactly those applicants.
+// WHY THE GUARD IS "HAS A JOBSEEKER PROFILE"
+// `User.role` is only which workspace an account is CURRENTLY in, so it cannot
+// answer "is this a jobseeker" — someone who registered as a jobseeker and later
+// opened the recruiter workspace is still a jobseeker. The Profile is the
+// per-workspace record, so presence of a jobseeker profile is the real answer.
 //
-// This endpoint is only ever reached from an application row, so the real
-// question is "is this account an applicant?". An account with no applications
-// is not an applicant and is a 404, which keeps the route from being used to
-// read a recruiter or admin account that has never applied.
+// This also keeps the list and this endpoint in agreement. The Admin Jobseekers
+// workspace lists every account holding a jobseeker profile, so this endpoint
+// must serve exactly that set. An earlier version guarded on "has at least one
+// application" instead; that is a proxy, not a definition, and it 404'd every
+// listed jobseeker who had not applied yet (20 of 28 rows in the development
+// database), so selecting a listed row reported "Jobseeker not found".
 //
 // WHAT IS AND IS NOT EXPOSED
 //   - The JOBSEEKER profile is the subject, and it is read by
-//     `{ userId, role: 'jobseeker' }` — i.e. the applicant's own historical
-//     profile, independent of whichever workspace is currently active.
+//     `{ userId, role: 'jobseeker' }` — the person's own profile,
+//     independent of whichever workspace is currently active.
 //   - Recruiter-only fields (jobTitle, companyName, companyWebsite,
 //     companyDescription) are never returned, so an account that also has a
 //     recruiter workspace is never presented as a jobseeker on those details.
-//   - If the account has no jobseeker profile at all, nothing is invented:
-//     profileExists is false and the applicant fields come back empty.
+//   - An account with NO jobseeker profile — a recruiter-only or admin-only
+//     account — is still a 404, so the route cannot be used to read a profile
+//     it was never meant to expose.
+//   - `applications` and `recentApplications` are real: they are simply empty
+//     for someone who has not applied to anything, rather than being padded or
+//     the account being hidden.
 //   - activeWorkspace is returned so the UI can say where the person is
 //     working without implying that is the only workspace they have.
 // ---------------------------------------------------------------------------
@@ -148,21 +301,29 @@ const getAdminJobseeker = async (req, res, next) => {
         SavedJob.countDocuments({ userId }),
       ]);
 
-    // Not an applicant. Same 404 as an unknown id so the route cannot be used
-    // to read a recruiter or admin account that has never applied.
-    if (applicationCount === 0) {
+    // Not a jobseeker: the account exists but holds no jobseeker profile. Same
+    // 404 as an unknown id, so the route cannot be used to read a
+    // recruiter-only or admin-only profile.
+    if (!jobseekerProfile) {
       return res.status(404).json({ error: 'Jobseeker not found' });
     }
 
-    const hasJobseekerProfile = !!jobseekerProfile;
-    // Shared identity (name/phone/location/avatar) belongs to the person, so it
-    // can come from whichever profile exists. These are the same fields
-    // GET /api/applications/:id already returns for this application.
-    const identity = jobseekerProfile || recruiterProfile;
-    const available = [
-      hasJobseekerProfile ? 'jobseeker' : null,
-      recruiterProfile ? 'recruiter' : null,
-    ].filter(Boolean);
+    // The most recent applications, for the workspace detail panel. Joined to
+    // their jobs so the panel can show what was applied to. `status` is the
+    // canonical backend value; the UI maps it for display.
+    const recentApplications = await Application.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('jobId status createdAt')
+      .populate('jobId', 'title company')
+      .lean();
+
+    // The guard above guarantees a jobseeker profile exists, so it is the
+    // source for identity and for every applicant-specific field. The
+    // recruiter profile is read only to report which other workspaces the
+    // account holds — none of its fields are ever returned.
+    const identity = jobseekerProfile;
+    const available = ['jobseeker', recruiterProfile ? 'recruiter' : null].filter(Boolean);
 
     return res.status(200).json({
       jobseeker: {
@@ -173,8 +334,8 @@ const getAdminJobseeker = async (req, res, next) => {
         activeWorkspace: user.role,
         availableWorkspaces: available,
         isActiveJobseeker: user.role === 'jobseeker',
-        // Whether the account holds a jobseeker profile at all.
-        profileExists: hasJobseekerProfile,
+        // Always true on this response: a 404 is returned when it would not be.
+        profileExists: true,
         fullName: (identity && identity.fullName) || '',
         location: (identity && identity.location) || '',
         phone: (identity && identity.phone) || '',
@@ -190,6 +351,14 @@ const getAdminJobseeker = async (req, res, next) => {
         links: (jobseekerProfile && jobseekerProfile.links) || [],
         applications: applicationCount,
         savedJobs: savedJobCount,
+        // Newest first, for the detail panel's "Recent applications" list.
+        recentApplications: recentApplications.map((app) => ({
+          id: app._id,
+          job: (app.jobId && app.jobId.title) || 'Untitled job',
+          company: (app.jobId && app.jobId.company) || 'Unknown company',
+          status: app.status,
+          appliedAt: app.createdAt,
+        })),
       },
     });
   } catch (err) {
@@ -834,6 +1003,7 @@ module.exports = {
   getStats,
   getApplicationsTrend,
   getAdminJobseeker,
+  listAdminJobseekers,
   listAdminApplications,
   getAdminApplication,
   updateAdminApplicationStatus,

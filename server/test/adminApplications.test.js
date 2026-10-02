@@ -1000,34 +1000,33 @@ describe('admin applicant profile', () => {
 
   // Registration creates the User while the Profile is filled in later, so many
   // applicants who have applied have no profile row at all.
-  it('returns 200 with profileExists:false for a jobseeker with no profile yet', async () => {
+  it('404s a jobseeker account that has no Profile row, and does not list it either', async () => {
+    // An account whose User.role is 'jobseeker' but which never got a Profile
+    // (registration creates both together and rolls the User back on failure,
+    // so this is an edge case). It is not a jobseeker workspace record, so the
+    // detail endpoint 404s and the Jobseekers workspace does not list it —
+    // list and detail must agree.
     const admin = await makeUser('admin-noprofile@example.com', 'admin');
     const recruiter = await makeRecruiter('noprofile-owner@example.com', 'Owner');
     const job = await Job.create({ ...baseJob(), postedBy: recruiter._id });
-    // A jobseeker account with no Profile document at all.
     const seeker = await makeUser('noprofile-seeker@example.com', 'jobseeker');
     await applyAsJobseeker(signTokenFor(seeker), job._id, { fullName: 'No Profile Yet' });
 
     const res = await request('GET', `/api/admin/jobseekers/${seeker._id}`, {
       token: signTokenFor(admin),
     });
+    assert.equal(res.status, 404);
+    assert.equal(res.body.error, 'Jobseeker not found');
 
-    assert.equal(res.status, 200);
-    const js = res.body.jobseeker;
-    assert.equal(js.id, String(seeker._id));
-    assert.equal(js.email, 'noprofile-seeker@example.com');
-    assert.equal(js.activeWorkspace, 'jobseeker');
-    assert.equal(js.isActiveJobseeker, true);
-    assert.equal(js.profileExists, false);
-    assert.equal(js.fullName, '');
-    assert.equal(js.headline, '');
-    assert.deepEqual(js.skills, []);
-    assert.deepEqual(js.experience, []);
-    assert.deepEqual(js.education, []);
-    assert.deepEqual(js.links, []);
-    assert.equal(js.resumeUrl, '');
-    // The counts are real even without a profile.
-    assert.equal(js.applications, 1);
+    // And it is absent from the workspace list, so no listed row can 404.
+    const list = await request('GET', '/api/admin/jobseekers', {
+      token: signTokenFor(admin),
+    });
+    assert.equal(list.status, 200);
+    assert.equal(
+      list.body.jobseekers.some((j) => String(j.id) === String(seeker._id)),
+      false
+    );
   });
 
   // An admin account can never hold an application (applying is jobseeker-only),

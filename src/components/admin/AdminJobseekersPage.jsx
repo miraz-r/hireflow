@@ -1,23 +1,14 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Select from '../ui/Select';
-import Toast from '../Toast';
 import Avatar from '../Avatar';
-import { avatarFallback } from '../../lib/media';
+import { avatarFallback, resolveMediaUrl } from '../../lib/media';
+import { ADMIN_STATUS_LABELS } from '../../constants/applicationStatus';
+import { getAdminJobseekers, getAdminJobseeker } from '../../utils/adminApi';
 import './AdminJobseekersPage.css';
 
 const PAGE_SIZE = 10;
-
-// Same dot + soft tint badge language as the other Admin sections; the three
-// tones are reused from the existing Applications/Recruiters palette so no new
-// status color is introduced here.
-const STATUS_META = {
-  active: { label: 'Active', tone: 'active' },
-  inactive: { label: 'Inactive', tone: 'inactive' },
-  suspended: { label: 'Suspended', tone: 'suspended' },
-};
-const STATUS_OPTIONS = Object.keys(STATUS_META);
 
 const DATE_OPTIONS = [
   { value: '', label: 'Any date' },
@@ -26,6 +17,23 @@ const DATE_OPTIONS = [
   { value: '30', label: 'Last 30 days' },
   { value: '90', label: 'Last 90 days' },
 ];
+
+// The backend stores the canonical pipeline statuses and nothing else. Each is
+// mapped onto one of the tones this page already styled, so the badge palette
+// is unchanged — only the vocabulary is now the real one. Labels come from
+// ADMIN_STATUS_LABELS (under-review renders as "Screening", offer as
+// "Shortlisted"), the same mapping the Admin Overview and Applications pages
+// already use.
+const APPLICATION_STATUS_TONES = {
+  applied: { tone: 'new' },
+  'under-review': { tone: 'reviewing' },
+  interview: { tone: 'interview' },
+  offer: { tone: 'shortlisted' },
+  hired: { tone: 'hired' },
+  rejected: { tone: 'rejected' },
+};
+
+const statusLabel = (status) => ADMIN_STATUS_LABELS[status] || status;
 
 const SEARCH_ICON = (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -38,12 +46,6 @@ const X_ICON = (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
-const CHECK_ICON = (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 
@@ -67,149 +69,6 @@ const ARROW_RIGHT = (
   </svg>
 );
 
-// UI mock data for now: there is no admin jobseekers endpoint yet and backend
-// changes are out of scope for this phase. Names are picked from the shared
-// DEMO_PORTRAITS list so the shared Avatar resolves a real photo for each of
-// them, and joined dates are fixed so the date filter can still compare them
-// against today.
-// Application status vocabulary for the panel's recent list, reusing the same
-// labels/tones the Admin Applications page already renders.
-const APPLICATION_STATUS_META = {
-  new: { label: 'New', tone: 'new' },
-  reviewing: { label: 'Reviewing', tone: 'reviewing' },
-  shortlisted: { label: 'Shortlisted', tone: 'shortlisted' },
-  interview: { label: 'Interview', tone: 'interview' },
-  rejected: { label: 'Rejected', tone: 'rejected' },
-  hired: { label: 'Hired', tone: 'hired' },
-};
-
-const MOCK_JOBSEEKERS = [
-  { id: '1', name: 'Aisha Khan', email: 'aisha.khan@gmail.com', phone: '+1 (917) 555-0142', location: 'New York, NY', status: 'active', applications: 24, savedJobs: 11, joinedAt: '2026-09-01T10:00:00.000Z' },
-  { id: '2', name: 'Marcus Chen', email: 'marcus.chen@outlook.com', phone: '+1 (415) 555-0164', location: 'San Francisco, CA', status: 'active', applications: 18, savedJobs: 7, joinedAt: '2026-09-05T10:00:00.000Z' },
-  { id: '3', name: 'Sofia Ramirez', email: 'sofia.ramirez@gmail.com', phone: '+1 (512) 555-0127', location: 'Austin, TX', status: 'inactive', applications: 6, savedJobs: 3, joinedAt: '2026-09-12T10:00:00.000Z' },
-  { id: '4', name: 'David Okafor', email: 'david.okafor@yahoo.com', phone: '+1 (206) 555-0183', location: 'Seattle, WA', status: 'active', applications: 31, savedJobs: 15, joinedAt: '2026-09-18T10:00:00.000Z' },
-  { id: '5', name: 'Priya Sharma', email: 'priya.sharma@gmail.com', phone: '+1 (312) 555-0158', location: 'Chicago, IL', status: 'active', applications: 12, savedJobs: 9, joinedAt: '2026-09-23T10:00:00.000Z' },
-  { id: '6', name: 'Lucas Meyer', email: 'lucas.meyer@outlook.com', phone: '+1 (617) 555-0136', location: 'Boston, MA', status: 'suspended', applications: 9, savedJobs: 2, joinedAt: '2026-08-30T10:00:00.000Z' },
-  { id: '7', name: 'Natalia Reyes', email: 'natalia.reyes@gmail.com', phone: '+1 (305) 555-0171', location: 'Miami, FL', status: 'active', applications: 27, savedJobs: 13, joinedAt: '2026-08-14T10:00:00.000Z' },
-  { id: '8', name: 'James Rodriguez', email: 'james.rodriguez@yahoo.com', phone: '+1 (303) 555-0149', location: 'Denver, CO', status: 'inactive', applications: 4, savedJobs: 1, joinedAt: '2026-08-02T10:00:00.000Z' },
-  { id: '9', name: 'Grace Liu', email: 'grace.liu@gmail.com', phone: '+1 (213) 555-0122', location: 'Los Angeles, CA', status: 'active', applications: 22, savedJobs: 18, joinedAt: '2026-07-21T10:00:00.000Z' },
-  { id: '10', name: 'Tom Becker', email: 'tom.becker@outlook.com', phone: '+1 (646) 555-0193', location: 'New York, NY', status: 'active', applications: 15, savedJobs: 6, joinedAt: '2026-07-09T10:00:00.000Z' },
-  { id: '11', name: 'Maya Singh', email: 'maya.singh@gmail.com', phone: '+1 (628) 555-0157', location: 'San Francisco, CA', status: 'active', applications: 29, savedJobs: 12, joinedAt: '2026-06-25T10:00:00.000Z' },
-  { id: '12', name: 'Jordan Fields', email: 'jordan.fields@yahoo.com', phone: '+1 (503) 555-0118', location: 'Portland, OR', status: 'inactive', applications: 7, savedJobs: 4, joinedAt: '2026-06-11T10:00:00.000Z' },
-  { id: '13', name: 'Nina Petrova', email: 'nina.petrova@gmail.com', phone: '+1 (617) 555-0166', location: 'Boston, MA', status: 'active', applications: 19, savedJobs: 8, joinedAt: '2026-05-28T10:00:00.000Z' },
-  { id: '14', name: 'Oliver Smith', email: 'oliver.smith@outlook.com', phone: '+1 (312) 555-0198', location: 'Chicago, IL', status: 'suspended', applications: 11, savedJobs: 5, joinedAt: '2026-05-06T10:00:00.000Z' },
-  { id: '15', name: 'Fatima Noor', email: 'fatima.noor@gmail.com', phone: '+1 (512) 555-0175', location: 'Austin, TX', status: 'active', applications: 26, savedJobs: 10, joinedAt: '2026-04-22T10:00:00.000Z' },
-  { id: '16', name: 'Ryan O Connor', email: 'ryan.oconnor@yahoo.com', phone: '+1 (206) 555-0131', location: 'Seattle, WA', status: 'active', applications: 14, savedJobs: 6, joinedAt: '2026-04-03T10:00:00.000Z' },
-  { id: '17', name: 'Emily Davis', email: 'emily.davis@gmail.com', phone: '+1 (303) 555-0162', location: 'Denver, CO', status: 'active', applications: 33, savedJobs: 21, joinedAt: '2026-03-19T10:00:00.000Z' },
-  { id: '18', name: 'Michael Chen', email: 'michael.chen@outlook.com', phone: '+1 (213) 555-0184', location: 'Los Angeles, CA', status: 'inactive', applications: 8, savedJobs: 3, joinedAt: '2026-02-27T10:00:00.000Z' },
-  { id: '19', name: 'Isabella Rossi', email: 'isabella.rossi@gmail.com', phone: '+1 (305) 555-0115', location: 'Miami, FL', status: 'active', applications: 21, savedJobs: 14, joinedAt: '2026-01-15T10:00:00.000Z' },
-  { id: '20', name: 'Marcus Hill', email: 'marcus.hill@yahoo.com', phone: '+1 (503) 555-0177', location: 'Portland, OR', status: 'active', applications: 16, savedJobs: 9, joinedAt: '2025-12-08T10:00:00.000Z' },
-  { id: '21', name: 'Sarah Johnson', email: 'sarah.johnson@gmail.com', phone: '+1 (212) 555-0129', location: 'New York, NY', status: 'suspended', applications: 10, savedJobs: 2, joinedAt: '2025-11-14T10:00:00.000Z' },
-  { id: '22', name: 'Zoe Carter', email: 'zoe.carter@outlook.com', phone: '+1 (415) 555-0146', location: 'San Francisco, CA', status: 'active', applications: 25, savedJobs: 17, joinedAt: '2025-10-02T10:00:00.000Z' },
-  { id: '23', name: 'Daniel Lopez', email: 'daniel.lopez@gmail.com', phone: '+1 (312) 555-0188', location: 'Chicago, IL', status: 'active', applications: 13, savedJobs: 5, joinedAt: '2025-08-19T10:00:00.000Z' },
-  { id: '24', name: 'Priya Patel', email: 'priya.patel@yahoo.com', phone: '+1 (512) 555-0139', location: 'Austin, TX', status: 'inactive', applications: 5, savedJobs: 2, joinedAt: '2025-06-25T10:00:00.000Z' },
-];
-
-// Recent applications shown in the detail panel. Kept beside the records rather
-// than inside them so the table rows stay scannable - same split the Recruiters
-// page uses for its company extras.
-const MOCK_RECENT_APPLICATIONS = {
-  '1': [
-    { job: 'Senior Frontend Engineer', company: 'Stark Industries', status: 'interview' },
-    { job: 'Product Designer', company: 'LexCorp', status: 'shortlisted' },
-    { job: 'UI/UX Designer', company: 'OmniCorp', status: 'new' },
-  ],
-  '2': [
-    { job: 'Backend Engineer', company: 'Aperture Science', status: 'reviewing' },
-    { job: 'DevOps Engineer', company: 'Stark Industries', status: 'new' },
-  ],
-  '3': [
-    { job: 'Marketing Manager', company: 'OmniCorp', status: 'rejected' },
-  ],
-  '4': [
-    { job: 'Data Analyst', company: 'Aperture Science', status: 'hired' },
-    { job: 'Business Analyst', company: 'LexCorp', status: 'shortlisted' },
-  ],
-  '5': [
-    { job: 'Customer Success Manager', company: 'Stark Industries', status: 'reviewing' },
-    { job: 'QA Engineer', company: 'Umbrella Corp.', status: 'new' },
-    { job: 'Product Designer', company: 'OmniCorp', status: 'rejected' },
-  ],
-  '6': [
-    { job: 'Mobile Engineer', company: 'Umbrella Corp.', status: 'new' },
-  ],
-  '7': [
-    { job: 'Account Executive', company: 'LexCorp', status: 'interview' },
-    { job: 'Marketing Manager', company: 'Stark Industries', status: 'reviewing' },
-  ],
-  '8': [
-    { job: 'Business Analyst', company: 'OmniCorp', status: 'rejected' },
-  ],
-  '9': [
-    { job: 'UI/UX Designer', company: 'OmniCorp', status: 'hired' },
-    { job: 'Senior Frontend Engineer', company: 'LexCorp', status: 'shortlisted' },
-    { job: 'Product Designer', company: 'Aperture Science', status: 'interview' },
-  ],
-  '10': [
-    { job: 'Data Analyst', company: 'Stark Industries', status: 'reviewing' },
-    { job: 'QA Engineer', company: 'LexCorp', status: 'new' },
-  ],
-  '11': [
-    { job: 'Senior Frontend Engineer', company: 'Aperture Science', status: 'interview' },
-    { job: 'Backend Engineer', company: 'Stark Industries', status: 'shortlisted' },
-  ],
-  '12': [
-    { job: 'QA Engineer', company: 'OmniCorp', status: 'reviewing' },
-  ],
-  '13': [
-    { job: 'Product Designer', company: 'Aperture Science', status: 'new' },
-    { job: 'Marketing Manager', company: 'LexCorp', status: 'rejected' },
-    { job: 'Business Analyst', company: 'Stark Industries', status: 'shortlisted' },
-  ],
-  '14': [
-    { job: 'Backend Engineer', company: 'Umbrella Corp.', status: 'rejected' },
-    { job: 'DevOps Engineer', company: 'Stark Industries', status: 'reviewing' },
-  ],
-  '15': [
-    { job: 'Customer Success Manager', company: 'Aperture Science', status: 'interview' },
-    { job: 'Data Analyst', company: 'Stark Industries', status: 'new' },
-  ],
-  '16': [
-    { job: 'Mobile Engineer', company: 'LexCorp', status: 'hired' },
-    { job: 'QA Engineer', company: 'Stark Industries', status: 'shortlisted' },
-  ],
-  '17': [
-    { job: 'Senior Frontend Engineer', company: 'Stark Industries', status: 'hired' },
-    { job: 'Data Analyst', company: 'Aperture Science', status: 'interview' },
-    { job: 'Business Analyst', company: 'OmniCorp', status: 'shortlisted' },
-  ],
-  '18': [
-    { job: 'DevOps Engineer', company: 'OmniCorp', status: 'reviewing' },
-  ],
-  '19': [
-    { job: 'UI/UX Designer', company: 'LexCorp', status: 'interview' },
-    { job: 'Product Designer', company: 'Stark Industries', status: 'new' },
-  ],
-  '20': [
-    { job: 'Account Executive', company: 'Aperture Science', status: 'shortlisted' },
-    { job: 'Marketing Manager', company: 'OmniCorp', status: 'reviewing' },
-  ],
-  '21': [
-    { job: 'Customer Success Manager', company: 'LexCorp', status: 'rejected' },
-  ],
-  '22': [
-    { job: 'Senior Frontend Engineer', company: 'Aperture Science', status: 'shortlisted' },
-    { job: 'UI/UX Designer', company: 'Stark Industries', status: 'interview' },
-  ],
-  '23': [
-    { job: 'Backend Engineer', company: 'Stark Industries', status: 'new' },
-    { job: 'Mobile Engineer', company: 'OmniCorp', status: 'reviewing' },
-  ],
-  '24': [
-    { job: 'QA Engineer', company: 'Aperture Science', status: 'rejected' },
-  ],
-};
-
 const formatJoinedDate = (iso) => {
   if (!iso) return '—';
   const date = new Date(iso);
@@ -231,23 +90,57 @@ const getPageItems = (page, totalPages) => {
   return items;
 };
 
+// Union the locations seen so far with the ones just returned, keeping the
+// selected value present. Without this, filtering by a location would shrink
+// the dropdown to just that location and leave no way back to "Any location".
+const mergeLocations = (previous, incoming, selected) => {
+  const set = new Set(previous);
+  for (const value of incoming) if (value) set.add(value);
+  if (selected && selected !== 'all') set.add(selected);
+  return [...set].sort();
+};
+
 /**
  * AdminJobseekersPage - the /admin/jobseekers workspace.
  *
- * Lists jobseekers with local search (name/email) plus status, location, and
- * date filters, explicit selected-row state, a compact row action menu, and
- * URL-backed pagination. Nothing is auto-selected: the panel keeps its empty
- * state until the user clicks a row. Data is UI mock data for now, so status
- * changes stay local for the current session.
+ * Fully backed by GET /api/admin/jobseekers (list) and GET
+ * /api/admin/jobseekers/:userId (detail). Search, the location and date
+ * filters, ordering, and paging all run on the server, so the page keeps no
+ * second copy of the list to filter locally and the footer counts are real
+ * totals.
+ *
+ * Rows come from each account's JOBSEEKER workspace profile, so a person whose
+ * account is currently active in the recruiter workspace still appears here.
+ *
+ * There is no status column or status filter: the User model has no status
+ * field, so no activity state can be reported for an account without inventing
+ * one. The row's action menu therefore offers "View profile" instead.
  */
 export default function AdminJobseekersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [jobseekers, setJobseekers] = useState(MOCK_JOBSEEKERS);
+
+  // Debounced term actually sent to the server; `searchInput` is what the box
+  // holds, so typing does not fire a request per keystroke.
   const [searchInput, setSearchInput] = useState('');
-  const [status, setStatus] = useState('all');
+  const [q, setQ] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [dateRange, setDateRange] = useState('');
+
+  const [list, setList] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [locations, setLocations] = useState([]);
+
+  const [selectedId, setSelectedId] = useState(null);
+  const [detail, setDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(null);
+  // Bumped to re-run the detail request without changing the selection.
+  const [detailNonce, setDetailNonce] = useState(0);
+
+  const [activeMenuId, setActiveMenuId] = useState(null);
 
   // The current page lives in the URL (?page=N) so a browser refresh or a
   // Back/Forward step restores the exact page instead of falling back to 1.
@@ -268,23 +161,19 @@ export default function AdminJobseekersPage() {
     [searchParams, setSearchParams]
   );
 
-  const [selectedId, setSelectedId] = useState(null);
-  const [activeMenuId, setActiveMenuId] = useState(null);
-  const [toast, setToast] = useState(null);
-
-  const showToast = useCallback((message) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 3200);
-  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setQ(searchInput.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Any filter or search change jumps back to page 1 and clears the selection
   // so it never points at a row that left the visible page. Only reacts to an
   // actual filter change, so a refresh with ?page=N never drops the param.
-  const prevFiltersRef = useRef(`${searchInput}|${status}|${locationFilter}|${dateRange}`);
+  const filterKey = JSON.stringify({ q, locationFilter, dateRange });
+  const lastFilterKeyRef = useRef(filterKey);
   useEffect(() => {
-    const filtersKey = `${searchInput}|${status}|${locationFilter}|${dateRange}`;
-    if (filtersKey === prevFiltersRef.current) return;
-    prevFiltersRef.current = filtersKey;
+    if (lastFilterKeyRef.current === filterKey) return;
+    lastFilterKeyRef.current = filterKey;
     setSelectedId(null);
     if (searchParams.has('page')) {
       const params = new URLSearchParams(searchParams);
@@ -292,40 +181,76 @@ export default function AdminJobseekersPage() {
       setSearchParams(params, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchInput, status, locationFilter, dateRange]);
+  }, [filterKey]);
 
-  const uniqueLocations = useMemo(
-    () => [...new Set(jobseekers.map((j) => j.location))].sort(),
-    [jobseekers]
-  );
+  const loadList = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getAdminJobseekers({
+        page,
+        limit: PAGE_SIZE,
+        q,
+        location: locationFilter,
+        dateRange,
+      });
+      setList(data);
+      setLocations((prev) =>
+        mergeLocations(
+          prev,
+          (data.jobseekers || []).map((j) => j.location),
+          locationFilter
+        )
+      );
+    } catch (err) {
+      setError(err);
+      setList(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, q, locationFilter, dateRange]);
 
-  const filtered = useMemo(() => {
-    const q = searchInput.trim().toLowerCase();
-    return jobseekers.filter((j) => {
-      if (status !== 'all' && j.status !== status) return false;
-      if (locationFilter !== 'all' && j.location !== locationFilter) return false;
-      if (dateRange) {
-        const cutoff = new Date();
-        if (dateRange === 'today') {
-          cutoff.setHours(0, 0, 0, 0);
-        } else {
-          cutoff.setDate(cutoff.getDate() - Number(dateRange));
-        }
-        if (new Date(j.joinedAt) < cutoff) return false;
-      }
-      if (q) {
-        const haystack = `${j.name} ${j.email}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [jobseekers, searchInput, status, locationFilter, dateRange]);
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
 
-  const filtersActive = searchInput !== '' || status !== 'all' || locationFilter !== 'all' || dateRange !== '';
+  // Load the selected jobseeker's real profile. The row already in hand drives
+  // the panel header so selecting a row feels instant; the request fills in the
+  // contact details and the real recent-applications list.
+  useEffect(() => {
+    if (!selectedId) {
+      setDetail(null);
+      setDetailError(null);
+      return undefined;
+    }
+    let cancelled = false;
+    setDetailLoading(true);
+    setDetailError(null);
+    getAdminJobseeker(selectedId)
+      .then((data) => {
+        if (!cancelled) setDetail(data.jobseeker);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setDetail(null);
+        setDetailError(err);
+      })
+      .finally(() => {
+        if (!cancelled) setDetailLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId, detailNonce]);
+
+  const reloadDetail = useCallback(() => {
+    setDetailNonce((n) => n + 1);
+  }, []);
+
+  const filtersActive = q !== '' || locationFilter !== 'all' || dateRange !== '';
 
   const clearFilters = useCallback(() => {
     setSearchInput('');
-    setStatus('all');
     setLocationFilter('all');
     setDateRange('');
   }, []);
@@ -336,20 +261,6 @@ export default function AdminJobseekersPage() {
     setSelectedId(id);
     setActiveMenuId(null);
   }, []);
-
-  const changeStatus = useCallback(
-    (id, nextStatus) => {
-      setActiveMenuId(null);
-      setJobseekers((prev) =>
-        prev.map((j) => (j.id === id ? { ...j, status: nextStatus } : j))
-      );
-      const jobseeker = jobseekers.find((j) => j.id === id);
-      if (jobseeker) {
-        showToast(`“${jobseeker.name}” moved to ${STATUS_META[nextStatus].label.toLowerCase()} status`);
-      }
-    },
-    [jobseekers, showToast]
-  );
 
   // View Applications hands the selected person over to the existing Admin
   // Applications workspace, which seeds its search box from ?search= and so
@@ -362,24 +273,31 @@ export default function AdminJobseekersPage() {
     [navigate]
   );
 
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-  const listStart = total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
-  const listEnd = Math.min(safePage * PAGE_SIZE, total);
+  // Opens the real applicant profile on the existing
+  // /admin/jobseekers/:userId route, which reads the jobseeker's own workspace
+  // profile regardless of the account's active workspace.
+  const viewProfile = useCallback(
+    (jobseeker) => {
+      setActiveMenuId(null);
+      navigate(`/admin/jobseekers/${jobseeker.id}`);
+    },
+    [navigate]
+  );
 
-  // An invalid or out-of-range ?page=N (e.g. after a refresh with stale data)
-  // is repaired to a valid page instead of silently showing an empty one.
+  const total = list?.total ?? 0;
+  const totalPages = Math.max(1, list?.totalPages ?? 1);
+  const rows = list?.jobseekers ?? [];
+  const listStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const listEnd = Math.min(page * PAGE_SIZE, total);
+
+  // An out-of-range ?page=N (a stale deep link, or the last page disappearing
+  // after a filter change) is repaired instead of showing an empty table.
   useEffect(() => {
-    if (pageInvalid) goToPage(1, { replace: true });
-    else if (page > totalPages) goToPage(totalPages, { replace: true });
-  }, [page, pageInvalid, totalPages, goToPage]);
+    if (loading || error) return;
+    if (total > 0 && page > totalPages) goToPage(totalPages, { replace: true });
+  }, [loading, error, total, page, totalPages, goToPage]);
 
-  // Read the selection straight from the live list so a status change lands in
-  // the table row on the same render.
-  const selected =
-    jobseekers.find((j) => String(j.id) === String(selectedId)) || null;
+  const selected = rows.find((j) => String(j.id) === String(selectedId)) || null;
 
   return (
     <div className="admin-page admin-jobseekers">
@@ -411,27 +329,13 @@ export default function AdminJobseekersPage() {
 
           <div className="admin-jobseekers-filter">
             <Select
-              id="admin-jobseekers-status"
-              name="status"
-              className="admin-jobseekers-filter-select"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              aria-label="Status"
-              options={[
-                { value: 'all', label: 'All statuses' },
-                ...STATUS_OPTIONS.map((value) => ({ value, label: STATUS_META[value].label })),
-              ]}
-            />
-          </div>
-          <div className="admin-jobseekers-filter">
-            <Select
               id="admin-jobseekers-location"
               name="location"
               className="admin-jobseekers-filter-select"
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
               aria-label="Location"
-              options={[{ value: 'all', label: 'Any location' }, ...uniqueLocations.map((name) => ({ value: name, label: name }))]}
+              options={[{ value: 'all', label: 'Any location' }, ...locations.map((name) => ({ value: name, label: name }))]}
             />
           </div>
           <div className="admin-jobseekers-filter">
@@ -459,7 +363,6 @@ export default function AdminJobseekersPage() {
             <colgroup>
               <col className="admin-jobseekers-col-jobseeker" />
               <col className="admin-jobseekers-col-location" />
-              <col className="admin-jobseekers-col-status" />
               <col className="admin-jobseekers-col-applications" />
               <col className="admin-jobseekers-col-saved" />
               <col className="admin-jobseekers-col-joined" />
@@ -469,7 +372,6 @@ export default function AdminJobseekersPage() {
               <tr>
                 <th className="admin-jobseekers-col-jobseeker">Jobseeker</th>
                 <th className="admin-jobseekers-col-location">Location</th>
-                <th className="admin-jobseekers-col-status">Status</th>
                 <th className="admin-jobseekers-col-applications">Applications</th>
                 <th className="admin-jobseekers-col-saved">Saved Jobs</th>
                 <th className="admin-jobseekers-col-joined">Joined</th>
@@ -479,12 +381,35 @@ export default function AdminJobseekersPage() {
               </tr>
             </thead>
             <tbody>
-              {pageItems.length === 0 ? (
+              {loading && rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="admin-jobseekers-state">
+                  <td colSpan={6} className="admin-jobseekers-state">
+                    <span className="admin-jobseekers-state-title">Loading jobseekers...</span>
+                    <span className="admin-jobseekers-state-text">
+                      Fetching the latest jobseekers from the server.
+                    </span>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="admin-jobseekers-state">
+                    <span className="admin-jobseekers-state-title">Unable to load jobseekers</span>
+                    <span className="admin-jobseekers-state-text">
+                      {error?.message || 'Something went wrong while fetching jobseekers.'}
+                    </span>
+                    <button type="button" className="admin-jobseekers-btn" onClick={loadList}>
+                      Try again
+                    </button>
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="admin-jobseekers-state">
                     <span className="admin-jobseekers-state-title">No jobseekers found</span>
                     <span className="admin-jobseekers-state-text">
-                      Try adjusting your search or filters.
+                      {filtersActive
+                        ? 'Try adjusting your search or filters.'
+                        : 'No jobseeker profiles have been created yet.'}
                     </span>
                     {filtersActive && (
                       <button type="button" className="admin-jobseekers-btn" onClick={clearFilters}>
@@ -494,8 +419,7 @@ export default function AdminJobseekersPage() {
                   </td>
                 </tr>
               ) : (
-                pageItems.map((jobseeker) => {
-                  const meta = STATUS_META[jobseeker.status] || STATUS_META.active;
+                rows.map((jobseeker) => {
                   const isSelected = String(jobseeker.id) === String(selectedId);
                   return (
                     <tr
@@ -506,7 +430,7 @@ export default function AdminJobseekersPage() {
                       <td className="admin-jobseekers-col-jobseeker">
                         <span className="admin-jobseekers-person">
                           <Avatar
-                            src={null}
+                            src={jobseeker.avatarUrl ? resolveMediaUrl(jobseeker.avatarUrl) : null}
                             fallbackSrc={avatarFallback(jobseeker.name, jobseeker.email)}
                             imgClassName="admin-jobseekers-avatar"
                             placeholderClassName="admin-jobseekers-avatar admin-jobseekers-avatar--initials"
@@ -515,17 +439,12 @@ export default function AdminJobseekersPage() {
                           />
                           <span className="admin-jobseekers-person-text">
                             <span className="admin-jobseekers-person-name">{jobseeker.name}</span>
-                            <span className="admin-jobseekers-person-email">{jobseeker.email}</span>
+                            <span className="admin-jobseekers-person-email">{jobseeker.email || '—'}</span>
                           </span>
                         </span>
                       </td>
                       <td className="admin-jobseekers-col-location">
-                        <span className="admin-jobseekers-location">{jobseeker.location}</span>
-                      </td>
-                      <td className="admin-jobseekers-col-status">
-                        <span className={`admin-jobseekers-badge admin-jobseekers-badge--${meta.tone}`}>
-                          {meta.label}
-                        </span>
+                        <span className="admin-jobseekers-location">{jobseeker.location || '—'}</span>
                       </td>
                       <td className="admin-jobseekers-col-applications">
                         <span className="admin-jobseekers-count">{jobseeker.applications}</span>
@@ -537,7 +456,7 @@ export default function AdminJobseekersPage() {
                         <span className="admin-jobseekers-date">{formatJoinedDate(jobseeker.joinedAt)}</span>
                       </td>
                       <td className="admin-jobseekers-col-actions" onClick={(e) => e.stopPropagation()}>
-                        <RowMenu
+                        <RowActions
                           jobseeker={jobseeker}
                           open={activeMenuId === String(jobseeker.id)}
                           onToggle={() =>
@@ -546,7 +465,7 @@ export default function AdminJobseekersPage() {
                             )
                           }
                           onClose={() => setActiveMenuId(null)}
-                          onChangeStatus={changeStatus}
+                          onViewProfile={viewProfile}
                         />
                       </td>
                     </tr>
@@ -559,20 +478,28 @@ export default function AdminJobseekersPage() {
 
         <footer className="admin-jobseekers-footer">
           <p className="admin-jobseekers-footer-count">
-            Showing <strong>{listStart}–{listEnd}</strong> of <strong>{total}</strong> jobseekers
+            {loading && rows.length === 0 ? (
+              'Loading jobseekers...'
+            ) : error ? (
+              'Jobseekers could not be loaded'
+            ) : (
+              <>
+                Showing <strong>{listStart}–{listEnd}</strong> of <strong>{total}</strong> jobseekers
+              </>
+            )}
           </p>
-          {totalPages > 1 && (
+          {!loading && !error && totalPages > 1 && (
             <nav className="admin-jobseekers-pagination" aria-label="Jobseekers pagination">
               <button
                 type="button"
                 className="admin-jobseekers-page-btn admin-jobseekers-page-btn--nav"
                 onClick={() => goToPage(Math.max(1, page - 1))}
-                disabled={safePage <= 1}
+                disabled={page <= 1}
               >
                 {ARROW_LEFT}
                 Previous
               </button>
-              {getPageItems(safePage, totalPages).map((item, index) =>
+              {getPageItems(page, totalPages).map((item, index) =>
                 item === '…' ? (
                   <span key={`gap-${index}`} className="admin-jobseekers-page-gap">
                     {item}
@@ -581,10 +508,10 @@ export default function AdminJobseekersPage() {
                   <button
                     key={item}
                     type="button"
-                    className={`admin-jobseekers-page-btn${item === safePage ? ' admin-jobseekers-page-btn--current' : ''}`}
+                    className={`admin-jobseekers-page-btn${item === page ? ' admin-jobseekers-page-btn--current' : ''}`}
                     onClick={() => goToPage(item)}
                     aria-label={`Go to page ${item}`}
-                    aria-current={item === safePage ? 'page' : undefined}
+                    aria-current={item === page ? 'page' : undefined}
                   >
                     {item}
                   </button>
@@ -594,7 +521,7 @@ export default function AdminJobseekersPage() {
                 type="button"
                 className="admin-jobseekers-page-btn admin-jobseekers-page-btn--nav"
                 onClick={() => goToPage(Math.min(totalPages, page + 1))}
-                disabled={safePage >= totalPages}
+                disabled={page >= totalPages}
               >
                 Next
                 {ARROW_RIGHT}
@@ -606,7 +533,15 @@ export default function AdminJobseekersPage() {
 
       <aside className="admin-jobseekers-panel" aria-label="Jobseeker details">
         {selected ? (
-          <DetailPanel jobseeker={selected} onViewApplications={viewApplications} />
+          <DetailPanel
+            jobseeker={selected}
+            detail={detail}
+            loading={detailLoading}
+            error={detailError}
+            onRetry={reloadDetail}
+            onViewApplications={viewApplications}
+            onViewProfile={viewProfile}
+          />
         ) : (
           <div className="admin-jobseekers-panel-state">
             <span className="admin-jobseekers-state-title">Select a jobseeker</span>
@@ -616,33 +551,25 @@ export default function AdminJobseekersPage() {
           </div>
         )}
       </aside>
-
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </div>
   );
 }
 
 /* ------------------------------------------------------------------------ */
-/* Row action menu - compact three-dot menu portaled to <body>, anchored      */
-/* near the trigger, closed on outside click / Escape / scroll / resize.     */
-/* Change Status is the only entry: the selected row already opens the        */
-/* person's details, so there is nothing else to offer here.                 */
+/* Row action menu - compact three-dot menu with the same interaction        */
+/* language as the other Admin workspaces: portaled to <body>, anchored near  */
+/* the trigger, closed on outside click / Escape / scroll / resize.          */
 /* ------------------------------------------------------------------------ */
 
-function RowMenu({ jobseeker, open, onToggle, onClose, onChangeStatus }) {
+function RowActions({ jobseeker, open, onToggle, onClose, onViewProfile }) {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
   const [pos, setPos] = useState(null);
-  const [statusView, setStatusView] = useState(false);
-
-  useEffect(() => {
-    if (!open) setStatusView(false);
-  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const handlePointerDown = (e) => {
-      const inMenu = menuRef.current?.contains(e.target);
+      const inMenu = menuRef?.current?.contains(e.target);
       const inTrigger = triggerRef.current?.contains(e.target);
       if (!inMenu && !inTrigger) onClose();
     };
@@ -716,50 +643,15 @@ function RowMenu({ jobseeker, open, onToggle, onClose, onChangeStatus }) {
               minWidth: 196,
             }}
           >
-            {statusView ? (
-              <>
-                <div className="admin-jobseekers-menu-head">
-                  <button
-                    type="button"
-                    className="admin-jobseekers-menu-subhead"
-                    onClick={() => setStatusView(false)}
-                    aria-label="Back"
-                  >
-                    {ARROW_LEFT}
-                  </button>
-                  <span className="admin-jobseekers-menu-label">Change status</span>
-                </div>
-                <div className="admin-jobseekers-menu-divider" />
-                {STATUS_OPTIONS.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={jobseeker.status === value}
-                    className={`admin-jobseekers-menu-item${
-                      jobseeker.status === value ? ' admin-jobseekers-menu-item--selected' : ''
-                    }`}
-                    onClick={() => onChangeStatus(jobseeker.id, value)}
-                  >
-                    <span className="admin-jobseekers-menu-check">
-                      {jobseeker.status === value ? CHECK_ICON : null}
-                    </span>
-                    <span className="admin-jobseekers-menu-item-label">{STATUS_META[value].label}</span>
-                  </button>
-                ))}
-              </>
-            ) : (
-              <button
-                type="button"
-                role="menuitem"
-                className="admin-jobseekers-menu-item"
-                onClick={() => setStatusView(true)}
-              >
-                <span className="admin-jobseekers-menu-check" />
-                <span className="admin-jobseekers-menu-item-label">Change Status</span>
-                <span className="admin-jobseekers-menu-chevron" aria-hidden="true">{ARROW_RIGHT}</span>
-              </button>
-            )}
+            <button
+              type="button"
+              role="menuitem"
+              className="admin-jobseekers-menu-item"
+              onClick={() => onViewProfile(jobseeker)}
+            >
+              <span className="admin-jobseekers-menu-check" />
+              <span className="admin-jobseekers-menu-item-label">View profile</span>
+            </button>
           </div>,
           document.body
         )}
@@ -769,106 +661,158 @@ function RowMenu({ jobseeker, open, onToggle, onClose, onChangeStatus }) {
 
 /* ------------------------------------------------------------------------ */
 /* Right-side detail panel - contextual inspector for the selected jobseeker. */
-/* Header stays free of a status badge: the status belongs to the table row    */
-/* and to the row's Change Status menu, so repeating it here would be noise.   */
+/* Header stays free of a status badge: there is no account status to report. */
+/* The header renders from the list row so the panel fills instantly; the     */
+/* sections below render from the loaded profile so contact details and the   */
+/* recent-applications list are the real values.                              */
 /* ------------------------------------------------------------------------ */
 
-function DetailPanel({ jobseeker, onViewApplications }) {
-  const recent = MOCK_RECENT_APPLICATIONS[String(jobseeker.id)] || [];
+function DetailPanel({
+  jobseeker,
+  detail,
+  loading,
+  error,
+  onRetry,
+  onViewApplications,
+  onViewProfile,
+}) {
+  const name = detail?.fullName || jobseeker.name;
+  const email = detail?.email || jobseeker.email || '—';
+  const phone = detail?.phone || jobseeker.phone || '—';
+  const location = detail?.location || jobseeker.location || '—';
+  const applications = detail?.applications ?? jobseeker.applications;
+  const savedJobs = detail?.savedJobs ?? jobseeker.savedJobs;
+  const recent = detail?.recentApplications || [];
 
   return (
     <div className="admin-jobseekers-detail">
       <header className="admin-jobseekers-detail-head">
         <Avatar
-          src={null}
-          fallbackSrc={avatarFallback(jobseeker.name, jobseeker.email)}
+          src={
+            detail?.avatarUrl || jobseeker.avatarUrl
+              ? resolveMediaUrl(detail?.avatarUrl || jobseeker.avatarUrl)
+              : null
+          }
+          fallbackSrc={avatarFallback(name, email)}
           imgClassName="admin-jobseekers-avatar admin-jobseekers-detail-avatar"
           placeholderClassName="admin-jobseekers-avatar admin-jobseekers-avatar--initials admin-jobseekers-detail-avatar"
           imgAlt=""
           iconSize={16}
         />
         <div className="admin-jobseekers-detail-titles">
-          <h2 className="admin-jobseekers-detail-name">{jobseeker.name}</h2>
-          <p className="admin-jobseekers-detail-email">{jobseeker.email}</p>
-          <p className="admin-jobseekers-detail-location">{jobseeker.location}</p>
+          <h2 className="admin-jobseekers-detail-name">{name}</h2>
+          <p className="admin-jobseekers-detail-email">{email}</p>
+          {location !== '—' && (
+            <p className="admin-jobseekers-detail-location">{location}</p>
+          )}
         </div>
       </header>
 
-      <section className="admin-jobseekers-detail-section">
-        <h3 className="admin-jobseekers-detail-sub">Profile</h3>
-        <dl className="admin-jobseekers-detail-list">
-          <div className="admin-jobseekers-detail-row">
-            <dt>Full name</dt>
-            <dd>{jobseeker.name}</dd>
-          </div>
-          <div className="admin-jobseekers-detail-row">
-            <dt>Email</dt>
-            <dd>{jobseeker.email}</dd>
-          </div>
-          <div className="admin-jobseekers-detail-row">
-            <dt>Phone</dt>
-            <dd>{jobseeker.phone}</dd>
-          </div>
-          <div className="admin-jobseekers-detail-row">
-            <dt>Location</dt>
-            <dd>{jobseeker.location}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="admin-jobseekers-detail-section">
-        <h3 className="admin-jobseekers-detail-sub">Activity</h3>
-        <dl className="admin-jobseekers-detail-list">
-          <div className="admin-jobseekers-detail-row">
-            <dt>Applications</dt>
-            <dd>{jobseeker.applications}</dd>
-          </div>
-          <div className="admin-jobseekers-detail-row">
-            <dt>Saved jobs</dt>
-            <dd>{jobseeker.savedJobs}</dd>
-          </div>
-          <div className="admin-jobseekers-detail-row">
-            <dt>Joined</dt>
-            <dd>{formatJoinedDate(jobseeker.joinedAt)}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="admin-jobseekers-detail-section">
-        <h3 className="admin-jobseekers-detail-sub">Recent applications</h3>
-        {recent.length === 0 ? (
-          <p className="admin-jobseekers-detail-empty">No applications yet.</p>
-        ) : (
-          <ul className="admin-jobseekers-recent">
-            {recent.map((item, index) => {
-              const meta = APPLICATION_STATUS_META[item.status] || APPLICATION_STATUS_META.new;
-              return (
-                <li key={`${item.job}-${index}`} className="admin-jobseekers-recent-item">
-                  <span className="admin-jobseekers-recent-job">{item.job}</span>
-                  <span className="admin-jobseekers-recent-meta">
-                    <span className="admin-jobseekers-recent-company">{item.company}</span>
-                    <span className={`admin-jobseekers-recent-status admin-jobseekers-recent-status--${meta.tone}`}>
-                      {meta.label}
-                    </span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      <footer className="admin-jobseekers-detail-actions">
-        <div className="admin-jobseekers-detail-actions-row">
-          <button
-            type="button"
-            className="admin-jobseekers-btn"
-            onClick={() => onViewApplications(jobseeker)}
-          >
-            View Applications
+      {error ? (
+        <div className="admin-jobseekers-panel-state">
+          <span className="admin-jobseekers-state-title">Unable to load this profile</span>
+          <span className="admin-jobseekers-state-text">
+            {error?.message || 'Something went wrong while fetching the profile.'}
+          </span>
+          <button type="button" className="admin-jobseekers-btn" onClick={onRetry}>
+            Try again
           </button>
         </div>
-      </footer>
+      ) : loading && !detail ? (
+        <div className="admin-jobseekers-panel-state">
+          <span className="admin-jobseekers-state-title">Loading profile...</span>
+          <span className="admin-jobseekers-state-text">
+            Fetching this jobseeker's details from the server.
+          </span>
+        </div>
+      ) : (
+        <>
+          <section className="admin-jobseekers-detail-section">
+            <h3 className="admin-jobseekers-detail-sub">Profile</h3>
+            <dl className="admin-jobseekers-detail-list">
+              <div className="admin-jobseekers-detail-row">
+                <dt>Full name</dt>
+                <dd>{name}</dd>
+              </div>
+              <div className="admin-jobseekers-detail-row">
+                <dt>Email</dt>
+                <dd>{email}</dd>
+              </div>
+              <div className="admin-jobseekers-detail-row">
+                <dt>Phone</dt>
+                <dd>{phone}</dd>
+              </div>
+              <div className="admin-jobseekers-detail-row">
+                <dt>Location</dt>
+                <dd>{location}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="admin-jobseekers-detail-section">
+            <h3 className="admin-jobseekers-detail-sub">Activity</h3>
+            <dl className="admin-jobseekers-detail-list">
+              <div className="admin-jobseekers-detail-row">
+                <dt>Applications</dt>
+                <dd>{applications}</dd>
+              </div>
+              <div className="admin-jobseekers-detail-row">
+                <dt>Saved jobs</dt>
+                <dd>{savedJobs}</dd>
+              </div>
+              <div className="admin-jobseekers-detail-row">
+                <dt>Joined</dt>
+                <dd>{formatJoinedDate(jobseeker.joinedAt)}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="admin-jobseekers-detail-section">
+            <h3 className="admin-jobseekers-detail-sub">Recent applications</h3>
+            {loading && !detail ? (
+              <p className="admin-jobseekers-detail-empty">Loading applications...</p>
+            ) : recent.length === 0 ? (
+              <p className="admin-jobseekers-detail-empty">No applications yet.</p>
+            ) : (
+              <ul className="admin-jobseekers-recent">
+                {recent.map((item, index) => {
+                  const tone = APPLICATION_STATUS_TONES[item.status] || APPLICATION_STATUS_TONES.applied;
+                  return (
+                    <li key={`${item.id}-${index}`} className="admin-jobseekers-recent-item">
+                      <span className="admin-jobseekers-recent-job">{item.job}</span>
+                      <span className="admin-jobseekers-recent-meta">
+                        <span className="admin-jobseekers-recent-company">{item.company}</span>
+                        <span className={`admin-jobseekers-recent-status admin-jobseekers-recent-status--${tone.tone}`}>
+                          {statusLabel(item.status)}
+                        </span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          <footer className="admin-jobseekers-detail-actions">
+            <div className="admin-jobseekers-detail-actions-row">
+              <button
+                type="button"
+                className="admin-jobseekers-btn"
+                onClick={() => onViewProfile(jobseeker)}
+              >
+                View Profile
+              </button>
+              <button
+                type="button"
+                className="admin-jobseekers-btn"
+                onClick={() => onViewApplications(jobseeker)}
+              >
+                View Applications
+              </button>
+            </div>
+          </footer>
+        </>
+      )}
     </div>
   );
 }

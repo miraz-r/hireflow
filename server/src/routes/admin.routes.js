@@ -4,6 +4,7 @@ const {
   getStats,
   getApplicationsTrend,
   getAdminJobseeker,
+  listAdminJobseekers,
   listAdminApplications,
   getAdminApplication,
   updateAdminApplicationStatus,
@@ -17,6 +18,7 @@ const {
   statusUpdateValidators,
   adminApplicationQueryValidators,
   jobseekerIdParamValidators,
+  adminJobseekerQueryValidators,
 } = require('../validators/application.validators');
 
 const router = express.Router();
@@ -66,6 +68,15 @@ router.patch(
 // Applicant profile viewer, reached from the Applications detail panel's
 // "View Profile". Registered before '/jobs' so the literal 'jobseekers' path is
 // unambiguous alongside the '/applications/:id' patterns above.
+// The workspace list must be declared before '/jobseekers/:userId' so the
+// literal path is never swallowed by the :userId segment.
+router.get(
+  '/jobseekers',
+  authenticate,
+  authorize('admin'),
+  adminJobseekerQueryValidators,
+  listAdminJobseekers
+);
 router.get(
   '/jobseekers/:userId',
   authenticate,
