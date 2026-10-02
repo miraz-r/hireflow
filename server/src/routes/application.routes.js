@@ -34,18 +34,23 @@ router.get('/activity', authorize('recruiter'), getRecruiterActivity);
 // controller against the application's own job.
 router.patch('/:id/status', authorize('recruiter'), statusUpdateValidators, updateApplicationStatus);
 
-// Jobseeker-only: list the current user's own applications
-router.get('/my-applications', authorize('jobseeker'), listJobseekerApplications);
+// The current user's OWN applications. Available in any workspace: the records
+// belong to the account (matched on req.user.id inside the controller), not to
+// the active workspace, so switching workspace must not hide a user's own
+// history. This is a read of the caller's own data, not a privilege change —
+// the caller can never see another account's applications here.
+router.get('/my-applications', listJobseekerApplications);
 
 // Recruiter-only: single application detail (ownership enforced in the
 // controller against the application's own job). Defined after the literal
 // /mine and /my-applications paths so it never shadows them.
 router.get('/:id', authorize('recruiter'), applicationIdValidators, getApplicationDetail);
 
-// Jobseeker-only: apply to a job
+// Jobseeker-workspace action: applying to a job.
 router.post('/', authorize('jobseeker'), createValidators, createApplication);
 
-// Jobseeker-only: check whether the current user applied to a job
-router.get('/:jobId/me', authorize('jobseeker'), jobIdParamValidators, getMyApplication);
+// Own-data read: "did I apply to this job". Available in any workspace for the
+// same reason as /my-applications.
+router.get('/:jobId/me', jobIdParamValidators, getMyApplication);
 
 module.exports = router;

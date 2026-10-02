@@ -30,7 +30,7 @@ const SUN_ICON = (
 );
 
 export default function Navbar() {
-  const { user, logout, toggleRole } = useAuth();
+  const { user, logout, switchWorkspace } = useAuth();
   const { theme, updateTheme } = useTheme();
   const toggleTheme = () => updateTheme(theme === 'dark' ? 'light' : 'dark');
   const navigate = useNavigate();
@@ -207,21 +207,29 @@ export default function Navbar() {
     navigate('/login');
   };
 
-  const handleSwitchRole = async () => {
+  const handleSwitchWorkspace = async () => {
     if (!user) return;
     const targetRole = user.role === 'jobseeker' ? 'recruiter' : 'jobseeker';
     setMenuOpen(false);
     try {
-      await toggleRole(targetRole);
-      // A role switch always lands on the homepage at the very top. Replace
-      // the current entry with "/" so the reload isn't tied to whatever page
-      // the user was on, and suspend the browser's native scroll restoration
-      // for this reload so it can't drop them back to a previous scroll
-      // offset. ScrollToTop re-enables native restoration on the fresh mount.
+      // Non-destructive: this only changes which workspace is active. Both
+      // profiles are kept server-side, so nothing is reset or overwritten.
+      await switchWorkspace(targetRole);
+      // A workspace switch always lands on the homepage at the very top.
+      // Replace the current entry with "/" so the reload isn't tied to whatever
+      // page the user was on, and suspend the browser's native scroll
+      // restoration for this reload so it can't drop them back to a previous
+      // scroll offset. ScrollToTop re-enables native restoration on the fresh
+      // mount.
       history.scrollRestoration = 'manual';
       window.location.replace('/');
-    } catch {
-      // role unchanged on failure
+    } catch (err) {
+      // The switch failed, so the account is still on the previous workspace.
+      // Do not navigate. Previously this was a bare `catch {}`, which made a
+      // server-side failure look like the button did nothing at all; log it so
+      // the actual reason is visible in the console.
+      // eslint-disable-next-line no-console
+      console.error('[navbar] workspace switch failed:', err?.message || err);
     }
   };
 
@@ -267,7 +275,7 @@ export default function Navbar() {
   const handleDrawerSwitchRole = () => {
     restoreScrollRef.current = false;
     restoreDrawerFocusRef.current = false;
-    handleSwitchRole();
+    handleSwitchWorkspace();
     closeMobile();
   };
 
@@ -336,7 +344,7 @@ export default function Navbar() {
       : user?.role === 'recruiter'
         ? 'Recruiter'
         : 'Jobseeker';
-  const switchLabel = user?.role === 'recruiter' ? 'Switch to Jobseeker' : 'Switch to Recruiter';
+  const switchLabel = user?.role === 'recruiter' ? 'Open Jobseeker workspace' : 'Open Recruiter workspace';
   const avatarSrc = resolveMediaUrl(user?.avatarUrl);
 
   return (
@@ -480,7 +488,7 @@ export default function Navbar() {
                         type="button"
                         className="account-menu-item"
                         role="menuitem"
-                        onClick={handleSwitchRole}
+                        onClick={handleSwitchWorkspace}
                       >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M17 1l4 4-4 4" />
@@ -601,7 +609,7 @@ export default function Navbar() {
             </div>
 
             <nav className="mobile-drawer-nav" aria-label="Mobile navigation">
-              {/* Switch to Recruiter - above Navigation */}
+              {/* Workspace switcher - above Navigation */}
               {user && user.role !== 'admin' && (
                 <div className="mobile-drawer-section">
                   <button

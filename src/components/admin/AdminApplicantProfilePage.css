@@ -1,0 +1,295 @@
+/* Admin applicant profile viewer - /admin/jobseekers/:userId
+   Reuses the Admin Applications panel vocabulary (surfaces, borders, text
+   tokens) so the viewer reads as part of the same workspace. */
+
+.admin-applicant {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 860px;
+}
+
+/* ---------- Back link ---------- */
+
+.admin-applicant-bar {
+  display: flex;
+  align-items: center;
+}
+
+.admin-applicant-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  text-decoration: none;
+}
+
+.admin-applicant-back:hover {
+  color: var(--admin-text-strong);
+}
+
+.admin-applicant-back:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---------- Loading / error / empty states ---------- */
+
+.admin-applicant-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 48px 24px;
+  text-align: center;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+}
+
+.admin-applicant-state-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-applicant-state-text {
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+.admin-applicant-btn {
+  margin-top: 8px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.admin-applicant-btn:hover {
+  border-color: var(--admin-primary);
+}
+
+/* ---------- Header ---------- */
+
+.admin-applicant-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+}
+
+.admin-applicant-avatar {
+  width: 52px;
+  height: 52px;
+  font-size: 20px;
+}
+
+.admin-applicant-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.admin-applicant-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--admin-text-strong);
+}
+
+.admin-applicant-headline {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--admin-text-muted);
+}
+
+.admin-applicant-meta {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-applicant-counts {
+  display: flex;
+  gap: 18px;
+  flex: 0 0 auto;
+}
+
+.admin-applicant-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.admin-applicant-count-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--admin-text-strong);
+}
+
+.admin-applicant-count-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Sections ---------- */
+
+.admin-applicant-section {
+  padding: 16px 20px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+}
+
+.admin-applicant-sub {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--admin-text-faint);
+}
+
+.admin-applicant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.admin-applicant-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.admin-applicant-row dt {
+  color: var(--admin-text-faint);
+}
+
+.admin-applicant-row dd {
+  margin: 0;
+  color: var(--admin-text-strong);
+  word-break: break-word;
+}
+
+.admin-applicant-bio {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.admin-applicant-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+/* Shown when the account holding these applications is no longer a jobseeker
+   (it switched role after applying). Warns that no jobseeker profile data is
+   available, so the reduced view is never mistaken for a complete profile. */
+.admin-applicant-role-note {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-left: 3px solid var(--admin-primary);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Skills ---------- */
+
+.admin-applicant-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-applicant-skill {
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+}
+
+/* ---------- Entries (experience / education / links) ---------- */
+
+.admin-applicant-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-applicant-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-applicant-entry-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-applicant-link {
+  color: var(--admin-primary);
+  text-decoration: none;
+}
+
+.admin-applicant-link:hover {
+  text-decoration: underline;
+}
+
+.admin-applicant-link:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.admin-applicant-entry-org {
+  font-size: 13px;
+  color: var(--admin-text-muted);
+  word-break: break-word;
+}
+
+.admin-applicant-entry-meta {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+
+.admin-applicant-entry-body {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

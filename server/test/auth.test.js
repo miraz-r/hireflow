@@ -89,8 +89,8 @@ beforeEach(async () => {
   await Profile.deleteMany({});
 });
 
-describe('POST /api/auth/role (toggleRole)', () => {
-  it('toggles jobseeker -> recruiter and issues a token with the new role', async () => {
+describe('POST /api/auth/role (workspace switch)', () => {
+  it('switches the active workspace and issues a token with the new role', async () => {
     const user = await makeUser('toggle-js@example.com', 'jobseeker');
     await makeProfile(user, 'jobseeker');
 
@@ -108,15 +108,17 @@ describe('POST /api/auth/role (toggleRole)', () => {
 
     const reloadedUser = await User.findById(user._id);
     assert.equal(reloadedUser.role, 'recruiter');
-    const reloadedProfile = await Profile.findOne({ userId: user._id });
-    assert.equal(reloadedProfile.role, 'recruiter');
+    // Both workspaces now have a profile for this account.
+    assert.deepEqual(res.body.user.workspaces.sort(), ['jobseeker', 'recruiter']);
   });
 
-  it('toggles recruiter -> jobseeker and clears recruiter-only profile fields', async () => {
+  it('preserves the outgoing workspace profile instead of clearing it', async () => {
+    // The old implementation rewrote the single Profile's role and $unset the
+    // recruiter-only fields, destroying the recruiter profile on first switch.
     const user = await makeUser('toggle-rec@example.com', 'recruiter');
     await makeProfile(user, 'recruiter');
     await Profile.updateOne(
-      { userId: user._id },
+      { userId: user._id, role: 'recruiter' },
       { $set: { companyName: 'Acme Corp', jobTitle: 'CTO' } }
     );
 
@@ -131,17 +133,71 @@ describe('POST /api/auth/role (toggleRole)', () => {
     const decoded = jwt.verify(res.body.token, env.jwtSecret);
     assert.equal(decoded.role, 'jobseeker');
 
-    const reloadedProfile = await Profile.findOne({ userId: user._id }).lean();
-    assert.equal(reloadedProfile.role, 'jobseeker');
-    // Lean (no schema default rehydration) proves the recruiter-only fields
-    // were genuinely $unset from the stored document.
-    assert.equal('companyName' in reloadedProfile, false);
-    assert.equal('jobTitle' in reloadedProfile, false);
+    // The recruiter profile is untouched and still readable by workspace.
+    const recruiterProfile = await Profile.findOne({
+      userId: user._id,
+      role: 'recruiter',
+    }).lean();
+    assert.equal(recruiterProfile.companyName, 'Acme Corp');
+    assert.equal(recruiterProfile.jobTitle, 'CTO');
+
+    // And a jobseeker profile now exists alongside it.
+    const jobseekerProfile = await Profile.findOne({
+      userId: user._id,
+      role: 'jobseeker',
+    }).lean();
+    assert.ok(jobseekerProfile);
+    // Seeded from the person's own shared identity, not from recruiter data.
+    assert.equal(jobseekerProfile.fullName, 'Test User');
+    assert.ok(jobseekerProfile.phone);
+    // The recruiter-only values did not leak across. (The schema defaults these
+    // to '', so assert the value rather than the key's absence.)
+    assert.equal(jobseekerProfile.companyName, '');
+    assert.equal(jobseekerProfile.jobTitle, '');
   });
 
-  it('persists role on the User and Profile WITHOUT the async profile update', async () => {
-    // Regression guard for the fire-and-forget Profile.updateOne bug: the
-    // User and Profile must BOTH reflect the new role before the response.
+  it('keeps jobseeker profile data intact across a round trip', async () => {
+    const user = await makeUser('toggle-roundtrip@example.com', 'jobseeker');
+    await Profile.create({
+      userId: user._id,
+      role: 'jobseeker',
+      fullName: 'Round Trip',
+      phone: '+1 555 010 7777',
+      location: 'Remote',
+      headline: 'Backend Engineer',
+      skills: ['Node.js', 'Mongo'],
+      bio: 'Builds things.',
+    });
+
+    const toRecruiter = await request('POST', '/api/auth/role', {
+      token: signTokenFor(user),
+      body: { role: 'recruiter' },
+    });
+    assert.equal(toRecruiter.status, 200);
+
+    // Still intact while recruiter is the active workspace.
+    let js = await Profile.findOne({ userId: user._id, role: 'jobseeker' }).lean();
+    assert.equal(js.headline, 'Backend Engineer');
+    assert.deepEqual(js.skills, ['Node.js', 'Mongo']);
+    assert.equal(js.bio, 'Builds things.');
+
+    const backToJobseeker = await request('POST', '/api/auth/role', {
+      token: toRecruiter.body.token,
+      body: { role: 'jobseeker' },
+    });
+    assert.equal(backToJobseeker.status, 200);
+    assert.equal(backToJobseeker.body.user.role, 'jobseeker');
+
+    js = await Profile.findOne({ userId: user._id, role: 'jobseeker' }).lean();
+    assert.equal(js.headline, 'Backend Engineer');
+    assert.deepEqual(js.skills, ['Node.js', 'Mongo']);
+    assert.equal(js.bio, 'Builds things.');
+    assert.equal(js.location, 'Remote');
+  });
+
+  it('persists the active workspace on the User before responding', async () => {
+    // Regression guard for the fire-and-forget Profile write bug: the User must
+    // reflect the new active workspace before the response is sent.
     const user = await makeUser('toggle-sync@example.com', 'jobseeker');
     await makeProfile(user, 'jobseeker');
 
@@ -152,9 +208,12 @@ describe('POST /api/auth/role (toggleRole)', () => {
     assert.equal(res.status, 200);
 
     const userAfter = await User.findById(user._id);
-    const profileAfter = await Profile.findOne({ userId: user._id });
     assert.equal(userAfter.role, 'recruiter');
-    assert.equal(profileAfter.role, 'recruiter');
+    const targetProfile = await Profile.findOne({
+      userId: user._id,
+      role: 'recruiter',
+    });
+    assert.ok(targetProfile);
   });
 
   it('requires authentication', async () => {
@@ -187,14 +246,16 @@ describe('POST /api/auth/role (toggleRole)', () => {
   });
 });
 
-describe('toggleRole failure handling', () => {
-  it('does not send a success response when the Profile update fails', async () => {
+describe('workspace switch failure handling', () => {
+  it('does not send a success response when the Profile write fails', async () => {
     const user = await makeUser('toggle-fail@example.com', 'jobseeker');
     await makeProfile(user, 'jobseeker');
     const token = signTokenFor(user);
 
-    const originalUpdateOne = Profile.updateOne;
-    Profile.updateOne = () => Promise.reject(new Error('simulated profile failure'));
+    // The switch now creates the target workspace's profile via
+    // Profile.create, so that is what must be made to fail here.
+    const originalUpdateOne = Profile.create;
+    Profile.create = () => Promise.reject(new Error('simulated profile failure'));
 
     const logs = [];
     const originalError = console.error;
@@ -219,24 +280,40 @@ describe('toggleRole failure handling', () => {
         'double-response error was logged: ' + logs.join('\n')
       );
 
-      // No silent drift: the User was rolled back to its original role.
+      // No silent drift: the User was rolled back to its original workspace,
+      // and the original profile is untouched.
       const reloadedUser = await User.findById(user._id);
       assert.equal(reloadedUser.role, 'jobseeker');
-      const reloadedProfile = await Profile.findOne({ userId: user._id });
+      const reloadedProfile = await Profile.findOne({
+        userId: user._id,
+        role: 'jobseeker',
+      });
       assert.equal(reloadedProfile.role, 'jobseeker');
+      // No half-created target profile was left behind.
+      const target = await Profile.findOne({
+        userId: user._id,
+        role: 'recruiter',
+      });
+      assert.equal(target, null);
     } finally {
-      Profile.updateOne = originalUpdateOne;
+      Profile.create = originalUpdateOne;
       console.error = originalError;
       console.log = originalLog;
     }
   });
 
-  it('leaves User and Profile roles consistent after a failed toggle', async () => {
+  it('leaves the original workspace intact after a failed switch', async () => {
     const user = await makeUser('toggle-drift@example.com', 'recruiter');
-    await makeProfile(user, 'recruiter');
+    await Profile.create({
+      userId: user._id,
+      role: 'recruiter',
+      fullName: 'Drift Check',
+      phone: '+1 555 010 8888',
+      companyName: 'Acme Corp',
+    });
 
-    const originalUpdateOne = Profile.updateOne;
-    Profile.updateOne = () => Promise.reject(new Error('simulated profile failure'));
+    const originalCreate = Profile.create;
+    Profile.create = () => Promise.reject(new Error('simulated profile failure'));
 
     try {
       const res = await request('POST', '/api/auth/role', {
@@ -245,17 +322,17 @@ describe('toggleRole failure handling', () => {
       });
       assert.equal(res.status, 500);
 
-      const [reloadedUser, reloadedProfile] = await Promise.all([
-        User.findById(user._id),
-        Profile.findOne({ userId: user._id }),
-      ]);
-      // Both must agree on the original role — the failed toggle changed
-      // neither persistently.
+      // The failed switch changed nothing persistently.
+      const reloadedUser = await User.findById(user._id);
       assert.equal(reloadedUser.role, 'recruiter');
+      const reloadedProfile = await Profile.findOne({
+        userId: user._id,
+        role: 'recruiter',
+      });
       assert.equal(reloadedProfile.role, 'recruiter');
-      assert.equal(reloadedUser.role, reloadedProfile.role);
+      assert.equal(reloadedProfile.companyName, 'Acme Corp');
     } finally {
-      Profile.updateOne = originalUpdateOne;
+      Profile.create = originalCreate;
     }
   });
 });

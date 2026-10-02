@@ -131,3 +131,62 @@
   color: #fca5a5;
   border-color: rgba(239, 68, 68, 0.3);
 }
+
+/* ---------- Initial workspace choice ---------- */
+
+.auth-workspace {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.auth-workspace-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.auth-workspace-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  cursor: pointer;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-workspace-option:hover {
+  border-color: #4f46e5;
+}
+
+.auth-workspace-option--selected {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px #4f46e5;
+}
+
+.auth-workspace-option input {
+  margin: 0;
+  accent-color: #4f46e5;
+}
+
+.auth-workspace-option-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.auth-workspace-option-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 520px) {
+  .auth-workspace-options {
+    grid-template-columns: 1fr;
+  }
+}

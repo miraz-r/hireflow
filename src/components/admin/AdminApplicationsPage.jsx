@@ -1,23 +1,36 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Select from '../ui/Select';
 import Toast from '../Toast';
 import Avatar from '../Avatar';
-import { avatarFallback } from '../../lib/media';
+import { avatarFallback, resolveMediaUrl } from '../../lib/media';
+import { ADMIN_STATUS_LABELS } from '../../constants/applicationStatus';
+import {
+  getAdminApplications,
+  getAdminApplication,
+  updateAdminApplicationStatus,
+} from '../../utils/adminApi';
 import './AdminApplicationsPage.css';
 
 const PAGE_SIZE = 10;
 
+// The backend stores the canonical pipeline statuses and nothing else. Each one
+// is paired with the tone that already existed on this page, so the badge
+// palette is unchanged — only the vocabulary is now the real one. Labels come
+// from ADMIN_STATUS_LABELS (under-review renders as "Screening", offer as
+// "Shortlisted") exactly as the Admin Overview already does.
 const STATUS_META = {
-  new: { label: 'New', tone: 'new' },
-  reviewing: { label: 'Reviewing', tone: 'reviewing' },
-  shortlisted: { label: 'Shortlisted', tone: 'shortlisted' },
-  interview: { label: 'Interview', tone: 'interview' },
-  rejected: { label: 'Rejected', tone: 'rejected' },
-  hired: { label: 'Hired', tone: 'hired' },
+  applied: { tone: 'new' },
+  'under-review': { tone: 'reviewing' },
+  interview: { tone: 'interview' },
+  offer: { tone: 'shortlisted' },
+  hired: { tone: 'hired' },
+  rejected: { tone: 'rejected' },
 };
 const STATUS_OPTIONS = Object.keys(STATUS_META);
+
+const statusLabel = (status) => ADMIN_STATUS_LABELS[status] || status;
 
 const DATE_OPTIONS = [
   { value: '', label: 'Any date' },
@@ -76,56 +89,6 @@ const ARROW_RIGHT = (
   </svg>
 );
 
-// Relative dates keep the date filters meaningful no matter when the page is
-// viewed. Part 1 renders UI mock data because the existing admin applications
-// endpoint is a slim Overview feed (no email, no filters) and backend changes
-// are out of scope for this phase.
-const daysAgo = (n) => {
-  const date = new Date();
-  date.setDate(date.getDate() - n);
-  date.setHours(10, 0, 0, 0);
-  return date.toISOString();
-};
-
-const MOCK_APPLICATIONS = [
-  { id: '1', name: 'Sarah Johnson', email: 'sarah.johnson@email.com', job: 'Frontend Developer', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'new', appliedAt: daysAgo(0), location: 'New York, NY', experience: '5 years', skills: ['React', 'TypeScript', 'Node.js'], phone: '(809) 345-7670', resume: 'Resume.pdf' },
-  { id: '2', name: 'Michael Chen', email: 'michael.chen@email.com', job: 'Backend Engineer', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'interview', appliedAt: daysAgo(1), location: 'San Francisco, CA', experience: '6 years', skills: ['Node.js', 'PostgreSQL', 'Docker'], phone: '(415) 220-8841', resume: 'Resume.pdf' },
-  { id: '3', name: 'Emily Davis', email: 'emily.davis@email.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'shortlisted', appliedAt: daysAgo(2), location: 'Austin, TX', experience: '4 years', skills: ['Figma', 'Prototyping', 'UX Research'], phone: '(512) 774-3319', resume: 'Resume.pdf' },
-  { id: '4', name: 'James Rodriguez', email: 'james.rodriguez@email.com', job: 'Frontend Developer', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'reviewing', appliedAt: daysAgo(2), location: 'Chicago, IL', experience: '3 years', skills: ['React', 'TypeScript', 'CSS'], phone: '(312) 558-9072', resume: 'Resume.pdf' },
-  { id: '5', name: 'Aisha Khan', email: 'aisha.khan@email.com', job: 'Data Analyst', company: 'Hooli', recruiter: 'Daniel Cho', status: 'new', appliedAt: daysAgo(3), location: 'Boston, MA', experience: '5 years', skills: ['SQL', 'Python', 'Tableau'], phone: '(617) 483-2210', resume: 'Resume.pdf' },
-  { id: '6', name: 'Tom Becker', email: 'tom.becker@email.com', job: 'DevOps Engineer', company: 'Umbrella Corp', recruiter: 'Sofia Marchetti', status: 'rejected', appliedAt: daysAgo(4), location: 'Denver, CO', experience: '7 years', skills: ['AWS', 'Kubernetes', 'CI/CD'], phone: '(303) 661-4408', resume: 'Resume.pdf' },
-  { id: '7', name: 'Priya Patel', email: 'priya.patel@email.com', job: 'Marketing Manager', company: 'Wayne Enterprises', recruiter: 'James Kowalski', status: 'new', appliedAt: daysAgo(5), location: 'Seattle, WA', experience: '4 years', skills: ['SEO', 'Content Strategy', 'Analytics'], phone: '(206) 349-7715', resume: 'Resume.pdf' },
-  { id: '8', name: 'Daniel Lopez', email: 'daniel.lopez@email.com', job: 'QA Engineer', company: 'Initech', recruiter: 'Elena Petrova', status: 'reviewing', appliedAt: daysAgo(6), location: 'Miami, FL', experience: '3 years', skills: ['Selenium', 'Cypress', 'Test Planning'], phone: '(305) 228-6194', resume: 'Resume.pdf' },
-  { id: '9', name: 'Hannah Kim', email: 'hannah.kim@stark.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'interview', appliedAt: daysAgo(7), location: 'Los Angeles, CA', experience: '6 years', skills: ['Figma', 'Design Systems', 'Wireframing'], phone: '(213) 907-5528', resume: 'Resume.pdf' },
-  { id: '10', name: 'Oliver Smith', email: 'oliver.smith@email.com', job: 'Backend Engineer', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'hired', appliedAt: daysAgo(8), location: 'New York, NY', experience: '8 years', skills: ['Node.js', 'GraphQL', 'AWS'], phone: '(917) 640-2287', resume: 'Resume.pdf' },
-  { id: '11', name: 'Fatima Noor', email: 'fatima.noor@email.com', job: 'Data Analyst', company: 'Hooli', recruiter: 'Daniel Cho', status: 'shortlisted', appliedAt: daysAgo(9), location: 'Portland, OR', experience: '4 years', skills: ['SQL', 'Python', 'dbt'], phone: '(503) 712-9930', resume: 'Resume.pdf' },
-  { id: '12', name: 'Ryan O Connor', email: 'ryan.oconnor@email.com', job: 'Frontend Developer', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'reviewing', appliedAt: daysAgo(10), location: 'Philadelphia, PA', experience: '2 years', skills: ['React', 'JavaScript', 'Tailwind'], phone: '(215) 337-4401', resume: 'Resume.pdf' },
-  { id: '13', name: 'Grace Liu', email: 'grace.liu@email.com', job: 'DevOps Engineer', company: 'Umbrella Corp', recruiter: 'Sofia Marchetti', status: 'interview', appliedAt: daysAgo(12), location: 'San Jose, CA', experience: '5 years', skills: ['Terraform', 'AWS', 'Kubernetes'], phone: '(408) 559-6623', resume: 'Resume.pdf' },
-  { id: '14', name: 'Victor Almeida', email: 'victor.almeida@email.com', job: 'Marketing Manager', company: 'Wayne Enterprises', recruiter: 'James Kowalski', status: 'rejected', appliedAt: daysAgo(14), location: 'Atlanta, GA', experience: '6 years', skills: ['Email Marketing', 'SEO', 'Copywriting'], phone: '(404) 781-2246', resume: 'Resume.pdf' },
-  { id: '15', name: 'Nina Petrova', email: 'nina.petrova@email.com', job: 'QA Engineer', company: 'Initech', recruiter: 'Elena Petrova', status: 'new', appliedAt: daysAgo(15), location: 'Charlotte, NC', experience: '4 years', skills: ['Cypress', 'Playwright', 'API Testing'], phone: '(704) 553-8821', resume: 'Resume.pdf' },
-  { id: '16', name: 'Ethan Brooks', email: 'ethan.brooks@stark.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'new', appliedAt: daysAgo(17), location: 'Nashville, TN', experience: '3 years', skills: ['Figma', 'Illustration', 'Prototyping'], phone: '(615) 428-3370', resume: 'Resume.pdf' },
-  { id: '17', name: 'Maya Singh', email: 'maya.singh@email.com', job: 'Backend Engineer', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'reviewing', appliedAt: daysAgo(19), location: 'San Diego, CA', experience: '5 years', skills: ['Node.js', 'Python', 'Redis'], phone: '(619) 507-1142', resume: 'Resume.pdf' },
-  { id: '18', name: 'Lucas Meyer', email: 'lucas.meyer@email.com', job: 'Data Analyst', company: 'Hooli', recruiter: 'Daniel Cho', status: 'hired', appliedAt: daysAgo(21), location: 'Phoenix, AZ', experience: '7 years', skills: ['Python', 'SQL', 'Machine Learning'], phone: '(602) 844-9915', resume: 'Resume.pdf' },
-  { id: '19', name: 'Zoe Carter', email: 'zoe.carter@email.com', job: 'Frontend Developer', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'shortlisted', appliedAt: daysAgo(24), location: 'Minneapolis, MN', experience: '4 years', skills: ['React', 'TypeScript', 'Next.js'], phone: '(612) 339-7724', resume: 'Resume.pdf' },
-  { id: '20', name: 'Adrian Foster', email: 'adrian.foster@aperture.com', job: 'DevOps Engineer', company: 'Umbrella Corp', recruiter: 'Sofia Marchetti', status: 'new', appliedAt: daysAgo(27), location: 'Salt Lake City, UT', experience: '6 years', skills: ['Docker', 'Jenkins', 'AWS'], phone: '(801) 557-2208', resume: 'Resume.pdf' },
-  { id: '21', name: 'Natalia Reyes', email: 'natalia.reyes@email.com', job: 'Marketing Manager', company: 'Wayne Enterprises', recruiter: 'James Kowalski', status: 'reviewing', appliedAt: daysAgo(30), location: 'San Antonio, TX', experience: '5 years', skills: ['Social Media', 'Content Strategy', 'SEO'], phone: '(210) 664-3391', resume: 'Resume.pdf' },
-  { id: '22', name: 'Marcus Hill', email: 'marcus.hill@email.com', job: 'QA Engineer', company: 'Initech', recruiter: 'Elena Petrova', status: 'shortlisted', appliedAt: daysAgo(34), location: 'Detroit, MI', experience: '5 years', skills: ['Selenium', 'JUnit', 'Regression Testing'], phone: '(313) 771-5580', resume: 'Resume.pdf' },
-  { id: '23', name: 'Isabella Rossi', email: 'isabella.rossi@email.com', job: 'Product Designer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'interview', appliedAt: daysAgo(41), location: 'Boston, MA', experience: '6 years', skills: ['Figma', 'UX Research', 'Prototyping'], phone: '(617) 292-4413', resume: 'Resume.pdf' },
-  { id: '24', name: 'Jordan Fields', email: 'jordan.fields@email.com', job: 'Backend Engineer', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'rejected', appliedAt: daysAgo(55), location: 'Houston, TX', experience: '4 years', skills: ['Node.js', 'PostgreSQL', 'REST APIs'], phone: '(713) 448-9927', resume: 'Resume.pdf' },
-  // The next four people are also listed on the Admin Jobseekers page, where
-  // their recent applications are shown in the detail panel. These rows mirror
-  // those entries so "View Applications" lands on real results instead of an
-  // empty list, and both workspaces tell the same story.
-  { id: '25', name: 'Marcus Chen', email: 'marcus.chen@outlook.com', job: 'DevOps Engineer', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'new', appliedAt: daysAgo(0), location: 'San Francisco, CA', experience: '6 years', skills: ['AWS', 'Kubernetes', 'CI/CD'], phone: '+1 (415) 555-0164', resume: 'Resume.pdf' },
-  { id: '26', name: 'Priya Sharma', email: 'priya.sharma@gmail.com', job: 'QA Engineer', company: 'Umbrella Corp.', recruiter: 'Sofia Marchetti', status: 'new', appliedAt: daysAgo(1), location: 'Chicago, IL', experience: '3 years', skills: ['Selenium', 'Cypress', 'Test Planning'], phone: '+1 (312) 555-0158', resume: 'Resume.pdf' },
-  { id: '27', name: 'David Okafor', email: 'david.okafor@yahoo.com', job: 'Business Analyst', company: 'LexCorp', recruiter: 'Marcus Webb', status: 'shortlisted', appliedAt: daysAgo(2), location: 'Seattle, WA', experience: '7 years', skills: ['SQL', 'Requirements', 'Process Mapping'], phone: '+1 (206) 555-0183', resume: 'Resume.pdf' },
-  { id: '28', name: 'Marcus Chen', email: 'marcus.chen@outlook.com', job: 'Backend Engineer', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'reviewing', appliedAt: daysAgo(3), location: 'San Francisco, CA', experience: '5 years', skills: ['Node.js', 'PostgreSQL', 'Docker'], phone: '+1 (415) 555-0164', resume: 'Resume.pdf' },
-  { id: '29', name: 'David Okafor', email: 'david.okafor@yahoo.com', job: 'Data Analyst', company: 'Aperture Science', recruiter: 'Priya Raman', status: 'hired', appliedAt: daysAgo(4), location: 'Seattle, WA', experience: '8 years', skills: ['SQL', 'Python', 'Tableau'], phone: '+1 (206) 555-0183', resume: 'Resume.pdf' },
-  { id: '30', name: 'Priya Sharma', email: 'priya.sharma@gmail.com', job: 'Customer Success Manager', company: 'Stark Industries', recruiter: 'Olivia Bennett', status: 'reviewing', appliedAt: daysAgo(5), location: 'Chicago, IL', experience: '4 years', skills: ['Onboarding', 'Retention', 'CRM'], phone: '+1 (312) 555-0158', resume: 'Resume.pdf' },
-  { id: '31', name: 'Sofia Ramirez', email: 'sofia.ramirez@gmail.com', job: 'Marketing Manager', company: 'OmniCorp', recruiter: 'Elena Petrova', status: 'rejected', appliedAt: daysAgo(6), location: 'Austin, TX', experience: '3 years', skills: ['SEO', 'Content Strategy', 'Analytics'], phone: '+1 (512) 555-0127', resume: 'Resume.pdf' },
-  { id: '32', name: 'Priya Sharma', email: 'priya.sharma@gmail.com', job: 'Product Designer', company: 'OmniCorp', recruiter: 'Elena Petrova', status: 'rejected', appliedAt: daysAgo(8), location: 'Chicago, IL', experience: '2 years', skills: ['Figma', 'Prototyping', 'UX Research'], phone: '+1 (312) 555-0158', resume: 'Resume.pdf' },
-];
-
 const formatAppliedDate = (iso) => {
   if (!iso) return '—';
   const date = new Date(iso);
@@ -147,23 +110,58 @@ const getPageItems = (page, totalPages) => {
   return items;
 };
 
+// Derive a filename from the stored resume path. The API returns a path such as
+// /uploads/resumes/name-123.pdf, so the last path segment is the real file name.
+const fileNameFromUrl = (url) => {
+  const clean = String(url).split(/[?#]/)[0];
+  const base = clean.slice(clean.lastIndexOf('/') + 1);
+  try {
+    return decodeURIComponent(base) || 'resume';
+  } catch {
+    return base || 'resume';
+  }
+};
+
+// Union the options seen so far with the ones just returned, keeping the
+// currently selected value present even if the current page no longer contains
+// it. Without this, choosing a recruiter would shrink the dropdown to just that
+// recruiter and leave no way back to "All".
+const mergeOptions = (previous, incoming, selectedValue) => {
+  const byValue = new Map();
+  for (const option of previous) byValue.set(option.value, option);
+  for (const option of incoming) {
+    if (option && option.value && !byValue.has(option.value)) {
+      byValue.set(option.value, option);
+    }
+  }
+  if (selectedValue && selectedValue !== 'all' && !byValue.has(selectedValue)) {
+    byValue.set(selectedValue, { value: selectedValue, label: selectedValue });
+  }
+  return [...byValue.values()].sort((a, b) => a.label.localeCompare(b.label));
+};
+
 /**
  * AdminApplicationsPage - the /admin/applications workspace.
  *
- * Lists applicant applications (search + status/job/recruiter/date filters,
- * selected-row state, row action menu, pagination) beside a fixed-width
- * right-side detail panel for the selected application. Data is local UI mock
- * data until the admin applications API supports the fields and filters this
- * workspace needs.
+ * Fully backed by GET /api/admin/applications, GET /api/admin/applications/:id
+ * and PATCH /api/admin/applications/:id/status. Search, every filter, ordering,
+ * and paging run on the server, so the page keeps no second copy of the list to
+ * filter locally and the counts in the footer are the real totals.
+ *
+ * Selecting a row loads that application's detail from the API; the panel shows
+ * the real resume (open/download against the uploaded file) and links to the
+ * applicant's real profile. Nothing here falls back to placeholder content: a
+ * failed request renders an error with a retry, and a missing resume renders
+ * "No resume uploaded".
  */
 export default function AdminApplicationsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [applications, setApplications] = useState(MOCK_APPLICATIONS);
-  // Seeded from ?search= so another Admin workspace can deep-link a person's
-  // applications (the Jobseekers panel's "View Applications"). The existing
-  // search already matches applicant name and email, and the param stays in
-  // the URL so a refresh or Back/Forward step keeps the same applicant.
+  const navigate = useNavigate();
+
+  // Debounced search term actually sent to the server; `searchInput` is what the
+  // box holds. Keeps typing from firing a request per keystroke.
   const [searchInput, setSearchInput] = useState(() => searchParams.get('search') || '');
+  const [q, setQ] = useState('');
   const [status, setStatus] = useState('all');
   const [job, setJob] = useState('all');
   const [recruiter, setRecruiter] = useState('all');
@@ -188,23 +186,43 @@ export default function AdminApplicationsPage() {
     [searchParams, setSearchParams]
   );
 
+  const [list, setList] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [selectedId, setSelectedId] = useState(null);
+  const [detail, setDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(null);
+  // Bumped to re-run the detail request without changing the selection.
+  const [detailNonce, setDetailNonce] = useState(0);
+
+  const [busyId, setBusyId] = useState(null);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [downloading, setDownloading] = useState(false);
   const [toast, setToast] = useState(null);
+
+  const [jobOptions, setJobOptions] = useState([]);
+  const [recruiterOptions, setRecruiterOptions] = useState([]);
 
   const showToast = useCallback((message) => {
     setToast(message);
     setTimeout(() => setToast(null), 3200);
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setQ(searchInput.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   // Any filter or search change jumps back to page 1 and clears the selection
   // so it never points at a row that left the visible page. Only reacts to an
   // actual filter change, so a refresh with ?page=N never drops the param.
-  const prevFiltersRef = useRef(`${searchInput}|${status}|${job}|${recruiter}|${dateRange}`);
+  const filterKey = JSON.stringify({ q, status, job, recruiter, dateRange });
+  const lastFilterKeyRef = useRef(filterKey);
   useEffect(() => {
-    const filtersKey = `${searchInput}|${status}|${job}|${recruiter}|${dateRange}`;
-    if (filtersKey === prevFiltersRef.current) return;
-    prevFiltersRef.current = filtersKey;
+    if (lastFilterKeyRef.current === filterKey) return;
+    lastFilterKeyRef.current = filterKey;
     setSelectedId(null);
     if (searchParams.has('page')) {
       const params = new URLSearchParams(searchParams);
@@ -212,41 +230,93 @@ export default function AdminApplicationsPage() {
       setSearchParams(params, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchInput, status, job, recruiter, dateRange]);
+  }, [filterKey]);
 
-  const uniqueJobs = useMemo(
-    () => [...new Set(applications.map((app) => app.job))].sort(),
-    [applications]
-  );
-  const uniqueRecruiters = useMemo(
-    () => [...new Set(applications.map((app) => app.recruiter))].sort(),
-    [applications]
-  );
+  const loadList = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getAdminApplications({
+        page,
+        limit: PAGE_SIZE,
+        q,
+        status,
+        job,
+        recruiter,
+        dateRange,
+      });
+      setList(data);
 
-  const filtered = useMemo(() => {
-    const q = searchInput.trim().toLowerCase();
-    return applications.filter((app) => {
-      if (status !== 'all' && app.status !== status) return false;
-      if (job !== 'all' && app.job !== job) return false;
-      if (recruiter !== 'all' && app.recruiter !== recruiter) return false;
-      if (dateRange) {
-        const cutoff = new Date();
-        if (dateRange === 'today') {
-          cutoff.setHours(0, 0, 0, 0);
-        } else {
-          cutoff.setDate(cutoff.getDate() - Number(dateRange));
-        }
-        if (new Date(app.appliedAt) < cutoff) return false;
-      }
-      if (q) {
-        const haystack = `${app.name} ${app.email} ${app.job} ${app.company} ${app.recruiter}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [applications, searchInput, status, job, recruiter, dateRange]);
+      // Filter dropdowns are built from real rows the API has returned. They
+      // accumulate across pages rather than being replaced, so narrowing the
+      // list never removes a choice the admin still needs.
+      setJobOptions((prev) =>
+        mergeOptions(
+          prev,
+          (data.applications || [])
+            .map((app) => app.job)
+            .filter(Boolean)
+            .map((entry) => ({ value: entry.id, label: entry.title })),
+          job
+        )
+      );
+      setRecruiterOptions((prev) =>
+        mergeOptions(
+          prev,
+          (data.applications || [])
+            .map((app) => app.recruiter)
+            .filter(Boolean)
+            .map((entry) => ({ value: entry.id, label: entry.name })),
+          recruiter
+        )
+      );
+    } catch (err) {
+      setError(err);
+      setList(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, q, status, job, recruiter, dateRange]);
 
-  const filtersActive = searchInput !== '' || status !== 'all' || job !== 'all' || recruiter !== 'all' || dateRange !== '';
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
+
+  // Load the selected application's detail. The row already in hand drives the
+  // panel header so selecting a row feels instant; the detail request fills in
+  // the contact, resume, and links sections.
+  useEffect(() => {
+    if (!selectedId) {
+      setDetail(null);
+      setDetailError(null);
+      return undefined;
+    }
+    let cancelled = false;
+    setDetailLoading(true);
+    setDetailError(null);
+    getAdminApplication(selectedId)
+      .then((data) => {
+        if (!cancelled) setDetail(data.application);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setDetail(null);
+        setDetailError(err);
+      })
+      .finally(() => {
+        if (!cancelled) setDetailLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId, detailNonce]);
+
+  const reloadDetail = useCallback(() => {
+    setDetailNonce((n) => n + 1);
+  }, []);
+
+  const filtersActive =
+    q !== '' || status !== 'all' || job !== 'all' || recruiter !== 'all' || dateRange !== '';
 
   const clearFilters = useCallback(() => {
     setSearchInput('');
@@ -262,37 +332,117 @@ export default function AdminApplicationsPage() {
   }, []);
 
   const changeStatus = useCallback(
-    (id, nextStatus) => {
+    async (id, nextStatus) => {
       setActiveMenuId(null);
-      setApplications((prev) =>
-        prev.map((app) => (app.id === id ? { ...app, status: nextStatus } : app))
-      );
-      const app = applications.find((a) => a.id === id);
-      if (app) {
-        showToast(`“${app.name}” moved to ${STATUS_META[nextStatus].label.toLowerCase()} status`);
+      setBusyId(id);
+      try {
+        const data = await updateAdminApplicationStatus(id, nextStatus);
+        const updated = data.application;
+
+        // Replace the row with the server's normalized version so the badge and
+        // the panel can never disagree with what was stored.
+        setList((prev) =>
+          prev
+            ? {
+                ...prev,
+                applications: prev.applications.map((app) =>
+                  String(app.id) === String(id) ? { ...app, ...updated } : app
+                ),
+              }
+            : prev
+        );
+        // The panel's detail shape is richer than the list row, so only the
+        // status is carried over rather than replacing the whole object.
+        setDetail((prev) =>
+          prev && String(prev.id) === String(id)
+            ? { ...prev, status: updated.status, updatedAt: updated.updatedAt }
+            : prev
+        );
+        showToast(
+          `“${updated.applicant}” moved to ${statusLabel(updated.status).toLowerCase()} status`
+        );
+      } catch (err) {
+        // Surface the real reason; never pretend the change succeeded.
+        showToast(err?.message || 'Could not update the application status.');
+      } finally {
+        setBusyId(null);
       }
     },
-    [applications, showToast]
+    [showToast]
   );
 
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-  const listStart = total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
-  const listEnd = Math.min(safePage * PAGE_SIZE, total);
+  // Open the real uploaded file in a new tab.
+  const viewResume = useCallback(
+    (url) => {
+      const absolute = resolveMediaUrl(url);
+      if (!absolute) return;
+      window.open(absolute, '_blank', 'noopener,noreferrer');
+    },
+    []
+  );
 
-  // An invalid or out-of-range ?page=N (e.g. after a refresh with stale data)
-  // is repaired to a valid page instead of silently showing an empty one.
+  // Download the real file. The API is a different origin from the app, so a
+  // plain `download` attribute would be ignored by the browser; fetching the
+  // bytes and handing them over as a blob object URL forces a real download.
+  const downloadResume = useCallback(
+    async (url) => {
+      const absolute = resolveMediaUrl(url);
+      if (!absolute) return;
+      setDownloading(true);
+      let objectUrl = null;
+      try {
+        const response = await fetch(absolute);
+        if (!response.ok) {
+          throw new Error(`The server responded with ${response.status}.`);
+        }
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = fileNameFromUrl(absolute);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } catch (err) {
+        // Report the actual failure. A resume that cannot be downloaded is
+        // never papered over with a success message.
+        showToast(err?.message || 'Could not download the resume.');
+      } finally {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        setDownloading(false);
+      }
+    },
+    [showToast]
+  );
+
+  const viewProfile = useCallback(
+    (userId) => {
+      if (!userId) {
+        showToast('This application is not linked to an account.');
+        return;
+      }
+      navigate(`/admin/jobseekers/${userId}`);
+    },
+    [navigate, showToast]
+  );
+
+  const total = list?.total ?? 0;
+  const totalPages = Math.max(1, list?.totalPages ?? 1);
+  const rows = list?.applications ?? [];
+  const listStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const listEnd = Math.min(page * PAGE_SIZE, total);
+
+  // An out-of-range ?page=N (e.g. a deep link past the end, or the last page
+  // disappearing after a status filter change) is repaired instead of showing
+  // an empty table.
   useEffect(() => {
-    if (pageInvalid) goToPage(1, { replace: true });
-    else if (page > totalPages) goToPage(totalPages, { replace: true });
-  }, [page, pageInvalid, totalPages, goToPage]);
+    if (loading || error) return;
+    if (total > 0 && page > totalPages) goToPage(totalPages, { replace: true });
+  }, [loading, error, total, page, totalPages, goToPage]);
 
   // Read the selection straight from the live list so a status change lands in
   // both the table row and the detail panel on the same render.
-  const selected =
-    applications.find((app) => String(app.id) === String(selectedId)) || null;
+  const selected = rows.find((app) => String(app.id) === String(selectedId)) || null;
 
   return (
     <div className="admin-page admin-applications">
@@ -332,7 +482,7 @@ export default function AdminApplicationsPage() {
               aria-label="Status"
               options={[
                 { value: 'all', label: 'All statuses' },
-                ...STATUS_OPTIONS.map((value) => ({ value, label: STATUS_META[value].label })),
+                ...STATUS_OPTIONS.map((value) => ({ value, label: statusLabel(value) })),
               ]}
             />
           </div>
@@ -344,7 +494,10 @@ export default function AdminApplicationsPage() {
               value={job}
               onChange={(e) => setJob(e.target.value)}
               aria-label="Job"
-              options={[{ value: 'all', label: 'All jobs' }, ...uniqueJobs.map((title) => ({ value: title, label: title }))]}
+              options={[
+                { value: 'all', label: 'All jobs' },
+                ...jobOptions.map((option) => ({ value: option.value, label: option.label })),
+              ]}
             />
           </div>
           <div className="admin-applications-filter">
@@ -355,7 +508,10 @@ export default function AdminApplicationsPage() {
               value={recruiter}
               onChange={(e) => setRecruiter(e.target.value)}
               aria-label="Recruiter"
-              options={[{ value: 'all', label: 'All recruiters' }, ...uniqueRecruiters.map((name) => ({ value: name, label: name }))]}
+              options={[
+                { value: 'all', label: 'All recruiters' },
+                ...recruiterOptions.map((option) => ({ value: option.value, label: option.label })),
+              ]}
             />
           </div>
           <div className="admin-applications-filter">
@@ -401,12 +557,35 @@ export default function AdminApplicationsPage() {
               </tr>
             </thead>
             <tbody>
-              {pageItems.length === 0 ? (
+              {loading && rows.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="admin-applications-state">
+                    <span className="admin-applications-state-title">Loading applications...</span>
+                    <span className="admin-applications-state-text">
+                      Fetching the latest applications from the server.
+                    </span>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="admin-applications-state">
+                    <span className="admin-applications-state-title">Unable to load applications</span>
+                    <span className="admin-applications-state-text">
+                      {error?.message || 'Something went wrong while fetching applications.'}
+                    </span>
+                    <button type="button" className="admin-applications-btn" onClick={loadList}>
+                      Try again
+                    </button>
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="admin-applications-state">
                     <span className="admin-applications-state-title">No applications found</span>
                     <span className="admin-applications-state-text">
-                      Try adjusting your search or filters.
+                      {filtersActive
+                        ? 'Try adjusting your search or filters.'
+                        : 'No applications have been submitted yet.'}
                     </span>
                     {filtersActive && (
                       <button type="button" className="admin-applications-btn" onClick={clearFilters}>
@@ -416,9 +595,10 @@ export default function AdminApplicationsPage() {
                   </td>
                 </tr>
               ) : (
-                pageItems.map((app) => {
-                  const meta = STATUS_META[app.status] || STATUS_META.new;
+                rows.map((app) => {
+                  const meta = STATUS_META[app.status] || STATUS_META.applied;
                   const isSelected = String(app.id) === String(selectedId);
+                  const isBusy = String(app.id) === busyId;
                   return (
                     <tr
                       key={app.id}
@@ -428,28 +608,28 @@ export default function AdminApplicationsPage() {
                       <td className="admin-applications-col-applicant">
                         <span className="admin-applications-applicant">
                           <Avatar
-                            src={null}
-                            fallbackSrc={avatarFallback(app.name, app.email)}
+                            src={app.avatarUrl ? resolveMediaUrl(app.avatarUrl) : null}
+                            fallbackSrc={avatarFallback(app.applicant, app.email)}
                             imgClassName="admin-applications-avatar"
                             placeholderClassName="admin-applications-avatar admin-applications-avatar--initials"
                             imgAlt=""
                             iconSize={14}
                           />
                           <span className="admin-applications-applicant-text">
-                            <span className="admin-applications-applicant-name">{app.name}</span>
-                            <span className="admin-applications-applicant-email">{app.email}</span>
+                            <span className="admin-applications-applicant-name">{app.applicant}</span>
+                            <span className="admin-applications-applicant-email">{app.email || '—'}</span>
                           </span>
                         </span>
                       </td>
                       <td className="admin-applications-col-job">
-                        <span className="admin-applications-job">{app.job}</span>
+                        <span className="admin-applications-job">{app.jobTitle}</span>
                       </td>
                       <td className="admin-applications-col-company">
                         <span className="admin-applications-company">{app.company}</span>
                       </td>
                       <td className="admin-applications-col-status">
                         <span className={`admin-applications-badge admin-applications-badge--${meta.tone}`}>
-                          {meta.label}
+                          {statusLabel(app.status)}
                         </span>
                       </td>
                       <td className="admin-applications-col-applied">
@@ -458,6 +638,7 @@ export default function AdminApplicationsPage() {
                       <td className="admin-applications-col-actions" onClick={(e) => e.stopPropagation()}>
                         <RowActions
                           app={app}
+                          busy={isBusy}
                           open={activeMenuId === String(app.id)}
                           onToggle={() =>
                             setActiveMenuId((prev) =>
@@ -479,20 +660,28 @@ export default function AdminApplicationsPage() {
 
         <footer className="admin-applications-footer">
           <p className="admin-applications-footer-count">
-            Showing <strong>{listStart}–{listEnd}</strong> of <strong>{total}</strong> applications
+            {loading && rows.length === 0 ? (
+              'Loading applications...'
+            ) : error ? (
+              'Applications could not be loaded'
+            ) : (
+              <>
+                Showing <strong>{listStart}–{listEnd}</strong> of <strong>{total}</strong> applications
+              </>
+            )}
           </p>
-          {totalPages > 1 && (
+          {!loading && !error && totalPages > 1 && (
             <nav className="admin-applications-pagination" aria-label="Applications pagination">
               <button
                 type="button"
                 className="admin-applications-page-btn admin-applications-page-btn--nav"
                 onClick={() => goToPage(Math.max(1, page - 1))}
-                disabled={safePage <= 1}
+                disabled={page <= 1}
               >
                 {ARROW_LEFT}
                 Previous
               </button>
-              {getPageItems(safePage, totalPages).map((item, index) =>
+              {getPageItems(page, totalPages).map((item, index) =>
                 item === '…' ? (
                   <span key={`gap-${index}`} className="admin-applications-page-gap">
                     {item}
@@ -501,10 +690,10 @@ export default function AdminApplicationsPage() {
                   <button
                     key={item}
                     type="button"
-                    className={`admin-applications-page-btn${item === safePage ? ' admin-applications-page-btn--current' : ''}`}
+                    className={`admin-applications-page-btn${item === page ? ' admin-applications-page-btn--current' : ''}`}
                     onClick={() => goToPage(item)}
                     aria-label={`Go to page ${item}`}
-                    aria-current={item === safePage ? 'page' : undefined}
+                    aria-current={item === page ? 'page' : undefined}
                   >
                     {item}
                   </button>
@@ -514,7 +703,7 @@ export default function AdminApplicationsPage() {
                 type="button"
                 className="admin-applications-page-btn admin-applications-page-btn--nav"
                 onClick={() => goToPage(Math.min(totalPages, page + 1))}
-                disabled={safePage >= totalPages}
+                disabled={page >= totalPages}
               >
                 Next
                 {ARROW_RIGHT}
@@ -527,9 +716,16 @@ export default function AdminApplicationsPage() {
       <aside className="admin-applications-panel" aria-label="Application details">
         {selected ? (
           <DetailPanel
-            app={selected}
+            row={selected}
+            detail={detail}
+            loading={detailLoading}
+            error={detailError}
             onClose={() => setSelectedId(null)}
-            notify={showToast}
+            onRetry={reloadDetail}
+            onViewResume={viewResume}
+            onDownloadResume={downloadResume}
+            downloading={downloading}
+            onViewProfile={viewProfile}
           />
         ) : (
           <div className="admin-applications-panel-state">
@@ -552,7 +748,7 @@ export default function AdminApplicationsPage() {
 /* closed on outside click / Escape / scroll / resize.                       */
 /* ------------------------------------------------------------------------ */
 
-function RowActions({ app, open, onToggle, onClose, onSelect, onChangeStatus }) {
+function RowActions({ app, busy, open, onToggle, onClose, onSelect, onChangeStatus }) {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
   const [pos, setPos] = useState(null);
@@ -565,7 +761,7 @@ function RowActions({ app, open, onToggle, onClose, onSelect, onChangeStatus }) 
   useEffect(() => {
     if (!open) return;
     const handlePointerDown = (e) => {
-      const inMenu = menuRef.current?.contains(e.target);
+      const inMenu = menuRef?.current?.contains(e.target);
       const inTrigger = triggerRef.current?.contains(e.target);
       if (!inMenu && !inTrigger) onClose();
     };
@@ -621,7 +817,8 @@ function RowActions({ app, open, onToggle, onClose, onSelect, onChangeStatus }) 
         ref={triggerRef}
         className={`admin-applications-menu-btn${open ? ' admin-applications-menu-btn--open' : ''}`}
         onClick={onToggle}
-        aria-label={`Actions for ${app.name}`}
+        disabled={busy}
+        aria-label={`Actions for ${app.applicant}`}
         aria-expanded={open}
         aria-haspopup="menu"
       >
@@ -633,7 +830,7 @@ function RowActions({ app, open, onToggle, onClose, onSelect, onChangeStatus }) 
             ref={menuRef}
             className="admin-applications-menu"
             role="menu"
-            aria-label={`Actions for ${app.name}`}
+            aria-label={`Actions for ${app.applicant}`}
             style={{
               ...(pos ? { top: pos.top, left: pos.left } : { top: 0, left: 0, visibility: 'hidden' }),
               minWidth: 196,
@@ -667,7 +864,7 @@ function RowActions({ app, open, onToggle, onClose, onSelect, onChangeStatus }) 
                     <span className="admin-applications-menu-check">
                       {app.status === value ? CHECK_ICON : null}
                     </span>
-                    <span className="admin-applications-menu-item-label">{STATUS_META[value].label}</span>
+                    <span className="admin-applications-menu-item-label">{statusLabel(value)}</span>
                   </button>
                 ))}
               </>
@@ -683,13 +880,15 @@ function RowActions({ app, open, onToggle, onClose, onSelect, onChangeStatus }) 
                   <span className="admin-applications-menu-item-label">Change status</span>
                   <span className="admin-applications-menu-chevron" aria-hidden="true">{ARROW_RIGHT}</span>
                 </button>
-                <a
-                  className="admin-applications-menu-item admin-applications-menu-item--link"
-                  href={`mailto:${app.email}`}
-                >
-                  <span className="admin-applications-menu-check" />
-                  <span className="admin-applications-menu-item-label">Contact applicant</span>
-                </a>
+                {app.email && (
+                  <a
+                    className="admin-applications-menu-item admin-applications-menu-item--link"
+                    href={`mailto:${app.email}`}
+                  >
+                    <span className="admin-applications-menu-check" />
+                    <span className="admin-applications-menu-item-label">Contact applicant</span>
+                  </a>
+                )}
               </>
             )}
           </div>,
@@ -701,28 +900,60 @@ function RowActions({ app, open, onToggle, onClose, onSelect, onChangeStatus }) 
 
 /* ------------------------------------------------------------------------ */
 /* Right-side detail panel - contextual inspector for the selected row.      */
-/* All data is local mock data, so View Profile / View Resume only surface   */
-/* feedback through the existing Toast instead of navigating anywhere.       */
+/*                                                                          */
+/* The header renders from the list row so the panel fills instantly; the     */
+/* sections below it render from the application's detail once it has loaded,  */
+/* so contact details, links, and the resume are always the real values.      */
+/* The resume actions act on the stored file: View opens it, Download fetches  */
+/* the bytes. A record with no resume says so instead of offering a button.   */
 /* ------------------------------------------------------------------------ */
 
-function DetailPanel({ app, onClose, notify }) {
+function DetailPanel({
+  row,
+  detail,
+  loading,
+  error,
+  onClose,
+  onRetry,
+  onViewResume,
+  onDownloadResume,
+  downloading,
+  onViewProfile,
+}) {
+  const applicant = detail?.applicant || null;
+  const status = detail?.status ?? row.status;
+  const meta = STATUS_META[status] || STATUS_META.applied;
+  const resumeUrl = applicant?.resumeUrl || '';
+  const skills = applicant?.skills?.length ? applicant.skills : row.skills;
+
   return (
     <div className="admin-applications-detail">
       <header className="admin-applications-detail-head">
         <Avatar
-          src={null}
-          fallbackSrc={avatarFallback(app.name, app.email)}
+          src={(detail?.applicant?.avatarUrl || row.avatarUrl)
+            ? resolveMediaUrl(detail?.applicant?.avatarUrl || row.avatarUrl)
+            : null}
+          fallbackSrc={avatarFallback(detail?.applicant?.fullName || row.applicant, row.email)}
           imgClassName="admin-applications-avatar admin-applications-detail-avatar"
           placeholderClassName="admin-applications-avatar admin-applications-avatar--initials admin-applications-detail-avatar"
           imgAlt=""
           iconSize={16}
         />
         <div className="admin-applications-detail-titles">
-          <h2 className="admin-applications-detail-name">{app.name}</h2>
-          <p className="admin-applications-detail-email">{app.email}</p>
-          <p className="admin-applications-detail-location">{app.location}</p>
+          <h2 className="admin-applications-detail-name">
+            {applicant?.fullName || row.applicant}
+          </h2>
+          <p className="admin-applications-detail-email">{applicant?.email || row.email || '—'}</p>
+          {(applicant?.location || row.location) && (
+            <p className="admin-applications-detail-location">
+              {applicant?.location || row.location}
+            </p>
+          )}
         </div>
         <div className="admin-applications-detail-head-side">
+          <span className={`admin-applications-badge admin-applications-badge--${meta.tone}`}>
+            {statusLabel(status)}
+          </span>
           <button
             type="button"
             className="admin-applications-detail-close"
@@ -734,103 +965,172 @@ function DetailPanel({ app, onClose, notify }) {
         </div>
       </header>
 
-      <section className="admin-applications-detail-section">
-        <h3 className="admin-applications-detail-sub">Application</h3>
-        <dl className="admin-applications-detail-list">
-          <div className="admin-applications-detail-row">
-            <dt>Job title</dt>
-            <dd>{app.job}</dd>
-          </div>
-          <div className="admin-applications-detail-row">
-            <dt>Company</dt>
-            <dd>{app.company}</dd>
-          </div>
-          <div className="admin-applications-detail-row">
-            <dt>Applied</dt>
-            <dd>{formatAppliedDate(app.appliedAt)}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="admin-applications-detail-section">
-        <h3 className="admin-applications-detail-sub">Candidate</h3>
-        <dl className="admin-applications-detail-list">
-          <div className="admin-applications-detail-row">
-            <dt>Location</dt>
-            <dd>{app.location}</dd>
-          </div>
-          <div className="admin-applications-detail-row">
-            <dt>Experience</dt>
-            <dd>{app.experience}</dd>
-          </div>
-          <div className="admin-applications-detail-row">
-            <dt>Skills</dt>
-            <dd>
-              <span className="admin-applications-detail-skills">
-                {app.skills.map((skill) => (
-                  <span key={skill} className="admin-applications-detail-skill">
-                    {skill}
-                  </span>
-                ))}
-              </span>
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="admin-applications-detail-section">
-        <h3 className="admin-applications-detail-sub">Resume</h3>
-        <div className="admin-applications-detail-resume">
-          <span className="admin-applications-detail-resume-icon" aria-hidden="true">
-            {DOC_ICON}
+      {error ? (
+        <div className="admin-applications-panel-state">
+          <span className="admin-applications-state-title">Unable to load this application</span>
+          <span className="admin-applications-state-text">
+            {error?.message || 'Something went wrong while fetching the application detail.'}
           </span>
-          <div className="admin-applications-detail-resume-info">
-            <span className="admin-applications-detail-resume-name">{app.resume}</span>
-            <span className="admin-applications-detail-resume-actions">
-              <button type="button" onClick={() => notify('Resume access is not available in this preview.')}>
-                View
-              </button>
-              <span aria-hidden="true">·</span>
-              <button type="button" onClick={() => notify('Resume access is not available in this preview.')}>
-                Download
-              </button>
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <section className="admin-applications-detail-section">
-        <h3 className="admin-applications-detail-sub">Contact</h3>
-        <dl className="admin-applications-detail-list">
-          <div className="admin-applications-detail-row">
-            <dt>Email</dt>
-            <dd>{app.email}</dd>
-          </div>
-          <div className="admin-applications-detail-row">
-            <dt>Phone</dt>
-            <dd>{app.phone}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <footer className="admin-applications-detail-actions">
-        <div className="admin-applications-detail-actions-row">
           <button
             type="button"
             className="admin-applications-btn"
-            onClick={() => notify('Applicant profiles are not available in this preview.')}
+            onClick={onRetry}
           >
-            View Profile
-          </button>
-          <button
-            type="button"
-            className="admin-applications-btn"
-            onClick={() => notify('Resume access is not available in this preview.')}
-          >
-            View Resume
+            Try again
           </button>
         </div>
-      </footer>
+      ) : loading && !detail ? (
+        <div className="admin-applications-panel-state">
+          <span className="admin-applications-state-title">Loading application...</span>
+          <span className="admin-applications-state-text">
+            Fetching the applicant's details from the server.
+          </span>
+        </div>
+      ) : (
+        <>
+          <section className="admin-applications-detail-section">
+            <h3 className="admin-applications-detail-sub">Application</h3>
+            <dl className="admin-applications-detail-list">
+              <div className="admin-applications-detail-row">
+                <dt>Job title</dt>
+                <dd>{detail?.job?.title || row.jobTitle}</dd>
+              </div>
+              <div className="admin-applications-detail-row">
+                <dt>Company</dt>
+                <dd>{detail?.job?.company || row.company}</dd>
+              </div>
+              <div className="admin-applications-detail-row">
+                <dt>Recruiter</dt>
+                <dd>{detail?.recruiter?.name || row.recruiter?.name || 'Unassigned'}</dd>
+              </div>
+              <div className="admin-applications-detail-row">
+                <dt>Applied</dt>
+                <dd>{formatAppliedDate(detail?.appliedAt || row.appliedAt)}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="admin-applications-detail-section">
+            <h3 className="admin-applications-detail-sub">Candidate</h3>
+            <dl className="admin-applications-detail-list">
+              <div className="admin-applications-detail-row">
+                <dt>Location</dt>
+                <dd>{applicant?.location || row.location || '—'}</dd>
+              </div>
+              <div className="admin-applications-detail-row">
+                <dt>Skills</dt>
+                <dd>
+                  {skills && skills.length ? (
+                    <span className="admin-applications-detail-skills">
+                      {skills.map((skill) => (
+                        <span key={skill} className="admin-applications-detail-skill">
+                          {skill}
+                        </span>
+                      ))}
+                    </span>
+                  ) : (
+                    '—'
+                  )}
+                </dd>
+              </div>
+              {applicant?.portfolio && (
+                <div className="admin-applications-detail-row">
+                  <dt>Portfolio</dt>
+                  <dd>
+                    <a
+                      className="admin-applications-detail-link"
+                      href={applicant.portfolio}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {applicant.portfolio}
+                    </a>
+                  </dd>
+                </div>
+              )}
+              {applicant?.linkedin && (
+                <div className="admin-applications-detail-row">
+                  <dt>LinkedIn</dt>
+                  <dd>
+                    <a
+                      className="admin-applications-detail-link"
+                      href={applicant.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {applicant.linkedin}
+                    </a>
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </section>
+
+          <section className="admin-applications-detail-section">
+            <h3 className="admin-applications-detail-sub">Resume</h3>
+            {resumeUrl ? (
+              <div className="admin-applications-detail-resume">
+                <span className="admin-applications-detail-resume-icon" aria-hidden="true">
+                  {DOC_ICON}
+                </span>
+                <div className="admin-applications-detail-resume-info">
+                  <span className="admin-applications-detail-resume-name">
+                    {fileNameFromUrl(resumeUrl)}
+                  </span>
+                  <span className="admin-applications-detail-resume-actions">
+                    <button type="button" onClick={() => onViewResume(resumeUrl)}>
+                      View
+                    </button>
+                    <span aria-hidden="true">·</span>
+                    <button
+                      type="button"
+                      onClick={() => onDownloadResume(resumeUrl)}
+                      disabled={downloading}
+                    >
+                      {downloading ? 'Downloading...' : 'Download'}
+                    </button>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="admin-applications-detail-resume-missing">No resume uploaded</p>
+            )}
+          </section>
+
+          <section className="admin-applications-detail-section">
+            <h3 className="admin-applications-detail-sub">Contact</h3>
+            <dl className="admin-applications-detail-list">
+              <div className="admin-applications-detail-row">
+                <dt>Email</dt>
+                <dd>{applicant?.email || row.email || '—'}</dd>
+              </div>
+              <div className="admin-applications-detail-row">
+                <dt>Phone</dt>
+                <dd>{applicant?.phone || row.phone || '—'}</dd>
+              </div>
+            </dl>
+          </section>
+
+          {detail?.coverLetter && (
+            <section className="admin-applications-detail-section">
+              <h3 className="admin-applications-detail-sub">Cover letter</h3>
+              <p className="admin-applications-detail-cover">{detail.coverLetter}</p>
+            </section>
+          )}
+
+          <footer className="admin-applications-detail-actions">
+            <div className="admin-applications-detail-actions-row">
+              <button
+                type="button"
+                className="admin-applications-btn"
+                onClick={() => onViewProfile(row.userId)}
+              >
+                View Profile
+              </button>
+            </div>
+          </footer>
+        </>
+      )}
     </div>
   );
 }

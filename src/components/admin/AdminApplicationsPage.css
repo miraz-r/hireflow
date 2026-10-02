@@ -1127,6 +1127,54 @@ html[data-theme="dark"] .admin-applications-menu-chevron {
   border-radius: 2px;
 }
 
+/* While a download is in flight the button stays in place so the row does not
+   jump, but it is not clickable again. */
+.admin-applications-detail-resume-actions button:disabled {
+  color: var(--admin-text-faint);
+  cursor: default;
+}
+
+/* Shown in place of the resume row when the application has no stored file.
+   Deliberately plain: it states the absence instead of offering an action
+   that would not work. */
+.admin-applications-detail-resume-missing {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+  background-color: var(--admin-surface);
+  border: 1px dashed var(--admin-border);
+  border-radius: var(--radius-sm);
+}
+
+/* External links (portfolio, LinkedIn) inside a detail row. Long URLs wrap
+   instead of overflowing the fixed-width panel. */
+.admin-applications-detail-link {
+  color: var(--admin-primary);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.admin-applications-detail-link:hover {
+  text-decoration: underline;
+}
+
+.admin-applications-detail-link:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Cover letter body - preserved whitespace so submitted formatting survives. */
+.admin-applications-detail-cover {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* ---------- Action area ---------- */
 .admin-applications-detail-actions {
   display: flex;

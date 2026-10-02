@@ -1,4 +1,4 @@
-const { body, param, validationResult } = require('express-validator');
+const { body, param, query, validationResult } = require('express-validator');
 const { PHONE_CHARS_RE } = require('../utils/phone');
 const { APPLICATION_STATUSES } = require('../utils/applicationStatus');
 
@@ -110,10 +110,83 @@ const statusUpdateValidators = [
   runValidation,
 ];
 
+// ---------------------------------------------------------------------------
+// GET /api/admin/applications — Admin Applications workspace query filters.
+//
+// Every filter is optional, and the defaults reproduce the Overview feed
+// exactly: no query string at all must behave like the original call. Values
+// use `{ values: 'falsy' }` so an empty dropdown selection ("Any status",
+// "Any date") is treated as absent rather than as a validation failure — the
+// workspace sends '' for an unfiltered dropdown.
+// ---------------------------------------------------------------------------
+
+// "Any date" is '' ; every other value is either the literal 'today' or a
+// positive day count. The literal is allowed so a blank-vs-today choice is
+// expressible without a second parameter.
+const dateRangeValidator = query('dateRange')
+  .optional({ values: 'falsy' })
+  .custom((value) => {
+    if (value === 'today') return true;
+    const days = Number(value);
+    if (!Number.isInteger(days) || days < 1 || days > 365) {
+      throw new Error('dateRange must be "today" or a whole number of days between 1 and 365');
+    }
+    return true;
+  });
+
+const adminApplicationQueryValidators = [
+  query('page')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1 })
+    .withMessage('page must be a positive integer'),
+  query('limit')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1, max: 50 })
+    .withMessage('limit must be between 1 and 50'),
+  query('q')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('q must be at most 200 characters'),
+  // Reuses the canonical enum. An unknown status is rejected rather than
+  // silently ignored, so a filter typo cannot masquerade as "no filter".
+  query('status')
+    .optional({ values: 'falsy' })
+    .custom((value) => {
+      if (value === 'all') return true;
+      if (!APPLICATION_STATUSES.includes(value)) {
+        throw new Error(`Status must be one of: ${APPLICATION_STATUSES.join(', ')}`);
+      }
+      return true;
+    }),
+  query('job')
+    .optional({ values: 'falsy' })
+    .isMongoId()
+    .withMessage('job must be a valid id'),
+  query('recruiter')
+    .optional({ values: 'falsy' })
+    .isMongoId()
+    .withMessage('recruiter must be a valid id'),
+  dateRangeValidator,
+  runValidation,
+];
+
+// GET /api/admin/jobseekers/:userId — the applicant profile viewer. The id is a
+// user id, not an application id, so it gets its own named-param validator.
+const jobseekerIdParamValidators = [
+  param('userId')
+    .isMongoId()
+    .withMessage('Invalid jobseeker id'),
+  runValidation,
+];
+
 module.exports = {
   createValidators,
   jobIdParamValidators,
   applicationIdValidators,
   statusUpdateValidators,
+  adminApplicationQueryValidators,
+  jobseekerIdParamValidators,
   runValidation,
 };

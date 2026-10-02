@@ -45,12 +45,14 @@ const linkSchema = new mongoose.Schema(
 
 const profileSchema = new mongoose.Schema(
   {
-    // Owning user — 1:1. Unique index enforces at most one profile per user.
+    // Owning account. One account may hold one profile per workspace, so this
+    // is no longer unique on its own — see the compound {userId, role} unique
+    // index registered below. Keeping `userId` indexed alone is still useful
+    // for "every profile for this account" lookups (delete, workspace list).
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'Profile must belong to a user'],
-      unique: true,
       index: true,
     },
 
@@ -158,6 +160,12 @@ const profileSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// One profile per (account, workspace). This is what allows a single account to
+// hold an independent Jobseeker profile and an independent Recruiter profile
+// at the same time. Requires the migration that replaces the old unique
+// `userId_1` index — see src/seed/profileWorkspaces.migration.js.
+profileSchema.index({ userId: 1, role: 1 }, { unique: true });
 
 // Block accidental mixing of jobseeker and recruiter fields.
 // This runs as part of .validate() / .save().

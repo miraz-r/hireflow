@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, registerValidators, login, loginValidators, toggleRole, roleValidators } = require('../controllers/auth.controller');
+const { register, registerValidators, login, loginValidators, switchWorkspace, roleValidators, availableWorkspaces } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth');
 const { createRateLimiter } = require('../middleware/rateLimit');
 const User = require('../models/User');
@@ -16,7 +16,9 @@ const registerLimiter = createRateLimiter({ windowMs: 60 * 60 * 1000, max: 10 })
 router.post('/register', registerLimiter, registerValidators, register);
 router.post('/login', loginLimiter, loginValidators, login);
 
-router.post('/role', authenticate, roleValidators, toggleRole);
+// Switches the account's active workspace. Non-destructive: the workspace being
+// left keeps its own profile.
+router.post('/role', authenticate, roleValidators, switchWorkspace);
 
 router.get('/me', authenticate, async (req, res, next) => {
   try {
@@ -24,11 +26,19 @@ router.get('/me', authenticate, async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    const profile = await Profile.findOne({ userId: user.id }).select('fullName avatarUrl').lean();
+    // Scoped to the active workspace so the greeting matches the workspace the
+    // user is currently in, and includes every workspace the account holds.
+    const [profile, workspaces] = await Promise.all([
+      Profile.findOne({ userId: user.id, role: user.role })
+        .select('fullName avatarUrl')
+        .lean(),
+      availableWorkspaces(user.id),
+    ]);
     return res.status(200).json({
       id: user.id,
       email: user.email,
       role: user.role,
+      workspaces,
       fullName: profile && profile.fullName ? profile.fullName : null,
       avatarUrl: profile && profile.avatarUrl ? profile.avatarUrl : null,
     });

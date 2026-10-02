@@ -8,6 +8,7 @@ import AdminApplicationsPage from '../components/admin/AdminApplicationsPage';
 import AdminRecruitersPage from '../components/admin/AdminRecruitersPage';
 import AdminCompaniesPage from '../components/admin/AdminCompaniesPage';
 import AdminJobseekersPage from '../components/admin/AdminJobseekersPage';
+import AdminApplicantProfilePage from '../components/admin/AdminApplicantProfilePage';
 import AdminAnalyticsPage from '../components/admin/AdminAnalyticsPage';
 import AdminActivityPage from '../components/admin/AdminActivityPage';
 import AdminAccountPage from './AdminAccountPage';
@@ -63,6 +64,10 @@ export default function AdminPage() {
         <Route path="recruiters" element={<AdminRecruitersPage />} />
         <Route path="companies" element={<AdminCompaniesPage />} />
         <Route path="jobseekers" element={<AdminJobseekersPage />} />
+        {/* Real applicant profile, opened from the Applications detail panel.
+            Declared after the "jobseekers" index so the literal path is never
+            shadowed by the :userId segment. */}
+        <Route path="jobseekers/:userId" element={<AdminApplicantProfilePage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
         <Route path="activity" element={<AdminActivityPage />} />
         <Route path="*" element={<NotFoundPlaceholder />} />

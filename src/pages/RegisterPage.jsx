@@ -8,6 +8,13 @@ import { PEOPLE_ICON, TRACK_ICON, SHIELD_ICON, ZAP_ICON } from '../constants/aut
 import './RegisterPage.css';
 
 /* ---------- Carousel slide data ---------- */
+// The workspace the account opens in at signup. Both are available later via
+// the workspace switcher, so this is a starting point, not a restriction.
+const WORKSPACE_OPTIONS = [
+  { value: 'jobseeker', label: 'Find work' },
+  { value: 'recruiter', label: 'Hire talent' },
+];
+
 const REGISTER_SLIDES = [
   {
     id: 'join',
@@ -51,7 +58,7 @@ const REGISTER_SLIDES = [
  * - Right: HireFlow branding / product story panel (mirrors LoginPage)
  *
  * Behavior:
- * - Calls `register(email, password, role, fullName, phone)` from AuthContext.
+ * - Calls `register(email, password, fullName, phone, workspace)` from AuthContext.
  * - On success, navigates to "/login" so the user can sign in with their new account.
  * - On failure, displays the normalized API error message.
  * - Prevents duplicate submissions while the request is in flight.
@@ -125,6 +132,7 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState('');
   const [phoneCountry, setPhoneCountry] = useState(DEFAULT_DIAL_COUNTRY);
   const [password, setPassword] = useState('');
+  const [workspace, setWorkspace] = useState('jobseeker');
   const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -163,7 +171,7 @@ export default function RegisterPage() {
       // The UI separates the calling code (country selector) from the local
       // number, and submits one unambiguous international (E.164) value.
       const normalizedPhone = toE164(phone, phoneCountry);
-      await register(email.trim(), password, fullName.trim(), normalizedPhone);
+      await register(email.trim(), password, fullName.trim(), normalizedPhone, workspace);
       // Registration succeeded - direct the user to sign in.
       navigate('/login', { replace: true });
     } catch (err) {
@@ -436,7 +444,31 @@ export default function RegisterPage() {
                 )}
               </div>
 
-              {/* Role: everyone starts as a jobseeker; toggle to recruiter later from your profile. */}
+              {/* Initial workspace. This only decides where the account starts; the other
+                  workspace can be opened later at any time without losing this
+                  one's profile. */}
+              <fieldset className="auth-field auth-workspace" disabled={submitting}>
+                <legend className="auth-label">I&apos;m joining HireFlow to</legend>
+                <div className="auth-workspace-options">
+                  {WORKSPACE_OPTIONS.map((option) => (
+                    <label
+                      key={option.value}
+                      className={`auth-workspace-option${workspace === option.value ? ' auth-workspace-option--selected' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name="workspace"
+                        value={option.value}
+                        checked={workspace === option.value}
+                        onChange={() => setWorkspace(option.value)}
+                      />
+                      <span className="auth-workspace-option-body">
+                        <span className="auth-workspace-option-title">{option.label}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
 
               <button
                 type="submit"

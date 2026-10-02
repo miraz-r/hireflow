@@ -39,14 +39,16 @@ const CheckIcon = () => (
 );
 
 export default function PricingPage() {
-  const { user, toggleRole } = useAuth();
+  const { user, switchWorkspace } = useAuth();
 
   const handleSwitchToRecruiter = async () => {
     try {
-      await toggleRole('recruiter');
+      // Opens the recruiter workspace. Non-destructive: the jobseeker
+      // workspace keeps its own profile and stays available.
+      await switchWorkspace('recruiter');
       window.location.reload();
     } catch {
-      // role unchanged on failure
+      // workspace unchanged on failure
     }
   };
 

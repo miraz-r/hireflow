@@ -14,11 +14,18 @@ const {
 const router = express.Router();
 
 router.use(authenticate);
-router.use(authorize('jobseeker'));
 
+// READS of the caller's own saved jobs are available in any workspace. The
+// rows belong to the account (scoped on req.user.id in the controller), not to
+// the jobseeker workspace, so switching must not hide them. The caller can
+// only ever see their own saved jobs.
+//
+// WRITES remain jobseeker-workspace actions: saving and unsaving a job is
+// something you do while you are looking for work.
 router.get('/', listSavedJobs);
-router.post('/', saveJobValidators, saveJob);
 router.get('/check/:jobId', jobIdParamValidators, checkSaved);
-router.delete('/:jobId', jobIdParamValidators, unsaveJob);
+
+router.post('/', authorize('jobseeker'), saveJobValidators, saveJob);
+router.delete('/:jobId', authorize('jobseeker'), jobIdParamValidators, unsaveJob);
 
 module.exports = router;

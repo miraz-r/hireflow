@@ -46,6 +46,16 @@ const registerValidators = [
     .withMessage('Invalid phone number')
     .isLength({ max: 32 })
     .withMessage('Phone number must be at most 32 characters'),
+
+  // The workspace the account starts in. Optional so existing clients that omit
+  // it keep working; anything unrecognised falls back to 'jobseeker' in the
+  // controller. This is the *active* workspace, not a permanent restriction —
+  // the account can open the other workspace later without losing this one.
+  body('role')
+    .optional()
+    .isString()
+    .isIn(['jobseeker', 'recruiter'])
+    .withMessage('Role must be jobseeker or recruiter'),
 ];
 
 const register = async (req, res, next) => {
@@ -54,10 +64,11 @@ const register = async (req, res, next) => {
     return res.status(400).json({ error: errors.array()[0].msg });
   }
 
-  // Everyone starts as a jobseeker. Users switch to recruiter from the UI
-  // after signing up (see toggleRole).
+  // The account opens in the workspace the user chose at signup. This is the
+  // active workspace, not a limit on the account: the other workspace can be
+  // opened later via POST /api/auth/role, which no longer discards this one.
   const { email, password, fullName, phone } = req.body;
-  const role = 'jobseeker';
+  const role = req.body.role === 'recruiter' ? 'recruiter' : 'jobseeker';
 
   try {
     const passwordHash = await bcrypt.hash(password, env.bcryptRounds);
@@ -84,6 +95,7 @@ const register = async (req, res, next) => {
         id: user.id,
         email: user.email,
         role: user.role,
+        workspaces: [user.role],
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
@@ -100,6 +112,72 @@ const loginValidators = [
   body('email').isEmail().withMessage('Invalid email').normalizeEmail(),
   body('password').isString().withMessage('Password is required'),
 ];
+
+// ---------------------------------------------------------------------------
+// Workspace helpers.
+//
+// An account's available workspaces are simply the workspaces it holds a
+// profile for. Deriving this instead of storing a separate list means the value
+// can never drift out of sync with the profiles that actually exist.
+// ---------------------------------------------------------------------------
+const availableWorkspaces = async (userId) => {
+  const profiles = await Profile.find({ userId })
+    .select('role')
+    .lean();
+  const roles = profiles.map((p) => p.role).filter((r) => r && r !== 'admin');
+  return roles.length ? [...new Set(roles)] : ['jobseeker'];
+};
+
+// Make sure the account has a profile row for `workspace`, so switching never
+// lands the user on a 404 profile.
+//
+// A brand-new workspace profile is seeded ONLY with the person's own shared
+// identity details (name, phone, location, avatar) copied from their other
+// profile. Nothing from the other workspace's data is copied or invented — the
+// new profile starts with its workspace-specific fields empty, and the previous
+// profile is left completely untouched.
+const ensureWorkspaceProfile = async (userId, workspace) => {
+  const existing = await Profile.findOne({ userId, role: workspace }).lean();
+  if (existing) return existing;
+
+  const source = await Profile.findOne({
+    userId,
+    role: workspace === 'jobseeker' ? 'recruiter' : 'jobseeker',
+  }).lean();
+
+  // fullName and phone are required by the schema. Without a source profile
+  // there is nothing honest to seed from, so we leave the row absent rather
+  // than write placeholder data.
+  if (!source || !source.fullName || !source.phone) return null;
+
+  return Profile.create({
+    userId,
+    role: workspace,
+    fullName: source.fullName,
+    phone: source.phone,
+    location: source.location || '',
+    avatarUrl: source.avatarUrl || '',
+  });
+};
+
+// Build the standard auth payload: identity, the active workspace, and the
+// workspaces this account has available.
+const authUserPayload = async (user) => {
+  const [profile, workspaces] = await Promise.all([
+    Profile.findOne({ userId: user.id, role: user.role })
+      .select('fullName avatarUrl')
+      .lean(),
+    availableWorkspaces(user.id),
+  ]);
+  return {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    workspaces,
+    fullName: profile && profile.fullName ? profile.fullName : null,
+    avatarUrl: profile && profile.avatarUrl ? profile.avatarUrl : null,
+  };
+};
 
 const login = async (req, res, next) => {
   const errors = validationResult(req);
@@ -127,20 +205,13 @@ const login = async (req, res, next) => {
     );
 
     // Surface the user's name in the auth response so the UI can greet them
-    // without a separate profile fetch. The Profile holds fullName (1:1).
-    const profile = await Profile.findOne({ userId: user.id }).select('fullName avatarUrl').lean();
-    const fullName = profile && profile.fullName ? profile.fullName : null;
-    const avatarUrl = profile && profile.avatarUrl ? profile.avatarUrl : null;
+    // without a separate profile fetch. Scoped to the active workspace so the
+    // greeting matches the profile the user is currently working in.
+    const payload = await authUserPayload(user);
 
     return res.status(200).json({
       token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        fullName,
-        avatarUrl,
-      },
+      user: payload,
     });
   } catch (err) {
     return next(err);
@@ -153,30 +224,29 @@ const roleValidators = [
     .withMessage('Role must be jobseeker or recruiter'),
 ];
 
-// Fields that are only valid for one role. On toggle we clear the fields
-// belonging to the *previous* role so the profile stays valid for the new one.
-const RECRUITER_ONLY_FIELDS = [
-  'jobTitle',
-  'companyName',
-  'companyWebsite',
-  'companyDescription',
-];
-const JOBSEEKER_ONLY_FIELDS = [
-  'headline',
-  'bio',
-  'skills',
-  'education',
-  'experience',
-  'links',
-];
+// Workspace-specific field groups are documented in the Profile model, which
+// enforces the split at validation time. They are listed here for reference
+// only; the workspace switch no longer clears either group.
+//
+//   Recruiter-only : jobTitle, companyName, companyWebsite, companyDescription
+//   Jobseeker-only : headline, bio, skills, education, experience, links
 
 /**
- * POST /api/auth/role — switch the signed-in user between jobseeker and
- * recruiter. Updates the User and mirrors it onto the Profile (clearing the
- * previous role's fields so the profile passes schema validation), then
- * re-issues a JWT that reflects the new role.
+ * POST /api/auth/role — switch the signed-in account's ACTIVE WORKSPACE
+ * between jobseeker and recruiter, then re-issue a JWT reflecting it.
+ *
+ * NON-DESTRUCTIVE. The previous implementation rewrote the single Profile's
+ * role and `$unset` the outgoing workspace's fields, which permanently deleted
+ * a jobseeker's headline, bio, skills, education, experience and links the
+ * first time they switched. Accounts now hold one Profile per workspace, so a
+ * switch only:
+ *   1. changes User.role (the active workspace), and
+ *   2. ensures a profile row exists for the target workspace.
+ *
+ * Nothing belonging to the workspace being left is read, written, or removed.
+ * Switching back restores that workspace exactly as it was.
  */
-const toggleRole = async (req, res, next) => {
+const switchWorkspace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ error: errors.array()[0].msg });
@@ -199,27 +269,34 @@ const toggleRole = async (req, res, next) => {
     if (newRole !== user.role) {
       const previousRole = user.role;
       user.role = newRole;
-      await user.save();
 
       try {
-        await Profile.updateOne(
-          { userId: user._id },
-          {
-            $set: { role: newRole },
-            $unset: Object.fromEntries(
-              (newRole === 'jobseeker'
-                ? RECRUITER_ONLY_FIELDS
-                : JOBSEEKER_ONLY_FIELDS
-              ).map((f) => [f, 1])
-            ),
-          }
-        );
+        await user.save();
+        await ensureWorkspaceProfile(user._id, newRole);
       } catch (err) {
-        // A failed Profile mirror must not silently drift the User and
-        // Profile roles out of sync, nor produce a success response. Roll
-        // the User back and surface the error before any response is sent.
+        // A failed switch must not leave the account half-moved, nor report
+        // success. Restore the previous active workspace and surface the error.
         user.role = previousRole;
         await user.save().catch(() => {});
+
+        // E11000 on `userId` means the collection still carries the legacy
+        // unique index (userId_1) that permits only ONE profile per account.
+        // An account needs one profile per workspace, so opening the second
+        // workspace is impossible until that index is replaced by the
+        // compound {userId, role} one. This is a deployment that has not run
+        // the profile-workspaces migration — report it explicitly instead of
+        // returning an opaque 500 that looks like an application bug.
+        if (err && err.code === 11000) {
+          const onUserId =
+            err.keyPattern && Object.keys(err.keyPattern).length === 1 && 'userId' in err.keyPattern;
+          if (onUserId || (err.message || '').includes('userId_1')) {
+            return res.status(409).json({
+              error:
+                'This deployment has not run the profile-workspaces migration, so an account cannot hold more than one profile. Run "npm run migrate:profile-workspaces -- --apply" on the database, then retry.',
+              code: 'PROFILE_WORKSPACES_MIGRATION_PENDING',
+            });
+          }
+        }
         return next(err);
       }
     }
@@ -230,19 +307,9 @@ const toggleRole = async (req, res, next) => {
       { expiresIn: env.jwtExpiresIn }
     );
 
-    const profile = await Profile.findOne({ userId: user.id }).select('fullName avatarUrl').lean();
-    const fullName = profile && profile.fullName ? profile.fullName : null;
-    const avatarUrl = profile && profile.avatarUrl ? profile.avatarUrl : null;
-
     return res.status(200).json({
       token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        fullName,
-        avatarUrl,
-      },
+      user: await authUserPayload(user),
     });
   } catch (err) {
     return next(err);
@@ -254,6 +321,10 @@ module.exports = {
   registerValidators,
   login,
   loginValidators,
-  toggleRole,
+  // Exported under both names: switchWorkspace is the accurate name, and
+  // toggleRole is kept so existing imports keep working.
+  switchWorkspace,
+  toggleRole: switchWorkspace,
   roleValidators,
+  availableWorkspaces,
 };

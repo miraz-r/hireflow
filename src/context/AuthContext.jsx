@@ -43,19 +43,27 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  const register = async (email, password, fullName, phone) => {
+  // Signup. `role` is the workspace the account opens in. It only decides
+  // where the user starts — the other workspace can be opened later at any
+  // time without losing this one.
+  const register = async (email, password, fullName, phone, role) => {
     const res = await apiPost('/auth/register', {
       email,
       password,
       fullName,
       phone,
+      role,
     });
     return res.data;
   };
 
-  // Switch the signed-in user between jobseeker and recruiter. The backend
-  // re-issues a JWT carrying the new role, so we persist it like login.
-  const toggleRole = async (role) => {
+  // Switch the account's ACTIVE WORKSPACE (jobseeker <-> recruiter).
+  //
+  // Non-destructive: the backend keeps one profile per workspace and only
+  // changes which one is active, so switching never discards profile data.
+  // The backend re-issues a JWT carrying the new active workspace, so we
+  // persist it exactly like login.
+  const switchWorkspace = async (role) => {
     const res = await apiPost('/auth/role', { role });
     const { token: newToken, user: newUser } = res.data;
     localStorage.setItem(TOKEN_KEY, newToken);
@@ -98,7 +106,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, toggleRole, logout, setUserFullName, setUserAvatarUrl, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, switchWorkspace, logout, setUserFullName, setUserAvatarUrl, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

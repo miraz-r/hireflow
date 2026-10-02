@@ -2,6 +2,8 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
+const SavedJob = require('../models/SavedJob');
+const { APPLICATION_STATUSES } = require('../utils/applicationStatus');
 
 // Statuses an administrator can set through moderation. 'expired' is system-
 // owned (derived from time) and is intentionally not in the manual set.
@@ -95,37 +97,140 @@ const getApplicationsTrend = async (req, res, next) => {
 };
 
 // ---------------------------------------------------------------------------
-// GET /api/admin/applications?page=1&limit=8 — most recent applications with
-// the derived display fields the Overview's Recent Applications table needs
-// (applicant, job, company, status, applied date).
+// GET /api/admin/jobseekers/:userId
+//
+// The APPLICANT behind an application, for the Admin Applications "View
+// Profile" action. This exists because there is no other way to read someone
+// else's profile: GET /api/profile is scoped to the authenticated caller.
+//
+// WHY THE GUARD IS "HAS APPLICATIONS", NOT "ACTIVE WORKSPACE IS jobseeker"
+// An account keeps one Profile per workspace and its User.role is only the
+// *active* workspace. Someone who registered as a jobseeker, applied to jobs,
+// and later opened the recruiter workspace is a perfectly normal applicant
+// whose active workspace is now 'recruiter'. Guarding on the active workspace
+// made "View Profile" fail for exactly those applicants.
+//
+// This endpoint is only ever reached from an application row, so the real
+// question is "is this account an applicant?". An account with no applications
+// is not an applicant and is a 404, which keeps the route from being used to
+// read a recruiter or admin account that has never applied.
+//
+// WHAT IS AND IS NOT EXPOSED
+//   - The JOBSEEKER profile is the subject, and it is read by
+//     `{ userId, role: 'jobseeker' }` — i.e. the applicant's own historical
+//     profile, independent of whichever workspace is currently active.
+//   - Recruiter-only fields (jobTitle, companyName, companyWebsite,
+//     companyDescription) are never returned, so an account that also has a
+//     recruiter workspace is never presented as a jobseeker on those details.
+//   - If the account has no jobseeker profile at all, nothing is invented:
+//     profileExists is false and the applicant fields come back empty.
+//   - activeWorkspace is returned so the UI can say where the person is
+//     working without implying that is the only workspace they have.
 // ---------------------------------------------------------------------------
-const getRecentApplications = async (req, res, next) => {
+const getAdminJobseeker = async (req, res, next) => {
   try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId)
+      .select('email role createdAt')
+      .lean();
+    if (!user) {
+      return res.status(404).json({ error: 'Jobseeker not found' });
+    }
+
+    // One profile per workspace, so read the jobseeker one explicitly rather
+    // than "whatever profile this account happens to have".
+    const [jobseekerProfile, recruiterProfile, applicationCount, savedJobCount] =
+      await Promise.all([
+        Profile.findOne({ userId, role: 'jobseeker' }).lean(),
+        Profile.findOne({ userId, role: 'recruiter' }).lean(),
+        Application.countDocuments({ userId }),
+        SavedJob.countDocuments({ userId }),
+      ]);
+
+    // Not an applicant. Same 404 as an unknown id so the route cannot be used
+    // to read a recruiter or admin account that has never applied.
+    if (applicationCount === 0) {
+      return res.status(404).json({ error: 'Jobseeker not found' });
+    }
+
+    const hasJobseekerProfile = !!jobseekerProfile;
+    // Shared identity (name/phone/location/avatar) belongs to the person, so it
+    // can come from whichever profile exists. These are the same fields
+    // GET /api/applications/:id already returns for this application.
+    const identity = jobseekerProfile || recruiterProfile;
+    const available = [
+      hasJobseekerProfile ? 'jobseeker' : null,
+      recruiterProfile ? 'recruiter' : null,
+    ].filter(Boolean);
+
+    return res.status(200).json({
+      jobseeker: {
+        id: user._id,
+        email: user.email,
+        joinedAt: user.createdAt,
+        // Where the account is working right now (navigation/permissions).
+        activeWorkspace: user.role,
+        availableWorkspaces: available,
+        isActiveJobseeker: user.role === 'jobseeker',
+        // Whether the account holds a jobseeker profile at all.
+        profileExists: hasJobseekerProfile,
+        fullName: (identity && identity.fullName) || '',
+        location: (identity && identity.location) || '',
+        phone: (identity && identity.phone) || '',
+        avatarUrl: (identity && identity.avatarUrl) || '',
+        resumeUrl: (identity && identity.resumeUrl) || '',
+        resumeName: (identity && identity.resumeName) || '',
+        // Applicant-specific content, only ever from the jobseeker profile.
+        headline: (jobseekerProfile && jobseekerProfile.headline) || '',
+        bio: (jobseekerProfile && jobseekerProfile.bio) || '',
+        skills: (jobseekerProfile && jobseekerProfile.skills) || [],
+        education: (jobseekerProfile && jobseekerProfile.education) || [],
+        experience: (jobseekerProfile && jobseekerProfile.experience) || [],
+        links: (jobseekerProfile && jobseekerProfile.links) || [],
+        applications: applicationCount,
+        savedJobs: savedJobCount,
+      },
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid jobseeker id' });
+    }
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// GET /api/admin/applications?page=1&limit=8
+//
+// Backs two consumers at once:
+//   1. The Overview's "Recent Applications" table (page=1, limit=8, no filters).
+//   2. The Admin Applications workspace, which adds optional search, status,
+//      job, recruiter, and date-range filters over a full page of rows.
+//
+// BACKWARD COMPATIBILITY: the five fields the Overview already renders
+// (applicant, jobTitle, company, status, appliedAt) keep their exact names and
+// their exact fallback precedence, and the no-filter default still returns the
+// newest 8 rows. Everything the workspace needs is added alongside them, so an
+// Overview regression is impossible by construction.
+// ---------------------------------------------------------------------------
+const listAdminApplications = async (req, res, next) => {
+  try {
+    // Default 8 / default page 1 reproduce the Overview call exactly. The cap
+    // rises from 25 to 50 so the workspace can request a full table page; the
+    // Overview never asks for more than 8, so its behavior is untouched.
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-    const limit = Math.min(
-      Math.max(parseInt(req.query.limit, 10) || 8, 1),
-      25
-    );
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 8, 1), 50);
     const skip = (page - 1) * limit;
 
+    const filter = await buildApplicationFilter(req.query);
+
     const [applications, total] = await Promise.all([
-      Application.find({})
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate('jobId', 'title company')
-        .populate('userId', 'email'),
-      Application.countDocuments(),
+      Application.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Application.countDocuments(filter),
     ]);
 
-    const items = applications.map((app) => ({
-      id: app._id,
-      applicant: app.fullName || app.userId?.email || 'Anonymous',
-      jobTitle: app.jobId?.title || 'Untitled job',
-      company: app.jobId?.company || 'Unknown company',
-      status: app.status,
-      appliedAt: app.createdAt,
-    }));
+    const items = await hydrateAdminApplications(applications);
 
     return res.status(200).json({
       page,
@@ -135,8 +240,305 @@ const getRecentApplications = async (req, res, next) => {
       applications: items,
     });
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid filter id' });
+    }
     return next(err);
   }
+};
+
+// ---------------------------------------------------------------------------
+// GET /api/admin/applications/:id — full admin detail for the workspace panel.
+// Admin-scoped, so it is not subject to the recruiter ownership rule; it
+// returns the same applicant/job information the recruiter detail view shows,
+// plus the posting recruiter.
+// ---------------------------------------------------------------------------
+const getAdminApplication = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id).lean();
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    const [job, profile, account] = await Promise.all([
+      Job.findById(application.jobId).lean(),
+      Profile.findOne({ userId: application.userId }).lean(),
+      User.findById(application.userId).select('email').lean(),
+    ]);
+
+    const recruiterMap = job ? await recruiterInfoFor([job]) : new Map();
+    const postedBy = job && job.postedBy ? job.postedBy.toString() : '';
+    const accountEmail = (account && account.email) || '';
+    const profileName = (profile && profile.fullName) || '';
+
+    return res.status(200).json({
+      application: {
+        id: application._id,
+        userId: application.userId,
+        // Canonical backend status. The frontend maps it for display via
+        // ADMIN_STATUS_LABELS; no admin-specific status is stored.
+        status: application.status,
+        appliedAt: application.createdAt,
+        createdAt: application.createdAt,
+        updatedAt: application.updatedAt,
+        coverLetter: application.coverLetter || '',
+        applicant: {
+          id: application.userId,
+          // Application-submitted values win, then profile, then account —
+          // the same precedence the recruiter detail view uses, so legacy
+          // records without the submitted fields still render.
+          fullName: application.fullName || profileName || accountEmail || 'Applicant',
+          headline: (profile && profile.headline) || '',
+          avatarUrl: (profile && profile.avatarUrl) || '',
+          location: (profile && profile.location) || '',
+          email: application.email || accountEmail || null,
+          phone: application.phone || (profile && profile.phone) || '',
+          resumeUrl: application.resumeUrl || (profile && profile.resumeUrl) || '',
+          linkedin: application.linkedin || '',
+          portfolio: application.portfolio || '',
+          skills: (profile && profile.skills) || [],
+        },
+        job: job
+          ? {
+              id: job._id,
+              title: job.title,
+              company: job.company,
+              location: job.location,
+              workType: job.workType,
+              employmentType: job.employmentType,
+              experienceLevel: job.experienceLevel,
+              category: job.category,
+              salary: job.salary || {},
+              skills: job.skills || [],
+              description: job.description || '',
+              accent: job.accent || '',
+              // Mirrors the jobs workspace: a legacy job with no status is live.
+              status: job.status || 'active',
+            }
+          : null,
+        recruiter: postedBy ? recruiterMap.get(postedBy) || null : null,
+      },
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid application id' });
+    }
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// PATCH /api/admin/applications/:id/status — admin moderation of an
+// application's pipeline status.
+//
+// This is deliberately NOT the recruiter controller (updateApplicationStatus in
+// application.controller.js). That handler enforces `job.postedBy === caller`,
+// which an admin never satisfies, and — more importantly — it writes a
+// RecruiterActivity row on every change. RecruiterActivity is the recruiter's
+// own pipeline history keyed on `recruiterId`; recording an admin's moderation
+// action there would invent a recruiter who owns the job and would surface a
+// fabricated pipeline event in that recruiter's activity feed. So this handler
+// writes the status only and leaves recruiter activity untouched. A future
+// admin audit log should be a separate model, not this one.
+// ---------------------------------------------------------------------------
+const updateAdminApplicationStatus = async (req, res, next) => {
+  try {
+    const existing = await Application.findById(req.params.id).lean();
+    if (!existing) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    // statusUpdateValidators has already restricted `status` to the canonical
+    // APPLICATION_STATUSES, so this write can only ever store an existing
+    // pipeline value.
+    const updated = await Application.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true, runValidators: true, context: 'query' }
+    ).lean();
+
+    // Return the same normalized row shape the listing produced, so a client
+    // can replace the row it is editing without reshaping it.
+    const [item] = await hydrateAdminApplications([updated]);
+
+    return res.status(200).json({ application: item });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid application id' });
+    }
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Helpers for the applications workspace.
+// ---------------------------------------------------------------------------
+
+// Build the Mongo filter for the optional workspace filters. Every key is
+// absent unless the client actually sent it, which is what keeps the
+// no-filter Overview call identical to the original `Application.find({})`.
+const buildApplicationFilter = async (query) => {
+  const filter = {};
+  const { q, status, job, recruiter, dateRange } = query;
+
+  if (status && status !== 'all') {
+    filter.status = status;
+  }
+
+  if (job) {
+    filter.jobId = job;
+  }
+
+  // A recruiter filter resolves to the jobs that recruiter posted. An empty
+  // `$in` matches nothing, which is the correct answer for a recruiter with
+  // no jobs rather than an error.
+  if (recruiter) {
+    const posted = await Job.find({ postedBy: recruiter }, '_id').lean();
+    filter.jobId = { $in: posted.map((j) => j._id) };
+  }
+
+  if (dateRange) {
+    const start = new Date();
+    if (dateRange === 'today') {
+      start.setHours(0, 0, 0, 0);
+    } else {
+      const days = Math.min(Math.max(parseInt(dateRange, 10) || 7, 1), 365);
+      start.setDate(start.getDate() - days);
+    }
+    filter.createdAt = { $gte: start };
+  }
+
+  if (q && q.trim()) {
+    const regex = new RegExp(escapeRegex(q.trim()), 'i');
+    const { userIds, jobIds } = await resolveApplicationSearch(q, regex);
+
+    // The applicant name and email are denormalized onto the application, so
+    // those two match the document directly. Profile name, account email, job
+    // title/company, and recruiter name all live in other collections and come
+    // back as resolved id sets — each branch is omitted when it resolved to
+    // nothing, so a search never matches the whole collection by accident.
+    const conditions = [{ fullName: regex }, { email: regex }];
+    if (userIds.length) conditions.push({ userId: { $in: userIds } });
+    if (jobIds.length) conditions.push({ jobId: { $in: jobIds } });
+
+    filter.$or = conditions;
+  }
+
+  return filter;
+};
+
+// Resolve a search term to the job ids and user ids an application could match.
+// Run as parallel lookups so a single search costs one round of queries.
+const resolveApplicationSearch = async (q, regex) => {
+  const [jobseekerProfiles, accountUsers, matchingJobs, recruiterProfiles] =
+    await Promise.all([
+      Profile.find({ role: 'jobseeker', fullName: regex }, 'userId').lean(),
+      User.find({ email: regex }, '_id').lean(),
+      Job.find({ $or: [{ title: regex }, { company: regex }] }, '_id').lean(),
+      Profile.find({ role: 'recruiter', fullName: regex }, 'userId').lean(),
+    ]);
+
+  const userIds = new Set();
+  for (const profile of jobseekerProfiles) userIds.add(profile.userId.toString());
+  for (const user of accountUsers) userIds.add(user._id.toString());
+
+  const jobIds = new Set(matchingJobs.map((job) => job._id.toString()));
+
+  // A recruiter-name hit matches every application on the jobs they posted.
+  const recruiterIds = recruiterProfiles.map((profile) => profile.userId);
+  if (recruiterIds.length) {
+    const posted = await Job.find({ postedBy: { $in: recruiterIds } }, '_id').lean();
+    for (const job of posted) jobIds.add(job._id.toString());
+  }
+
+  return { userIds: [...userIds], jobIds: [...jobIds] };
+};
+
+// Resolve the job, applicant profile, account email, and posting recruiter for
+// a page of applications in a fixed number of queries, then map each row
+// through serializeAdminApplication.
+const hydrateAdminApplications = async (applications) => {
+  if (!applications.length) return [];
+
+  const jobIds = [...new Set(applications.map((app) => String(app.jobId)))];
+  const userIds = [...new Set(applications.map((app) => String(app.userId)))];
+
+  const [jobs, profiles, accounts] = await Promise.all([
+    Job.find({ _id: { $in: jobIds } })
+      .select('title company location workType employmentType category postedBy')
+      .lean(),
+    Profile.find({ userId: { $in: userIds } })
+      .select('userId fullName headline avatarUrl location phone resumeUrl skills')
+      .lean(),
+    User.find({ _id: { $in: userIds } }).select('email').lean(),
+  ]);
+
+  // Reuses the jobs-workspace recruiter resolver so both workspaces report a
+  // recruiter in exactly the same shape.
+  const recruiterMap = await recruiterInfoFor(jobs);
+
+  return applications.map((app) =>
+    serializeAdminApplication(app, {
+      jobById: new Map(jobs.map((job) => [job._id.toString(), job])),
+      profileByUserId: new Map(profiles.map((p) => [p.userId.toString(), p])),
+      emailByUserId: new Map(accounts.map((u) => [u._id.toString(), u.email])),
+      recruiterMap,
+    })
+  );
+};
+
+// Normalize one application row for the Admin Applications workspace.
+//
+// The first block is the original Overview contract, preserved field-for-field
+// including fallback precedence. The blocks below it are additive.
+const serializeAdminApplication = (
+  app,
+  { jobById, profileByUserId, emailByUserId, recruiterMap }
+) => {
+  const job = jobById.get(String(app.jobId));
+  const profile = profileByUserId.get(String(app.userId));
+  const accountEmail = emailByUserId.get(String(app.userId)) || '';
+  const postedBy = job && job.postedBy ? job.postedBy.toString() : '';
+
+  return {
+    // --- Existing Overview contract (unchanged names and fallbacks) ---
+    id: app._id,
+    applicant: app.fullName || accountEmail || 'Anonymous',
+    jobTitle: (job && job.title) || 'Untitled job',
+    company: (job && job.company) || 'Unknown company',
+    status: app.status,
+    appliedAt: app.createdAt,
+
+    // --- Workspace additions ---
+    userId: app.userId,
+    email: app.email || accountEmail || '',
+    phone: app.phone || (profile && profile.phone) || '',
+    location: (profile && profile.location) || '',
+    avatarUrl: (profile && profile.avatarUrl) || '',
+    resumeUrl: app.resumeUrl || (profile && profile.resumeUrl) || '',
+    linkedin: app.linkedin || '',
+    portfolio: app.portfolio || '',
+    skills: (profile && profile.skills) || [],
+    updatedAt: app.updatedAt,
+    // The recruiter who posted the job this application targets, or null when
+    // the job has no owner. Never invented.
+    recruiter: postedBy ? recruiterMap.get(postedBy) || null : null,
+    job: job
+      ? {
+          id: job._id,
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          workType: job.workType,
+          employmentType: job.employmentType,
+          category: job.category,
+          postedBy,
+        }
+      : null,
+  };
 };
 
 // ---------------------------------------------------------------------------
@@ -431,7 +833,10 @@ const serializeAdminJob = (job, counts, recruiterMap) => {
 module.exports = {
   getStats,
   getApplicationsTrend,
-  getRecentApplications,
+  getAdminJobseeker,
+  listAdminApplications,
+  getAdminApplication,
+  updateAdminApplicationStatus,
   getRecentActivity,
   listAdminJobs,
   getAdminJob,

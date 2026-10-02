@@ -4,6 +4,7 @@ const Profile = require('../models/Profile');
 const User = require('../models/User');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
+const SavedJob = require('../models/SavedJob');
 const { publicPathFor, UPLOAD_ROOT, AVATAR_DIR } = require('../config/uploads');
 
 /**
@@ -15,6 +16,13 @@ const { publicPathFor, UPLOAD_ROOT, AVATAR_DIR } = require('../config/uploads');
  *   - Unknown fields sent by clients are silently dropped before persistence.
  *   - The response is built from a fresh DB read so internal fields like
  *     `__v` are never exposed (Profile.toJSON also strips `__v`).
+ *
+ * WORKSPACE SCOPING: an account may hold one Profile per workspace, so every
+ * read and write here is scoped by BOTH `userId` and `role`. Scoping on
+ * `userId` alone is ambiguous once a second profile exists and would let a
+ * recruiter edit the jobseeker's profile (or vice versa). `req.user.role` is
+ * the active workspace, so "the profile the user is working in" is addressed as
+ * `{ userId: req.user.id, role: req.user.role }` everywhere below.
  */
 
 // Fields that are valid on the profile document.
@@ -140,12 +148,22 @@ const formatProfile = (doc) => {
   };
 };
 
+/**
+ * The profile document for the caller's ACTIVE workspace. This single helper
+ * backs every /api/profile read and write so the workspace predicate can never
+ * be forgotten in one of the nine call sites.
+ */
+const activeProfileQuery = (req) => ({
+  userId: req.user.id,
+  role: req.user.role,
+});
+
 // ---------------------------------------------------------------------------
 // GET /api/profile
 // ---------------------------------------------------------------------------
 const getMyProfile = async (req, res, next) => {
   try {
-    const profile = await Profile.findOne({ userId: req.user.id });
+    const profile = await Profile.findOne(activeProfileQuery(req));
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
     }
@@ -193,7 +211,7 @@ const updateMyProfile = async (req, res, next) => {
     const payload = pickPayload(req.body, role);
 
     const updated = await Profile.findOneAndUpdate(
-      { userId: req.user.id },
+      activeProfileQuery(req),
       { $set: { ...payload, role } },
       { new: true, runValidators: true, context: 'query' }
     );
@@ -219,7 +237,7 @@ const patchMyProfile = async (req, res, next) => {
     const payload = pickPayload(req.body, role);
 
     const updated = await Profile.findOneAndUpdate(
-      { userId: req.user.id },
+      activeProfileQuery(req),
       { $set: { ...payload, role } },
       { new: true, runValidators: true, context: 'query' }
     );
@@ -247,7 +265,7 @@ const uploadAvatar = async (req, res, next) => {
   try {
     const avatarUrl = publicPathFor(req.file.path);
     const profile = await Profile.findOneAndUpdate(
-      { userId: req.user.id },
+      activeProfileQuery(req),
       { $set: { avatarUrl } },
       { new: true, runValidators: true, context: 'query' }
     );
@@ -274,7 +292,7 @@ const uploadResume = async (req, res, next) => {
   try {
     const resumeUrl = publicPathFor(req.file.path);
     const profile = await Profile.findOneAndUpdate(
-      { userId: req.user.id },
+      activeProfileQuery(req),
       { $set: { resumeUrl, resumeName: req.file.originalname } },
       { new: true, runValidators: true, context: 'query' }
     );
@@ -292,7 +310,7 @@ const uploadResume = async (req, res, next) => {
 // ---------------------------------------------------------------------------
 const removeAvatar = async (req, res, next) => {
   try {
-    const profile = await Profile.findOne({ userId: req.user.id });
+    const profile = await Profile.findOne(activeProfileQuery(req));
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
     }
@@ -337,14 +355,16 @@ const deleteMyProfile = async (req, res, next) => {
     // req.user.id is derived from the JWT — never from the client body.
     const userId = req.user.id;
 
-    // Remove associated data: profile, jobs posted, applications.
-    // Use independent deleteMany calls — if one collection is empty the
-    // operation still succeeds.  We deliberately do NOT cascade-delete
+    // Remove associated data across every workspace this account holds:
+    // all of its profiles (one per workspace), jobs posted, applications, and
+    // saved jobs. Use independent deleteMany calls — if one collection is empty
+    // the operation still succeeds. We deliberately do NOT cascade-delete
     // jobs posted by other users or unrelated global seed data.
     await Promise.all([
-      Profile.deleteOne({ userId }),
+      Profile.deleteMany({ userId }),
       Job.deleteMany({ postedBy: userId }),
       Application.deleteMany({ userId }),
+      SavedJob.deleteMany({ userId }),
     ]);
 
     // Finally remove the user account itself.

@@ -75,3 +75,59 @@ export async function updateAdminJobStatus(id, status) {
   const res = await api.patch(`/admin/jobs/${id}/status`, { status });
   return res.data;
 }
+
+// ---------------------------------------------------------------------------
+// Admin Applications workspace.
+//
+// Listing, single-application detail, and status moderation. Filtering, paging,
+// and search all happen on the server, so the page holds no second copy of the
+// list to filter locally.
+//
+// `status` values are the canonical backend pipeline states (applied,
+// under-review, interview, offer, hired, rejected). The admin display labels
+// come from ADMIN_STATUS_LABELS in src/constants/applicationStatus.js — the
+// backend never sees an admin-only status.
+// ---------------------------------------------------------------------------
+
+export async function getAdminApplications({
+  page = 1,
+  limit = 10,
+  q = '',
+  status = 'all',
+  job = 'all',
+  recruiter = 'all',
+  dateRange = '',
+} = {}) {
+  const params = { page, limit };
+  if (q && q.trim()) params.q = q.trim();
+  if (status && status !== 'all') params.status = status;
+  if (job && job !== 'all') params.job = job;
+  if (recruiter && recruiter !== 'all') params.recruiter = recruiter;
+  if (dateRange) params.dateRange = dateRange;
+  const res = await api.get('/admin/applications', { params });
+  return res.data;
+}
+
+// Full detail for the workspace side panel: applicant contact details, the job,
+// the posting recruiter, cover letter, and the real resumeUrl. The resumeUrl is
+// a path served by the API's static /uploads mount; resolve it with
+// resolveMediaUrl() before opening or downloading it.
+export async function getAdminApplication(id) {
+  const res = await api.get(`/admin/applications/${id}`);
+  return res.data;
+}
+
+// Admin moderation of an application's pipeline status. `status` must be a
+// canonical value; the backend rejects anything else. Returns the normalized
+// application so the caller can replace the row it is editing.
+export async function updateAdminApplicationStatus(id, status) {
+  const res = await api.patch(`/admin/applications/${id}/status`, { status });
+  return res.data;
+}
+
+// An applicant's full profile, for the "View Profile" action. `userId` is the
+// applicant's account id (Application.userId), not an application id.
+export async function getAdminJobseeker(userId) {
+  const res = await api.get(`/admin/jobseekers/${userId}`);
+  return res.data;
+}
