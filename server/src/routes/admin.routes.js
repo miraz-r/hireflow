@@ -7,6 +7,7 @@ const {
   listAdminJobseekers,
   listAdminRecruiters,
   listAdminCompanies,
+  getAnalytics,
   listAdminApplications,
   getAdminApplication,
   updateAdminApplicationStatus,
@@ -23,6 +24,7 @@ const {
   adminJobseekerQueryValidators,
   adminRecruiterQueryValidators,
   adminCompanyQueryValidators,
+  adminAnalyticsQueryValidators,
 } = require('../validators/application.validators');
 
 const router = express.Router();
@@ -109,6 +111,16 @@ router.get(
   authorize('admin'),
   adminCompanyQueryValidators,
   listAdminCompanies
+);
+// Analytics reporting window. Admin-only. `range` picks the period and the
+// response carries the immediately preceding period for the KPI comparisons -
+// see the controller for the window and aggregation rules.
+router.get(
+  '/analytics',
+  authenticate,
+  authorize('admin'),
+  adminAnalyticsQueryValidators,
+  getAnalytics
 );
 // Jobs workspace: paginated list, single-job detail, and non-destructive
 // moderation (activate/pending/draft/close). All admin-only.

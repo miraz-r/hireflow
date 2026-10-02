@@ -134,16 +134,17 @@ html[data-theme="dark"] .admin-analytics-chart .an-series-jobs .recharts-active-
   stroke-width: 2;
 }
 
-.admin-analytics-slice--new { fill: #4f46e5; }
-.admin-analytics-slice--reviewing { fill: #8b5cf6; }
-.admin-analytics-slice--shortlisted { fill: #0ea5e9; }
+/* Per-status slice fills, keyed on the canonical backend statuses. */
+.admin-analytics-slice--applied { fill: #4f46e5; }
+.admin-analytics-slice--under-review { fill: #8b5cf6; }
+.admin-analytics-slice--offer { fill: #0ea5e9; }
 .admin-analytics-slice--interview { fill: #f59e0b; }
 .admin-analytics-slice--hired { fill: #10b981; }
 .admin-analytics-slice--rejected { fill: #94a3b8; }
 
-html[data-theme="dark"] .admin-analytics-slice--new { fill: #818cf8; }
-html[data-theme="dark"] .admin-analytics-slice--reviewing { fill: #a78bfa; }
-html[data-theme="dark"] .admin-analytics-slice--shortlisted { fill: #38bdf8; }
+html[data-theme="dark"] .admin-analytics-slice--applied { fill: #818cf8; }
+html[data-theme="dark"] .admin-analytics-slice--under-review { fill: #a78bfa; }
+html[data-theme="dark"] .admin-analytics-slice--offer { fill: #38bdf8; }
 html[data-theme="dark"] .admin-analytics-slice--interview { fill: #fbbf24; }
 html[data-theme="dark"] .admin-analytics-slice--hired { fill: #34d399; }
 html[data-theme="dark"] .admin-analytics-slice--rejected { fill: #64748b; }
@@ -226,10 +227,6 @@ html[data-theme="dark"] .admin-analytics-slice--rejected { fill: #64748b; }
   height: 8px;
   border-radius: 2px;
   flex-shrink: 0;
-}
-
-.admin-analytics-tooltip-dot--count {
-  background-color: var(--admin-border-strong);
 }
 
 .admin-analytics-tooltip-swatch {

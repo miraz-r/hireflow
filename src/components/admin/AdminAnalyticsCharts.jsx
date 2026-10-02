@@ -106,6 +106,11 @@ export function AdminActivityTrendChart({ data }) {
  * AdminStatusDonut - application status mix. The total sits in a plain overlay
  * rather than a Recharts label so it inherits the page's own typography and
  * stays centred at every card width.
+ *
+ * `data` rows are { id, label, count } where `id` is the canonical backend
+ * status. The chart plots the raw COUNT (`count` is the `value` key), so every
+ * slice angle is proportional to real applications - not to a percentage that
+ * was rounded and would drift out of proportion.
  */
 export function AdminStatusDonut({ data, total, totalLabel }) {
   return (
@@ -115,7 +120,7 @@ export function AdminStatusDonut({ data, total, totalLabel }) {
           <PieChart>
             <Pie
               data={data}
-              dataKey="value"
+              dataKey="count"
               nameKey="label"
               innerRadius="62%"
               outerRadius="94%"
@@ -178,29 +183,25 @@ function TrendTooltip({ active, payload }) {
 }
 
 /**
- * StatusTooltip - the hovered slice's status, its share, and the application
- * count that share works out to. The count is precomputed on the report row
- * (adminAnalyticsData), so the tooltip reports the same figure as the KPI card
- * and the CSV rather than re-deriving it at hover time.
+ * StatusTooltip - the hovered slice's status and its real application count.
+ *
+ * The count is the same figure the legend, the pipeline card and the CSV all
+ * read, because they all come from the same fetched report row - nothing is
+ * re-derived at hover time.
  */
 function StatusTooltip({ active, payload }) {
   if (!active || !payload || !payload.length) return null;
   const point = payload[0].payload;
   return (
     <div className="admin-analytics-tooltip" role="status">
-      <span className="admin-analytics-tooltip-date">{point.label}</span>
+      <span className="admin-analytics-tooltip-date">{point.label || point.id}</span>
       <span className="admin-analytics-tooltip-row">
         <span
           className={`admin-analytics-tooltip-dot admin-analytics-legend-dot--${point.id}`}
           aria-hidden="true"
         />
-        Share of applications
-        <strong>{point.value}%</strong>
-      </span>
-      <span className="admin-analytics-tooltip-row">
-        <span className="admin-analytics-tooltip-dot admin-analytics-tooltip-dot--count" aria-hidden="true" />
         Applications
-        <strong>{point.count.toLocaleString('en-US')}</strong>
+        <strong>{Number(point.count || 0).toLocaleString('en-US')}</strong>
       </span>
     </div>
   );

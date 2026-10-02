@@ -250,6 +250,24 @@ const adminRecruiterQueryValidators = [
 ];
 
 // ---------------------------------------------------------------------------
+// GET /api/admin/analytics — the Admin Analytics reporting window.
+//
+// `range` is a closed set rather than a free day count: `year` is year-to-date
+// and cannot be expressed as a number of days, and every option has to map to a
+// window the controller knows how to build. An unrecognised value is rejected
+// rather than silently defaulted, so a typo can never masquerade as a range.
+// ---------------------------------------------------------------------------
+const analyticsRangeValidator = query('range')
+  .optional({ values: 'falsy' })
+  .isIn(['7', '30', '90', 'year'])
+  .withMessage("range must be one of: 7, 30, 90, year");
+
+const adminAnalyticsQueryValidators = [
+  analyticsRangeValidator,
+  runValidation,
+];
+
+// ---------------------------------------------------------------------------
 // GET /api/admin/companies — the Admin Companies workspace list.
 //
 // Same conventions as the recruiter/jobseeker query validators: every filter is
@@ -289,5 +307,6 @@ module.exports = {
   adminJobseekerQueryValidators,
   adminRecruiterQueryValidators,
   adminCompanyQueryValidators,
+  adminAnalyticsQueryValidators,
   runValidation,
 };

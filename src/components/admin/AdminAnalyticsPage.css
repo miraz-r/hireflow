@@ -288,19 +288,40 @@ html[data-theme="dark"] .admin-analytics-legend-line--jobs {
   flex-shrink: 0;
 }
 
-.admin-analytics-legend-dot--new { background-color: #4f46e5; }
-.admin-analytics-legend-dot--reviewing { background-color: #8b5cf6; }
-.admin-analytics-legend-dot--shortlisted { background-color: #0ea5e9; }
+/* Per-status dot colours, keyed on the canonical backend statuses so the
+   legend, the donut slices and the tooltip swatch all share one vocabulary. */
+.admin-analytics-legend-dot--applied { background-color: #4f46e5; }
+.admin-analytics-legend-dot--under-review { background-color: #8b5cf6; }
+.admin-analytics-legend-dot--offer { background-color: #0ea5e9; }
 .admin-analytics-legend-dot--interview { background-color: #f59e0b; }
 .admin-analytics-legend-dot--hired { background-color: #10b981; }
 .admin-analytics-legend-dot--rejected { background-color: #94a3b8; }
 
-html[data-theme="dark"] .admin-analytics-legend-dot--new { background-color: #818cf8; }
-html[data-theme="dark"] .admin-analytics-legend-dot--reviewing { background-color: #a78bfa; }
-html[data-theme="dark"] .admin-analytics-legend-dot--shortlisted { background-color: #38bdf8; }
+html[data-theme="dark"] .admin-analytics-legend-dot--applied { background-color: #818cf8; }
+html[data-theme="dark"] .admin-analytics-legend-dot--under-review { background-color: #a78bfa; }
+html[data-theme="dark"] .admin-analytics-legend-dot--offer { background-color: #38bdf8; }
 html[data-theme="dark"] .admin-analytics-legend-dot--interview { background-color: #fbbf24; }
 html[data-theme="dark"] .admin-analytics-legend-dot--hired { background-color: #34d399; }
 html[data-theme="dark"] .admin-analytics-legend-dot--rejected { background-color: #64748b; }
+
+/* A KPI with no prior period to compare against, and one that fell. Both are
+   stated plainly rather than dressed up as the green "no change" reading. */
+.admin-analytics-kpi-delta--down {
+  color: #b45309;
+}
+
+.admin-analytics-kpi-delta--none {
+  color: var(--admin-text-faint);
+  font-weight: 500;
+}
+
+html[data-theme="dark"] .admin-analytics-kpi-delta--down {
+  color: #fbbf24;
+}
+
+html[data-theme="dark"] .admin-analytics-kpi-delta--none {
+  color: var(--admin-text-faint);
+}
 
 .admin-analytics-legend-text {
   min-width: 0;
@@ -431,34 +452,30 @@ html[data-theme="dark"] .admin-analytics-legend-dot--rejected { background-color
   color: var(--admin-text-faint);
 }
 
-/* ---------- Hiring funnel ----------
-   Stage bars are sized against the top of the funnel, so the narrowing widths
-   carry the progression without extra chrome. */
-.admin-analytics-funnel {
+/* ---------- Current pipeline ----------
+   One independent row per status, scaled against the largest status rather than
+   the first one. Nothing here encodes a stage-to-stage conversion or implies the
+   counts narrow down the list: each row is simply how many applications sit in
+   that status right now. */
+.admin-analytics-status-counts {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.admin-analytics-funnel-stage {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-width: 0;
-}
-
-.admin-analytics-funnel-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+.admin-analytics-status-count {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px auto;
+  align-items: center;
   gap: 10px;
+  min-width: 0;
   font-size: 13px;
 }
 
-.admin-analytics-funnel-label {
+.admin-analytics-status-count-label {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -466,45 +483,108 @@ html[data-theme="dark"] .admin-analytics-legend-dot--rejected { background-color
   color: var(--admin-text);
 }
 
-.admin-analytics-funnel-meta {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 7px;
-  flex-shrink: 0;
-}
-
-.admin-analytics-funnel-value {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--admin-text-strong);
-}
-
-.admin-analytics-funnel-rate {
-  min-width: 38px;
-  text-align: right;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: var(--admin-text-faint);
-}
-
-.admin-analytics-funnel-track {
+.admin-analytics-status-count-track {
   height: 7px;
   background-color: var(--admin-bar-track);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
-/* A restrained step through the brand family, ending on the emerald that the
-   hired state already uses across the admin tables. */
-.admin-analytics-funnel-stage:nth-child(1) .admin-analytics-funnel-fill { background-color: #6366f1; }
-.admin-analytics-funnel-stage:nth-child(2) .admin-analytics-funnel-fill { background-color: #4f46e5; }
-.admin-analytics-funnel-stage:nth-child(3) .admin-analytics-funnel-fill { background-color: #7c3aed; }
-.admin-analytics-funnel-stage:nth-child(4) .admin-analytics-funnel-fill { background-color: #10b981; }
+/* One neutral brand tone for every row on purpose: a stepped colour ramp would
+   read as a progression the numbers do not represent. */
+.admin-analytics-status-count-fill {
+  display: block;
+  height: 100%;
+  background-color: #4f46e5;
+  border-radius: var(--radius-full);
+}
 
-html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(1) .admin-analytics-funnel-fill { background-color: #818cf8; }
-html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(2) .admin-analytics-funnel-fill { background-color: #6366f1; }
-html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(3) .admin-analytics-funnel-fill { background-color: #a78bfa; }
-html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(4) .admin-analytics-funnel-fill { background-color: #34d399; }
+html[data-theme="dark"] .admin-analytics-status-count-fill {
+  background-color: #818cf8;
+}
+
+.admin-analytics-status-count-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-strong);
+}
+
+.admin-analytics-status-count-share {
+  min-width: 42px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Shared empty / error block ---------- */
+.admin-analytics-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 64px 24px;
+  text-align: center;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-analytics-state-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-analytics-state-text {
+  max-width: 420px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-faint);
+}
+
+.admin-analytics-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  margin-top: 10px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.admin-analytics-btn:hover {
+  background-color: var(--admin-hover);
+  border-color: var(--admin-text-faint);
+}
+
+.admin-analytics-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* Per-card "nothing in this period" line, for a breakdown whose period is
+   legitimately empty while the rest of the report is not. */
+.admin-analytics-empty {
+  margin: 0;
+  padding: 18px 0;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
 
 /* ---------- Recent platform activity table ----------
    Fixed layout plus a colgroup so the header and every row stay locked to the
@@ -608,8 +688,8 @@ html[data-theme="dark"] .admin-analytics-funnel-stage:nth-child(4) .admin-analyt
 }
 
 /* ---------- Local tokens ----------
-   The bar/funnel tracks need a faint indigo wash rather than the neutral hover
-   grey, so it is derived from the existing primary-soft token. */
+   The bar and status-count tracks need a faint indigo wash rather than the
+   neutral hover grey, so it is derived from the existing primary-soft token. */
 .admin-page.admin-analytics {
   --admin-bar-track: #eceffb;
 }

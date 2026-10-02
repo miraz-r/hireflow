@@ -209,3 +209,18 @@ export async function getAdminCompanies({
   const res = await api.get('/admin/companies', { params });
   return res.data;
 }
+
+// The Admin Analytics report for one period.
+//
+// The window is built and aggregated server-side, so the totals, the trend
+// series and the breakdowns all describe the same period and cannot disagree.
+// The response also carries the immediately preceding period, so the KPI
+// comparisons are computed from real totals rather than authored.
+//
+// `range` is '7' | '30' | '90' | 'year'. A KPI's `change` is the percentage
+// against the previous period, or null when there was no previous value to
+// compare against - never NaN or Infinity.
+export async function getAdminAnalytics({ range = '30' } = {}) {
+  const res = await api.get('/admin/analytics', { params: { range } });
+  return res.data;
+}

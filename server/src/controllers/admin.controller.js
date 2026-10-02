@@ -571,6 +571,352 @@ const hiringCountsByRecruiter = async (userIds) => {
 };
 
 // ---------------------------------------------------------------------------
+// GET /api/admin/analytics?range=7|30|90|year
+//
+// The Admin Analytics report.
+//
+// EVERY FIGURE IS AGGREGATED FROM REAL RECORDS. The previous implementation
+// served a deterministic synthetic series, so nothing here is authored: the
+// trends, KPIs, breakdowns and status mix are all read from Job, Application and
+// Profile.
+//
+// WINDOWS ARE SERVER-SIDDEN AND UTC. The client cannot pick its own dates, so a
+// report's numbers and its own trend series always describe the same period.
+// Every boundary is a UTC midnight so grouping and filtering agree, and a day is
+// bucketed by the same UTC calendar the range is built from.
+//
+// THE COMPARISON WINDOW IS DERIVED, NOT STORED. Each KPI carries its previous
+// period's value and the percentage change against it. A zero previous value has
+// no meaningful percentage, so it is reported as `null` rather than Infinity or
+// NaN, and the UI renders that as "no prior period" — a real state, not a
+// missing one.
+//
+// STATUS IS THE CANONICAL BACKEND VOCABULARY (applied, under-review, interview,
+// offer, hired, rejected), counted from Application.status. No admin-only status
+// is invented for reporting, and the display labels come from the shared
+// ADMIN_STATUS_LABELS map.
+//
+// THE PIPELINE CARD IS A CURRENT-STATUS SNAPSHOT, NOT A CONVERSION FUNNEL.
+// Application.status records where an application sits NOW, not every stage it
+// has passed through, so the numbers are honestly presented as current counts per
+// status. They are not forced to decrease down the list: an application that was
+// rejected and then re-reviewed would otherwise be counted twice across stages,
+// which is exactly the fabricated conversion the previous funnel invented.
+//
+// ONE SCAN PER COLLECTION. Job, Application and Profile are each read once,
+// using $facet so a collection is traversed a single time and every figure for
+// that collection comes out of the same pass.
+// ---------------------------------------------------------------------------
+const ANALYTICS_RANGES = {
+  7: { days: 7, label: 'Last 7 days' },
+  30: { days: 30, label: 'Last 30 days' },
+  90: { days: 90, label: 'Last 90 days' },
+  year: { yearToDate: true, label: 'This year' },
+};
+
+const ANALYTICS_TOP_N = 5;
+
+// One day in milliseconds. UTC days are always exactly this long (no DST), which
+// is why every boundary in this module can be built by adding this constant.
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Canonical pipeline order. Anything outside this list still appears in the
+// counts (a document cannot hold an invalid status), but these lead the display.
+const ANALYTICS_STATUS_ORDER = APPLICATION_STATUSES;
+
+// Start-of-day in UTC. Every window boundary and every daily bucket uses this,
+// so a record is grouped into exactly the day the range counts it in.
+const utcDayStart = (date) =>
+  new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+
+// The reporting window plus the immediately preceding window of equal length.
+const analyticsWindows = (rangeKey) => {
+  const config = ANALYTICS_RANGES[rangeKey];
+  const now = new Date();
+  // The window ends at the last millisecond of the current UTC day, so a record
+  // created a moment ago is inside it rather than in the future.
+  const end = new Date(utcDayStart(now).getTime() + DAY_MS - 1);
+
+  let start;
+  if (config.yearToDate) {
+    start = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+  } else {
+    // The window opens at the UTC midnight `days - 1` days back, so "Last 7
+    // days" is exactly seven whole calendar days including today. Deriving the
+    // start from the end-of-day timestamp instead would shift the window nearly a
+    // day forward and silently drop the oldest day.
+    start = new Date(utcDayStart(now).getTime() - (config.days - 1) * DAY_MS);
+  }
+
+  const duration = end.getTime() - start.getTime();
+  // The comparison window sits immediately before the reporting one and spans
+  // exactly the same duration, so the two are directly comparable.
+  const previousEnd = new Date(start.getTime() - 1);
+  const previousStart = new Date(previousEnd.getTime() - duration);
+
+  return { start, end, previousStart, previousEnd, label: config.label };
+};
+
+const countByFacet = (rows, key) => {
+  const row = rows[0];
+  return row && key in row ? row[key] : 0;
+};
+
+// Percentage change from previous to current, or null when there is no previous
+// value to compare against. Never returns Infinity or NaN: a zero baseline has
+// no percentage, and inventing one (or dividing by it) would be a fabrication.
+const percentChange = (current, previous) => {
+  if (!previous) return null;
+  const change = ((current - previous) / previous) * 100;
+  return Number.isFinite(change) ? Math.round(change * 10) / 10 : null;
+};
+
+// Zero-fill a grouped-by-day result across the window so the chart is
+// chronological and complete. Days with no activity are real zeroes, never gaps.
+const zeroFilledDays = (start, end) => {
+  const days = [];
+  for (
+    let day = utcDayStart(start);
+    day.getTime() <= end.getTime();
+    day = new Date(day.getTime() + DAY_MS)
+  ) {
+    days.push(day.toISOString().slice(0, 10));
+  }
+  return days;
+};
+
+const getAnalytics = async (req, res, next) => {
+  try {
+    const requested = req.query.range;
+    const rangeKey =
+      requested && Object.prototype.hasOwnProperty.call(ANALYTICS_RANGES, requested)
+        ? requested
+        : '30';
+    const { start, end, previousStart, previousEnd, label } =
+      analyticsWindows(rangeKey);
+
+    const windowMatch = { createdAt: { $gte: start, $lte: end } };
+    const previousMatch = { createdAt: { $gte: previousStart, $lte: previousEnd } };
+    const dayFormat = { format: '%Y-%m-%d', timezone: 'UTC' };
+
+    // ---- One pass over Job: totals, daily series, and the three breakdowns.
+    const [jobFacet] = await Job.aggregate([
+      {
+        $facet: {
+          current: [
+            { $match: windowMatch },
+            { $count: 'count' },
+          ],
+          previous: [
+            { $match: previousMatch },
+            { $count: 'count' },
+          ],
+          trend: [
+            { $match: windowMatch },
+            {
+              $group: {
+                _id: { $dateToString: { ...dayFormat, date: '$createdAt' } },
+                count: { $sum: 1 },
+              },
+            },
+          ],
+          byCategory: [
+            { $match: windowMatch },
+            { $group: { _id: '$category', count: { $sum: 1 } } },
+            { $sort: { count: -1, _id: 1 } },
+            { $limit: ANALYTICS_TOP_N },
+          ],
+          // workType is a closed enum on the Job model, so this breakdown is
+          // genuinely structured - unlike the free-text `location` field, whose
+          // raw values cannot be bucketed into cities without guessing.
+          byWorkType: [
+            { $match: windowMatch },
+            { $group: { _id: '$workType', count: { $sum: 1 } } },
+            { $sort: { count: -1, _id: 1 } },
+          ],
+          byCompany: [
+            { $match: windowMatch },
+            { $group: { _id: '$company', count: { $sum: 1 } } },
+            { $sort: { count: -1, _id: 1 } },
+            { $limit: ANALYTICS_TOP_N },
+          ],
+        },
+      },
+    ]);
+
+    // ---- One pass over Application: totals, daily series, status mix, and the
+    // most-applied ranking. The ranking joins its jobs in the same pipeline.
+    const [applicationFacet] = await Application.aggregate([
+      {
+        $facet: {
+          current: [{ $match: windowMatch }, { $count: 'count' }],
+          previous: [{ $match: previousMatch }, { $count: 'count' }],
+          trend: [
+            { $match: windowMatch },
+            {
+              $group: {
+                _id: { $dateToString: { ...dayFormat, date: '$createdAt' } },
+                count: { $sum: 1 },
+              },
+            },
+          ],
+          byStatus: [
+            { $match: windowMatch },
+            { $group: { _id: '$status', count: { $sum: 1 } } },
+          ],
+          mostApplied: [
+            { $match: windowMatch },
+            { $group: { _id: '$jobId', count: { $sum: 1 } } },
+            { $sort: { count: -1, _id: 1 } },
+            { $limit: ANALYTICS_TOP_N },
+            {
+              $lookup: {
+                from: Job.collection.name,
+                localField: '_id',
+                foreignField: '_id',
+                as: 'job',
+              },
+            },
+            // A listing deleted after being applied to has no title left. It
+            // keeps its real count and is labelled, never dropped or renamed.
+            { $unwind: { path: '$job', preserveNullAndEmptyArrays: true } },
+            {
+              $project: {
+                count: 1,
+                title: { $ifNull: ['$job.title', 'Deleted job'] },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    // ---- One pass over Profile: new jobseekers and new recruiters. Counted
+    // from the workspace profiles rather than User, so a person who holds both
+    // workspaces is counted once per workspace, matching how the Recruiters and
+    // Jobseekers workspaces count people.
+    const [profileFacet] = await Profile.aggregate([
+      { $match: { createdAt: { $gte: previousStart, $lte: end } } },
+      {
+        $facet: {
+          jobseekers: [
+            { $match: { role: 'jobseeker', ...windowMatch } },
+            { $count: 'count' },
+          ],
+          jobseekersPrevious: [
+            { $match: { role: 'jobseeker', ...previousMatch } },
+            { $count: 'count' },
+          ],
+          recruiters: [
+            { $match: { role: 'recruiter', ...windowMatch } },
+            { $count: 'count' },
+          ],
+          recruitersPrevious: [
+            { $match: { role: 'recruiter', ...previousMatch } },
+            { $count: 'count' },
+          ],
+        },
+      },
+    ]);
+
+    // ---- Assemble. Every figure below is a real aggregate.
+    const jobsTotal = countByFacet(jobFacet.current, 'count');
+    const jobsPrevious = countByFacet(jobFacet.previous, 'count');
+    const applicationsTotal = countByFacet(applicationFacet.current, 'count');
+    const applicationsPrevious = countByFacet(applicationFacet.previous, 'count');
+    const jobseekersTotal = countByFacet(profileFacet.jobseekers, 'count');
+    const jobseekersPrevious = countByFacet(profileFacet.jobseekersPrevious, 'count');
+    const recruitersTotal = countByFacet(profileFacet.recruiters, 'count');
+    const recruitersPrevious = countByFacet(profileFacet.recruitersPrevious, 'count');
+
+    const jobDays = {};
+    for (const row of jobFacet.trend || []) jobDays[row._id] = row.count;
+    const applicationDays = {};
+    for (const row of applicationFacet.trend || []) applicationDays[row._id] = row.count;
+    // Every calendar day in the window is present, with real zeroes on the quiet
+    // ones, so the chart is chronological and never implies missing data.
+    const trend = zeroFilledDays(start, end).map((date) => ({
+      date,
+      jobs: jobDays[date] || 0,
+      applications: applicationDays[date] || 0,
+    }));
+
+    const statusCounts = new Map(
+      (applicationFacet.byStatus || []).map((row) => [row._id, row.count])
+    );
+    const status = ANALYTICS_STATUS_ORDER.map((id) => ({
+      id,
+      count: statusCounts.get(id) || 0,
+    }));
+
+    const report = {
+      range: rangeKey,
+      label,
+      window: { start: start.toISOString(), end: end.toISOString() },
+      previousWindow: {
+        start: previousStart.toISOString(),
+        end: previousEnd.toISOString(),
+      },
+      trend,
+      applications: applicationsTotal,
+      jobs: jobsTotal,
+      kpis: [
+        {
+          id: 'jobs',
+          label: 'Total Jobs',
+          value: jobsTotal,
+          previous: jobsPrevious,
+          change: percentChange(jobsTotal, jobsPrevious),
+        },
+        {
+          id: 'applications',
+          label: 'Applications',
+          value: applicationsTotal,
+          previous: applicationsPrevious,
+          change: percentChange(applicationsTotal, applicationsPrevious),
+        },
+        {
+          id: 'jobseekers',
+          label: 'New Jobseekers',
+          value: jobseekersTotal,
+          previous: jobseekersPrevious,
+          change: percentChange(jobseekersTotal, jobseekersPrevious),
+        },
+        {
+          id: 'recruiters',
+          label: 'New Recruiters',
+          value: recruitersTotal,
+          previous: recruitersPrevious,
+          change: percentChange(recruitersTotal, recruitersPrevious),
+        },
+      ],
+      status,
+      category: (jobFacet.byCategory || []).map((row) => ({
+        label: row._id,
+        value: row.count,
+      })),
+      workTypes: (jobFacet.byWorkType || []).map((row) => ({
+        label: row._id,
+        value: row.count,
+      })),
+      topCompanies: (jobFacet.byCompany || []).map((row) => ({
+        label: row._id,
+        value: row.count,
+        unit: 'jobs',
+      })),
+      mostApplied: (applicationFacet.mostApplied || []).map((row) => ({
+        label: row.title,
+        value: row.count,
+      })),
+    };
+
+    return res.status(200).json(report);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
 // GET /api/admin/companies?page=1&limit=10&q=&dateRange=
 //
 // The Admin Companies workspace list.
@@ -1469,6 +1815,7 @@ module.exports = {
   listAdminJobseekers,
   listAdminRecruiters,
   listAdminCompanies,
+  getAnalytics,
   listAdminApplications,
   getAdminApplication,
   updateAdminApplicationStatus,
