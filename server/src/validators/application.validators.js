@@ -249,6 +249,36 @@ const adminRecruiterQueryValidators = [
   runValidation,
 ];
 
+// ---------------------------------------------------------------------------
+// GET /api/admin/companies — the Admin Companies workspace list.
+//
+// Same conventions as the recruiter/jobseeker query validators: every filter is
+// optional, and `{ values: 'falsy' }` makes an empty dropdown selection ("Any
+// date") read as absent rather than as a validation failure.
+//
+// There is deliberately no `status` or `industry` validator: no company record
+// exists to hold either, so filtering on them could only ever match invented
+// values.
+// ---------------------------------------------------------------------------
+const adminCompanyQueryValidators = [
+  query('page')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1 })
+    .withMessage('page must be a positive integer'),
+  query('limit')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1, max: 50 })
+    .withMessage('limit must be between 1 and 50'),
+  query('q')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('q must be at most 200 characters'),
+  dateRangeValidator,
+  runValidation,
+];
+
 module.exports = {
   createValidators,
   jobIdParamValidators,
@@ -258,5 +288,6 @@ module.exports = {
   jobseekerIdParamValidators,
   adminJobseekerQueryValidators,
   adminRecruiterQueryValidators,
+  adminCompanyQueryValidators,
   runValidation,
 };

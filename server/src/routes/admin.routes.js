@@ -6,6 +6,7 @@ const {
   getAdminJobseeker,
   listAdminJobseekers,
   listAdminRecruiters,
+  listAdminCompanies,
   listAdminApplications,
   getAdminApplication,
   updateAdminApplicationStatus,
@@ -21,6 +22,7 @@ const {
   jobseekerIdParamValidators,
   adminJobseekerQueryValidators,
   adminRecruiterQueryValidators,
+  adminCompanyQueryValidators,
 } = require('../validators/application.validators');
 
 const router = express.Router();
@@ -96,6 +98,17 @@ router.get(
   authorize('admin'),
   adminRecruiterQueryValidators,
   listAdminRecruiters
+);
+// Companies workspace: a paginated list of the companies named by real recruiter
+// profiles. Admin-only. Company records are derived (there is no Company model),
+// so there is likewise no per-company detail route - see the controller for the
+// full derivation and job-attribution rules.
+router.get(
+  '/companies',
+  authenticate,
+  authorize('admin'),
+  adminCompanyQueryValidators,
+  listAdminCompanies
 );
 // Jobs workspace: paginated list, single-job detail, and non-destructive
 // moderation (activate/pending/draft/close). All admin-only.

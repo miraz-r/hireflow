@@ -183,3 +183,29 @@ export async function getAdminRecruiters({
   const res = await api.get('/admin/recruiters', { params });
   return res.data;
 }
+
+// The Admin Companies workspace list. Search, date range, ordering, and paging
+// all happen on the server, so the page holds no second copy of the list to
+// filter locally.
+//
+// There is deliberately no `status`, `industry`, or `domain` filter: no company
+// record exists to hold any of them, so filtering on them could only match
+// invented values.
+//
+// Derived data, not a company record: companies are grouped from the
+// free-text companyName on recruiter profiles, grouped and matched exactly as
+// typed so "Acme Corp" and "acme corp" stay distinct. `jobs` counts listings
+// whose own `company` is that name — never "jobs this company's recruiters
+// posted", which would credit a company for other employers' work.
+export async function getAdminCompanies({
+  page = 1,
+  limit = 10,
+  q = '',
+  dateRange = '',
+} = {}) {
+  const params = { page, limit };
+  if (q && q.trim()) params.q = q.trim();
+  if (dateRange) params.dateRange = dateRange;
+  const res = await api.get('/admin/companies', { params });
+  return res.data;
+}

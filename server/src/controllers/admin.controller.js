@@ -571,6 +571,268 @@ const hiringCountsByRecruiter = async (userIds) => {
 };
 
 // ---------------------------------------------------------------------------
+// GET /api/admin/companies?page=1&limit=10&q=&dateRange=
+//
+// The Admin Companies workspace list.
+//
+// THERE IS NO COMPANY MODEL, and none is introduced here. A company is derived
+// entirely from the recruiter profiles that claim it, grouped by the
+// free-text `Profile.companyName`. Every field below is read or aggregated from
+// data that already exists.
+//
+// SOURCED FROM RECRUITER PROFILES, NOT THE ACCOUNT'S ACTIVE WORKSPACE, for the
+// same reason the recruiters list is: `User.role` only records which workspace
+// an account is currently in. A person whose account is active in the jobseeker
+// workspace still represents the company they work for.
+//
+// INNER-JOINED TO THE OWNING ACCOUNT, and deliberately so: a company whose only
+// recruiters have been deleted is not a company this workspace can attribute
+// anything to, and `$unwind` drops those profiles before grouping so they cannot
+// inflate a recruiter count. Dropping them here — before the `$facet` — also
+// keeps `total` and `totalPages` accurate.
+//
+// NAME IDENTITY IS THE NAME, EXACTLY AS TYPED. MongoDB groups and matches
+// strings case-sensitively, so "Acme Corp" and "acme corp" remain two separate
+// records. They may well be the same real-world company, but nothing stored
+// says so, and merging them would silently collapse two distinct sets of
+// recruiters. Normalising that is a data-modelling decision, not a display one.
+//
+// JOB ATTRIBUTION IS BY THE JOB'S OWN DECLARED EMPLOYER. `jobs` counts the
+// listings whose `Job.company` is exactly this company name, and `applications`
+// counts the applications received on those listings. It is deliberately NOT
+// "jobs posted by this company's recruiters": a recruiter can post on behalf of
+// a different employer, so the poster is not evidence of the company. In the
+// development data this distinction is load-bearing — the seeded recruiters all
+// work for one company while the listings they posted belong to many others —
+// and crediting the poster's company for them would be plainly wrong.
+//
+// NO STATUS, NO INDUSTRY, NO FABRICATED DOMAIN. None of those are stored
+// anywhere, so none are invented here, and no filter accepts them. The website
+// comes from the recruiters' own `companyWebsite` and is reported only when no
+// two of them recorded a different one.
+//
+// NO DETAIL ENDPOINT: the workspace panel renders entirely from the list row,
+// so a per-company fetch would be a second round trip for data the panel
+// already holds, and would create a second definition of "is a company" that
+// could drift from this list.
+// ---------------------------------------------------------------------------
+const listAdminCompanies = async (req, res, next) => {
+  try {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 50);
+    const skip = (page - 1) * limit;
+
+    const { q, dateRange } = req.query;
+
+    // A company only exists here once a recruiter has claimed it by naming it.
+    // Requiring a non-empty companyName also guarantees the `$group` key below
+    // is never null, which keeps every row's id a real name.
+    const filter = {
+      role: 'recruiter',
+      companyName: { $exists: true, $ne: '' },
+    };
+
+    if (dateRange) {
+      const start = new Date();
+      if (dateRange === 'today') {
+        start.setHours(0, 0, 0, 0);
+      } else {
+        const days = Math.min(Math.max(parseInt(dateRange, 10) || 7, 1), 365);
+        start.setDate(start.getDate() - days);
+      }
+      filter.createdAt = { $gte: start };
+    }
+
+    // Search spans the company name, its recruiters' names, and their account
+    // emails, so an admin can find a company by the person who works there.
+    // The first two live on Profile and the email on User, so the email arm
+    // matches the joined account below.
+    const searchRegex =
+      q && q.trim() ? new RegExp(escapeRegex(q.trim()), 'i') : null;
+
+    const pipeline = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: User.collection.name,
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'account',
+        },
+      },
+      { $unwind: '$account' },
+    ];
+
+    if (searchRegex) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { companyName: searchRegex },
+            { fullName: searchRegex },
+            { 'account.email': searchRegex },
+          ],
+        },
+      });
+    }
+
+    // Oldest recruiter first, so the group's `$first` is the company's earliest
+    // recruiter — which is both the "joined" date and a real, deterministic
+    // primary contact. `_id` breaks ties so the choice never depends on natural
+    // document order.
+    pipeline.push({ $sort: { createdAt: 1, _id: 1 } });
+
+    pipeline.push({
+      $group: {
+        _id: '$companyName',
+        recruiters: { $sum: 1 },
+        joinedAt: { $first: '$createdAt' },
+        contact: {
+          $first: {
+            id: '$userId',
+            name: '$fullName',
+            jobTitle: '$jobTitle',
+            email: '$account.email',
+            phone: '$phone',
+          },
+        },
+        websites: { $addToSet: { $ifNull: ['$companyWebsite', ''] } },
+      },
+    });
+
+    // Drop blank websites before deciding. A recruiter who never filled the
+    // field in has made no claim about the company's site, so a blank is an
+    // absence of information rather than a conflicting one — one blank among
+    // agreeing recruiters does not erase a website they all recorded.
+    // What does void it is two DIFFERENT recorded values: the company then has
+    // no single website, and reporting either one would be a guess.
+    pipeline.push({
+      $set: {
+        websites: {
+          $filter: {
+            input: '$websites',
+            as: 'site',
+            cond: { $ne: ['$$site', ''] },
+          },
+        },
+      },
+    });
+    pipeline.push({
+      $set: {
+        companyWebsite: {
+          $cond: [
+            { $eq: [{ $size: '$websites' }, 1] },
+            { $arrayElemAt: ['$websites', 0] },
+            '',
+          ],
+        },
+      },
+    });
+
+    // Most recently joined company first, name as a stable tie-break.
+    pipeline.push({ $sort: { joinedAt: -1, _id: 1 } });
+    pipeline.push({
+      $facet: {
+        rows: [{ $skip: skip }, { $limit: limit }],
+        total: [{ $count: 'count' }],
+      },
+    });
+
+    const [result] = await Profile.aggregate(pipeline);
+    const groups = result.rows || [];
+    const total = result.total.length ? result.total[0].count : 0;
+
+    const { jobsByCompany, applicationsByCompany } =
+      await jobsAndApplicationsByCompany(groups.map((group) => group._id));
+
+    const companies = groups.map((group) => {
+      const contact = group.contact;
+      return {
+        // No company document exists, so the name IS its identity and its key.
+        id: group._id,
+        name: group._id,
+        companyWebsite: group.companyWebsite || '',
+        recruiters: group.recruiters || 0,
+        jobs: jobsByCompany.get(group._id) || 0,
+        applications: applicationsByCompany.get(group._id) || 0,
+        joinedAt: group.joinedAt,
+        // Never a placeholder: every group is built from at least one real
+        // recruiter profile that survived the join.
+        primaryContact: {
+          id: contact.id,
+          name: contact.name || '',
+          jobTitle: contact.jobTitle || '',
+          email: contact.email || '',
+          phone: contact.phone || '',
+        },
+      };
+    });
+
+    return res.status(200).json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      companies,
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid filter id' });
+    }
+    return next(err);
+  }
+};
+
+// Count jobs and applications for a page of companies.
+//
+// JOB ATTRIBUTION, STATED ONCE: a listing belongs to a company when its own
+// `company` field is exactly that company name. Nothing here looks at who
+// posted it — see the attribution note on listAdminCompanies for why the
+// poster is not evidence.
+//
+// Matching is case-sensitive, matching how the companies themselves were
+// grouped. A listing for "acme corp" therefore does not count towards an
+// "Acme Corp" row, and is reported against neither rather than guessed into the
+// nearest one.
+const jobsAndApplicationsByCompany = async (companyNames) => {
+  const jobsByCompany = new Map();
+  const applicationsByCompany = new Map();
+
+  if (!companyNames.length) {
+    return { jobsByCompany, applicationsByCompany };
+  }
+
+  const jobs = await Job.find({ company: { $in: companyNames } })
+    .select('_id company')
+    .lean();
+
+  if (!jobs.length) {
+    return { jobsByCompany, applicationsByCompany };
+  }
+
+  // job id -> the company name the job itself declares, so each job's
+  // application total lands on the right company row.
+  const companyByJobId = new Map();
+  for (const job of jobs) {
+    jobsByCompany.set(job.company, (jobsByCompany.get(job.company) || 0) + 1);
+    companyByJobId.set(String(job._id), job.company);
+  }
+
+  const rows = await Application.aggregate([
+    { $match: { jobId: { $in: jobs.map((job) => job._id) } } },
+    { $group: { _id: '$jobId', count: { $sum: 1 } } },
+  ]);
+
+  for (const { _id, count } of rows) {
+    const name = companyByJobId.get(String(_id));
+    if (name) {
+      applicationsByCompany.set(name, (applicationsByCompany.get(name) || 0) + count);
+    }
+  }
+
+  return { jobsByCompany, applicationsByCompany };
+};
+
+// ---------------------------------------------------------------------------
 // GET /api/admin/applications?page=1&limit=8
 //
 // Backs two consumers at once:
@@ -1206,6 +1468,7 @@ module.exports = {
   getAdminJobseeker,
   listAdminJobseekers,
   listAdminRecruiters,
+  listAdminCompanies,
   listAdminApplications,
   getAdminApplication,
   updateAdminApplicationStatus,
