@@ -25,6 +25,7 @@ const {
   adminRecruiterQueryValidators,
   adminCompanyQueryValidators,
   adminAnalyticsQueryValidators,
+  adminActivityQueryValidators,
 } = require('../validators/application.validators');
 
 const router = express.Router();
@@ -48,10 +49,14 @@ router.get(
   adminApplicationQueryValidators,
   listAdminApplications
 );
+// Platform activity feed. Admin-only. Paginated over the merged event stream, and
+// filtered by event type. The response keeps the original `items` array so the
+// Overview and Analytics consumers of this endpoint are unaffected.
 router.get(
   '/activity',
   authenticate,
   authorize('admin'),
+  adminActivityQueryValidators,
   getRecentActivity
 );
 // Applications workspace detail + moderation. Declared after the literal

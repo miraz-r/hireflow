@@ -1520,27 +1520,178 @@ const serializeAdminApplication = (
 };
 
 // ---------------------------------------------------------------------------
-// GET /api/admin/activity?limit=8 — a recent-activity feed derived purely from
-// existing data (application creation + job creation/update timestamps). No
-// dedicated audit-log/activity model exists, so the feed is computed on demand
-// from data we already store.
+// GET /api/admin/activity?page=1&limit=8&type=all
+//
+// The platform activity feed.
+//
+// DERIVED FROM STORED DATA, NOT FROM AN AUDIT LOG. No audit-log collection
+// exists and none is introduced here. Every event is reconstructed on demand
+// from a timestamp that is already recorded:
+//
+//   application-created   Application.createdAt
+//   job-created           Job.createdAt   (createdAt === updatedAt)
+//   job-updated           Job.updatedAt   (the listing was edited)
+//   jobseeker-registered  User.createdAt  (account opened a jobseeker profile)
+//   recruiter-registered  User.createdAt  (account opened a recruiter profile)
+//
+// REGISTRATION IS AN ACCOUNT EVENT, AND IS COUNTED ONCE. A person may hold both
+// a jobseeker and a recruiter profile, but they registered a single time. The
+// account's registration timestamp is User.createdAt, and the workspace they
+// registered in is the role of their EARLIEST profile: auth.controller creates
+// the signup profile alongside the account, and only a later workspace switch
+// adds another. Grouping by account therefore reports one event per person
+// rather than double-counting dual-workspace accounts.
+//
+// ADMIN REGISTRATIONS ARE EXCLUDED. The admin role is granted server-side by
+// the bootstrap seed, not chosen at signup, so an admin account is not a
+// platform signup and has no recruiter or jobseeker profile to report.
+//
+// PAGINATION IS OVER THE MERGED FEED, so a page is a page of real activity
+// rather than a page per source. Because every source is read newest-first, the
+// first `skip + limit` rows of a source are guaranteed to contain anything from
+// that source that belongs on the requested page — so each source is scanned
+// that deep and the merged result is sliced once.
+//
+// `limit` defaults to 8 and `items` is returned exactly as before, so the
+// existing Admin Overview and Admin Analytics consumers of this endpoint are
+// unaffected by the added pagination and filter.
 // ---------------------------------------------------------------------------
+
+// Closed set. An unrecognised type is rejected by the validator rather than
+// silently returning an empty feed that reads like "nothing happened".
+const ACTIVITY_TYPES = [
+  'application-created',
+  'job-created',
+  'job-updated',
+  'jobseeker-registered',
+  'recruiter-registered',
+];
+
+// A Job is a creation when nothing has touched it since, and an update
+// otherwise. This is the same test the previous implementation applied.
+const JOB_CREATED_FILTER = { $expr: { $eq: ['$updatedAt', '$createdAt'] } };
+const JOB_UPDATED_FILTER = { $expr: { $ne: ['$updatedAt', '$createdAt'] } };
+
+// One registration event per account, classified by the role of its earliest
+// profile. Returns the newest-first events plus a per-type count map, so the
+// caller can total an unfiltered feed and honour a single-type filter from the
+// same pass.
+const registrationActivity = async (scan, onlyType) => {
+  // Ascending, so the first profile seen for an account is its earliest — the
+  // workspace it signed up in. Admin profiles are excluded outright.
+  const profiles = await Profile.find({ role: { $in: ['jobseeker', 'recruiter'] } })
+    .sort({ createdAt: 1, _id: 1 })
+    .select('userId role fullName location companyName')
+    .lean();
+
+  if (!profiles.length) {
+    return {
+      events: [],
+      counts: { 'jobseeker-registered': 0, 'recruiter-registered': 0 },
+      top: [],
+    };
+  }
+
+  const earliestByUser = new Map();
+  for (const profile of profiles) {
+    const key = String(profile.userId);
+    if (!earliestByUser.has(key)) earliestByUser.set(key, profile);
+  }
+
+  const registrations = [...earliestByUser.values()];
+  const accounts = await User.find({
+    _id: { $in: registrations.map((profile) => profile.userId) },
+  })
+    .select('email createdAt')
+    .lean();
+
+  const accountById = new Map(accounts.map((account) => [String(account._id), account]));
+
+  const events = [];
+  const counts = { 'jobseeker-registered': 0, 'recruiter-registered': 0 };
+
+  for (const profile of registrations) {
+    const account = accountById.get(String(profile.userId));
+    // A profile whose account has been deleted is not a person who joined the
+    // platform, and there is no email to attribute the event to.
+    if (!account) continue;
+
+    const isRecruiter = profile.role === 'recruiter';
+    const type = isRecruiter ? 'recruiter-registered' : 'jobseeker-registered';
+
+    // Counted regardless of the active filter, so a total is never a function of
+    // which slice happens to be on screen.
+    counts[type] += 1;
+
+    // A single-type request still reports only that type's rows.
+    if (onlyType && type !== onlyType) continue;
+
+    const name = profile.fullName || account.email;
+    // The recruiter's company is real stored data; a jobseeker has no company,
+    // so their location is the honest equivalent detail.
+    const detail = isRecruiter
+      ? profile.companyName || 'Recruiter'
+      : profile.location || 'Jobseeker';
+
+    events.push({
+      type,
+      label: isRecruiter ? 'Recruiter joined' : 'Jobseeker registered',
+      entity: name,
+      detail,
+      at: account.createdAt,
+    });
+  }
+
+  events.sort((a, b) => new Date(b.at) - new Date(a.at));
+
+  return { events, counts, top: events.slice(0, scan) };
+};
+
 const getRecentActivity = async (req, res, next) => {
   try {
-    const limit = Math.min(
-      Math.max(parseInt(req.query.limit, 10) || 8, 1),
-      20
-    );
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 8, 1), 50);
+    const skip = (page - 1) * limit;
 
-    const [recentApplications, recentJobs] = await Promise.all([
-      Application.find({})
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .populate('jobId', 'title company')
-        .populate('userId', 'email'),
-      // Jobs order only guards which subset we examine; the final sort below
-      // is the source of truth for the feed order.
-      Job.find({}).sort({ updatedAt: -1 }).limit(limit),
+    const requested = req.query.type;
+    const type = requested && requested !== 'all' ? requested : '';
+    const wants = (candidate) => !type || type === candidate;
+
+    // Deep enough per source that the merged page is guaranteed complete.
+    const scan = skip + limit;
+
+    const [
+      applicationCount,
+      jobCreatedCount,
+      jobUpdatedCount,
+      recentApplications,
+      recentCreatedJobs,
+      recentUpdatedJobs,
+      registrations,
+    ] = await Promise.all([
+      wants('application-created') ? Application.countDocuments() : 0,
+      wants('job-created') ? Job.countDocuments(JOB_CREATED_FILTER) : 0,
+      wants('job-updated') ? Job.countDocuments(JOB_UPDATED_FILTER) : 0,
+      wants('application-created')
+        ? Application.find({})
+            .sort({ createdAt: -1 })
+            .limit(scan)
+            .populate('jobId', 'title company')
+            .populate('userId', 'email')
+        : [],
+      wants('job-created')
+        ? Job.find(JOB_CREATED_FILTER).sort({ createdAt: -1 }).limit(scan).lean()
+        : [],
+      wants('job-updated')
+        ? Job.find(JOB_UPDATED_FILTER).sort({ updatedAt: -1 }).limit(scan).lean()
+        : [],
+      wants('jobseeker-registered') || wants('recruiter-registered')
+        ? registrationActivity(scan, type)
+        : {
+            events: [],
+            counts: { 'jobseeker-registered': 0, 'recruiter-registered': 0 },
+            top: [],
+          },
     ]);
 
     const items = [];
@@ -1558,28 +1709,55 @@ const getRecentActivity = async (req, res, next) => {
       });
     }
 
-    for (const job of recentJobs) {
-      const updatedAt = job.updatedAt || job.createdAt;
-      const isUpdate =
-        job.updatedAt && job.createdAt
-          ? job.updatedAt.getTime() !== job.createdAt.getTime()
-          : false;
+    for (const job of recentCreatedJobs) {
       items.push({
-        type: isUpdate ? 'job-updated' : 'job-created',
-        label: isUpdate ? 'Job listing updated' : 'New job posted',
+        type: 'job-created',
+        label: 'New job posted',
         entity: job.title,
         detail: `${job.company} • ${job.location}`,
-        at: updatedAt,
+        at: job.createdAt,
       });
     }
 
+    for (const job of recentUpdatedJobs) {
+      items.push({
+        type: 'job-updated',
+        label: 'Job listing updated',
+        entity: job.title,
+        detail: `${job.company} • ${job.location}`,
+        at: job.updatedAt || job.createdAt,
+      });
+    }
+
+    for (const event of registrations.top) {
+      items.push(event);
+    }
+
+    // Merge order is resolved here, across every source, before the page slice.
     items.sort((a, b) => new Date(b.at) - new Date(a.at));
 
+    // Only the sources the filter admits contribute to the total, so `total` is
+    // always the number of events the requested view contains.
+    const total =
+      applicationCount +
+      jobCreatedCount +
+      jobUpdatedCount +
+      (type
+        ? registrations.counts[type] || 0
+        : registrations.counts['jobseeker-registered'] +
+          registrations.counts['recruiter-registered']);
+
+    const pageItems = items.slice(skip, skip + limit);
+
     return res.status(200).json({
-      items: items.slice(0, limit).map((item) => ({
+      items: pageItems.map((item) => ({
         ...item,
         at: item.at ? new Date(item.at).toISOString() : item.at,
       })),
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (err) {
     return next(err);
@@ -1809,6 +1987,7 @@ const serializeAdminJob = (job, counts, recruiterMap) => {
 };
 
 module.exports = {
+  ACTIVITY_TYPES,
   getStats,
   getApplicationsTrend,
   getAdminJobseeker,

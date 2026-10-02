@@ -1,14 +1,29 @@
 /* ===========================================================================
-   ADMIN ACTIVITY
+   ADMIN ACTIVITY (/admin/activity)
    ---------------------------------------------------------------------------
-   The /admin/activity workspace. Intentionally a thin sheet: the page is one
-   read-only card, so it only needs the card surface and the same three-column
-   table language the Analytics page already uses. Colours come from the shared
-   admin tokens, so light and dark themes both work without extra rules.
+   The Activity workspace: a read-only, paginated feed of platform events
+   served by GET /api/admin/activity.
+
+   NAMESPACING: every rule here is prefixed `admin-activity-page-`. The Overview
+   dashboard owns an unrelated `.admin-activity*` family for its compact feed
+   widget (AdminOverview.css), so the two must never share class names or one
+   will silently restyle the other. Do not shorten these prefixes.
+
+   Colours come entirely from the shared admin tokens, so light and dark themes
+   both work without theme-specific rules.
    =========================================================================== */
 
+.admin-page.admin-activity-page {
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  max-width: 1460px;
+  margin-inline: auto;
+}
+
 /* ---------- Card ---------- */
-.admin-activity-card {
+.admin-activity-page-card {
   background-color: var(--admin-surface);
   border: 1px solid var(--admin-border);
   border-radius: var(--radius-lg);
@@ -16,7 +31,7 @@
   padding: 18px 20px 20px;
 }
 
-.admin-activity-card-head {
+.admin-activity-page-card-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -24,11 +39,11 @@
   margin-bottom: 16px;
 }
 
-.admin-activity-card-headings {
+.admin-activity-page-card-headings {
   min-width: 0;
 }
 
-.admin-activity-card-title {
+.admin-activity-page-card-title {
   margin: 0;
   font-size: 15px;
   font-weight: 700;
@@ -36,7 +51,7 @@
   color: var(--admin-text-strong);
 }
 
-.admin-activity-card-sub {
+.admin-activity-page-card-sub {
   margin: 3px 0 0;
   font-size: 12.5px;
   color: var(--admin-text-faint);
@@ -44,7 +59,7 @@
 
 /* Back to Analytics - a real <Link>, so it stays keyboard reachable, opens in a
    new tab on middle click, and is announced as a link rather than a button. */
-.admin-activity-back {
+.admin-activity-page-back {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -58,35 +73,138 @@
   transition: color var(--transition-fast);
 }
 
-.admin-activity-back:hover {
+.admin-activity-page-back:hover {
   color: var(--admin-primary-hover);
   text-decoration: underline;
 }
 
-.admin-activity-back:focus-visible {
+.admin-activity-page-back:focus-visible {
   outline: 2px solid var(--admin-primary);
   outline-offset: 3px;
   border-radius: 3px;
 }
 
+/* ---------- Toolbar ----------
+   One compact row: the type filter, plus a secondary clear action that only
+   appears while a filter is active. Same language as the other workspaces. */
+.admin-activity-page-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.admin-activity-page-filter {
+  width: 232px;
+  flex-shrink: 0;
+}
+
+.admin-activity-page-filter-select {
+  height: 38px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-field);
+  border-radius: var(--radius-md);
+}
+
+.admin-activity-page-filter-select:hover {
+  border-color: var(--admin-border-field-hover);
+}
+
+.admin-activity-page-filter-select:focus,
+.admin-activity-page-filter:focus-within .hf-select-trigger {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+
+.admin-activity-page-filter-select .hf-select-value--placeholder {
+  color: var(--admin-text-faint);
+}
+
+.admin-activity-page-filter-select .hf-select-chevron {
+  color: var(--admin-text-faint);
+}
+
+.admin-activity-page-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 6px 0 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--admin-border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.admin-activity-page-clear:hover {
+  color: var(--admin-primary);
+}
+
+.admin-activity-page-clear:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Buttons (shared language with the other workspaces) ---------- */
+.admin-activity-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  margin-top: 14px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--admin-text-strong);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.admin-activity-page-btn:hover {
+  background-color: var(--admin-hover);
+  border-color: var(--admin-text-faint);
+}
+
+.admin-activity-page-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
 /* ---------- Table ----------
    Fixed layout plus a colgroup so the header and every row stay locked to the
    same three columns and nothing overflows the card horizontally. */
-.admin-activity-table-scroll {
+.admin-activity-page-table-scroll {
   width: 100%;
   overflow-x: auto;
   overscroll-behavior-x: contain;
 }
 
-.admin-activity-table {
+.admin-activity-page-table {
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 14px;
 }
 
-.admin-activity-table th,
-.admin-activity-table td {
+.admin-activity-page-table th,
+.admin-activity-page-table td {
   text-align: left;
   vertical-align: middle;
   overflow: hidden;
@@ -94,7 +212,7 @@
   white-space: nowrap;
 }
 
-.admin-activity-table th {
+.admin-activity-page-table th {
   padding: 0 12px 9px;
   font-size: 11px;
   font-weight: 600;
@@ -104,82 +222,225 @@
   border-bottom: 1px solid var(--admin-border);
 }
 
-.admin-activity-table td {
+.admin-activity-page-table td {
   padding: 11px 12px;
   border-bottom: 1px solid var(--admin-border);
   color: var(--admin-text);
 }
 
-.admin-activity-table tbody tr:last-child td {
+.admin-activity-page-table tbody tr:last-child td {
   border-bottom: 0;
 }
 
-.admin-activity-table tbody tr:hover {
+.admin-activity-page-table tbody tr:hover {
   background-color: var(--admin-hover);
 }
 
-.admin-activity-table thead th:first-child,
-.admin-activity-table tbody td:first-child {
+.admin-activity-page-table thead th:first-child,
+.admin-activity-page-table tbody td:first-child {
   padding-left: 0;
 }
 
-.admin-activity-table thead th:last-child,
-.admin-activity-table tbody td:last-child {
+.admin-activity-page-table thead th:last-child,
+.admin-activity-page-table tbody td:last-child {
   padding-right: 0;
 }
 
-.admin-activity-cell-activity {
+/* ---------- Cells ----------
+   The Activity cell stacks the event name over the entity it happened to, which
+   is what the compact feed needs when there is no single "actor" column. */
+.admin-activity-page-cell-activity {
+  font-weight: 400;
+}
+
+.admin-activity-page-label {
+  display: block;
   font-weight: 600;
   color: var(--admin-text-strong);
 }
 
-/* Column widths - Activity takes the remaining space, the last two are fixed. */
-.admin-activity-col-activity {
+.admin-activity-page-entity {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--admin-text-faint);
+}
+
+.admin-activity-page-cell-detail {
+  color: var(--admin-text);
+}
+
+.admin-activity-page-cell-date {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Column widths - Activity and Detail share the remaining space, the date is
+   fixed so the dates always align in a readable column. */
+.admin-activity-page-col-activity {
+  width: 34%;
+}
+
+.admin-activity-page-col-detail {
   width: auto;
 }
 
-.admin-activity-col-user {
-  width: 220px;
+.admin-activity-page-col-date {
+  width: 132px;
 }
 
-.admin-activity-col-date {
-  width: 108px;
+/* ---------- Loading / error / empty state ---------- */
+.admin-activity-page-state {
+  padding: 44px 20px;
+  text-align: center;
 }
 
-/* ---------- Footer ---------- */
-.admin-activity-foot {
+.admin-activity-page-state-title {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+}
+
+.admin-activity-page-state-text {
+  display: block;
+  max-width: 460px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Footer + pagination ----------
+   The count sits left and the pager right, matching every other workspace
+   footer, on one wrapping row. */
+.admin-activity-page-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: 16px;
   padding-top: 14px;
   border-top: 1px solid var(--admin-border);
 }
 
-.admin-activity-foot-count {
+.admin-activity-page-foot-count {
   margin: 0;
   font-size: 13px;
   color: var(--admin-text-faint);
 }
 
-.admin-activity-foot-count strong {
+.admin-activity-page-foot-count strong {
   color: var(--admin-text-strong);
   font-variant-numeric: tabular-nums;
 }
 
+.admin-activity-page-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-activity-page-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-text-muted);
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.admin-activity-page-page-btn:hover:not(:disabled) {
+  color: var(--admin-text-strong);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-activity-page-page-btn:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 1px;
+}
+
+.admin-activity-page-page-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.admin-activity-page-page-btn--current {
+  color: #ffffff;
+  background-color: var(--admin-primary);
+  border-color: var(--admin-primary);
+}
+
+.admin-activity-page-page-btn--current:hover:not(:disabled) {
+  color: #ffffff;
+  border-color: var(--admin-primary-hover);
+}
+
+.admin-activity-page-page-btn--nav {
+  padding: 0 10px;
+}
+
+.admin-activity-page-page-gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  font-size: 13px;
+  color: var(--admin-text-faint);
+}
+
+/* ---------- Dark-mode contrast tune ----------
+   Mirrors the other admin workspaces: push faint/muted/text further up the slate
+   ramp so titles, headers, dates and secondary metadata stay clearly readable on
+   the dark admin surface. */
+html[data-theme="dark"] .admin-page.admin-activity-page {
+  --admin-text-faint: #8b9ab0;
+  --admin-text-muted: #a3b0c3;
+  --admin-text: #b7c2d2;
+}
+
 /* ---------- Narrow viewports ---------- */
+@media (max-width: 860px) {
+  .admin-activity-page-col-activity {
+    width: 40%;
+  }
+
+  .admin-activity-page-col-date {
+    width: 108px;
+  }
+}
+
 @media (max-width: 640px) {
-  .admin-activity-card {
+  .admin-activity-page-card {
     padding: 16px;
   }
 
-  .admin-activity-card-head {
+  .admin-activity-page-card-head {
     flex-direction: column;
     gap: 10px;
   }
 
-  .admin-activity-col-user {
-    width: 150px;
+  .admin-activity-page-filter {
+    width: 100%;
   }
 
-  .admin-activity-col-date {
-    width: 84px;
+  .admin-activity-page-col-activity {
+    width: 46%;
+  }
+
+  .admin-activity-page-col-date {
+    width: 96px;
   }
 }

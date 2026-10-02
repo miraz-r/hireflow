@@ -250,6 +250,42 @@ const adminRecruiterQueryValidators = [
 ];
 
 // ---------------------------------------------------------------------------
+// GET /api/admin/activity — the platform activity feed.
+//
+// `limit` defaults to 8 and is capped at 50 so the Activity workspace can page
+// through the feed; the Overview and Analytics callers pass their own smaller
+// limits and are unaffected. `type` is a closed set, and 'all' is accepted as
+// the explicit "no filter" choice the UI dropdown offers.
+const ACTIVITY_TYPES = [
+  'application-created',
+  'job-created',
+  'job-updated',
+  'jobseeker-registered',
+  'recruiter-registered',
+];
+
+const adminActivityQueryValidators = [
+  query('page')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1 })
+    .withMessage('page must be a positive integer'),
+  query('limit')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1, max: 50 })
+    .withMessage('limit must be between 1 and 50'),
+  query('type')
+    .optional({ values: 'falsy' })
+    .custom((value) => {
+      if (value === 'all') return true;
+      if (!ACTIVITY_TYPES.includes(value)) {
+        throw new Error(`type must be one of: ${ACTIVITY_TYPES.join(', ')}`);
+      }
+      return true;
+    }),
+  runValidation,
+];
+
+// ---------------------------------------------------------------------------
 // GET /api/admin/analytics — the Admin Analytics reporting window.
 //
 // `range` is a closed set rather than a free day count: `year` is year-to-date
@@ -308,5 +344,6 @@ module.exports = {
   adminRecruiterQueryValidators,
   adminCompanyQueryValidators,
   adminAnalyticsQueryValidators,
+  adminActivityQueryValidators,
   runValidation,
 };

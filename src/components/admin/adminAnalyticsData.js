@@ -14,10 +14,9 @@
      - buildAnalyticsCsv: a pure serialiser over the report the screen is
        already showing, so the exported file can never disagree with the page.
 
-   RECENT_ACTIVITY is intentionally still exported: AdminActivityPage.jsx imports
-   it and that page is out of scope for this change. When the Activity workspace
-   is migrated to the real feed, this constant should be deleted along with that
-   page's import of it.
+   The former RECENT_ACTIVITY mock constant lived here too. It is gone: the
+   Analytics activity card and the Activity workspace both read the real feed
+   from GET /api/admin/activity, so no consumer imports this module for data.
    =========================================================================== */
 
 export const DEFAULT_RANGE = '30';
@@ -52,21 +51,6 @@ export const STATUS_META = [
 export const STATUS_FILLS = Object.fromEntries(
   STATUS_META.map((status) => [status.id, status.fill])
 );
-
-/* --------------------------------------------------------------------------
-   The activity feed
-   --------------------------------------------------------------------------
-   STILL MOCK, and still consumed by AdminActivityPage.jsx, which this change
-   does not touch. Analytics no longer reads it - that card is fed by the real
-   /api/admin/activity endpoint instead.
-   -------------------------------------------------------------------------- */
-
-export const RECENT_ACTIVITY = [
-  { activity: 'Job posted', user: 'Stark Industries', date: 'Sep 26' },
-  { activity: 'Application received', user: 'David Okafor', date: 'Sep 26' },
-  { activity: 'Recruiter joined', user: 'Elena Petrova', date: 'Sep 25' },
-  { activity: 'Jobseeker registered', user: 'Marcus Chen', date: 'Sep 25' },
-];
 
 /* --------------------------------------------------------------------------
    CSV export

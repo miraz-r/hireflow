@@ -29,12 +29,32 @@ export async function getRecentApplications(page = 1, limit = 8) {
 }
 
 // Recent-activity feed (default 8 items) derived from existing data
-// (application creation + job creation/update timestamps). No dedicated
-// audit-log model exists; the feed is computed on demand from stored data.
+// (application creation, job creation/update, and account registration
+// timestamps). No dedicated audit-log model exists; the feed is computed on
+// demand from stored data.
+//
+// The single-argument form is kept for the Overview and Analytics callers, which
+// only need the newest N events and predate pagination.
 export async function getRecentActivity(limit = 8) {
   const res = await api.get('/admin/activity', {
     params: { limit },
   });
+  return res.data;
+}
+
+// The Admin Activity workspace feed: a page of the merged event stream.
+//
+// Search, the type filter, and paging all run on the server, so the page holds no
+// second copy of the feed to filter locally and the footer counts are real
+// totals. `type` is one of the canonical event types or 'all'.
+export async function getAdminActivity({
+  page = 1,
+  limit = 10,
+  type = 'all',
+} = {}) {
+  const params = { page, limit };
+  if (type && type !== 'all') params.type = type;
+  const res = await api.get('/admin/activity', { params });
   return res.data;
 }
 
