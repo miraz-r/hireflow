@@ -212,6 +212,43 @@ const adminJobseekerQueryValidators = [
   runValidation,
 ];
 
+// ---------------------------------------------------------------------------
+// GET /api/admin/recruiters — the Admin Recruiters workspace list.
+//
+// Same conventions as the jobseeker query validators: every filter is
+// optional, and `{ values: 'falsy' }` makes an empty dropdown selection ("Any
+// company", "Any date") read as absent rather than as a validation failure.
+//
+// There is deliberately no `status` validator: the User model has no status
+// field, so a recruiter activity state could not be filtered without inventing
+// one.
+// ---------------------------------------------------------------------------
+const adminRecruiterQueryValidators = [
+  query('page')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1 })
+    .withMessage('page must be a positive integer'),
+  query('limit')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1, max: 50 })
+    .withMessage('limit must be between 1 and 50'),
+  query('q')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('q must be at most 200 characters'),
+  // Matches Profile.companyName, which the schema caps at 200 characters.
+  query('company')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('company must be at most 200 characters'),
+  dateRangeValidator,
+  runValidation,
+];
+
 module.exports = {
   createValidators,
   jobIdParamValidators,
@@ -220,5 +257,6 @@ module.exports = {
   adminApplicationQueryValidators,
   jobseekerIdParamValidators,
   adminJobseekerQueryValidators,
+  adminRecruiterQueryValidators,
   runValidation,
 };

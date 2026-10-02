@@ -370,6 +370,207 @@ const getAdminJobseeker = async (req, res, next) => {
 };
 
 // ---------------------------------------------------------------------------
+// GET /api/admin/recruiters?page=1&limit=10&q=&company=&dateRange=
+//
+// The Admin Recruiters workspace list.
+//
+// SOURCED FROM THE RECRUITER PROFILE, NOT THE ACCOUNT'S ACTIVE WORKSPACE.
+// `User.role` is only which workspace an account is currently in, so someone
+// who registered as a jobseeker and later opened the recruiter workspace is
+// still a recruiter. Matching on `Profile.role === 'recruiter'` therefore lists
+// exactly the recruiters, whatever workspace their account happens to be
+// active in. The account's current workspace is reported separately as
+// `activeWorkspace` so an admin can still see who is currently hiring.
+//
+// INNER-JOINED TO THE OWNING ACCOUNT, and deliberately so, for the same reason
+// as the jobseeker list: a profile whose account has been deleted is not a
+// recruiter, and listing it would render a row backed by no real account.
+// `$unwind` drops those, and dropping them here — before paging — keeps `total`
+// and `totalPages` accurate.
+//
+// COUNTS are aggregated from Job and Application rather than invented. `jobs`
+// is the number of listings the recruiter posted; `applications` is the number
+// of applications received on those listings.
+//
+// NOTE ON `status`: the User model has no status field, so this endpoint
+// deliberately exposes none. A recruiter's active/suspended state cannot be
+// derived from existing data, and inventing one would be a fabrication.
+//
+// NO DETAIL ENDPOINT: the workspace's detail panel renders entirely from the
+// list row, so every field it shows is already returned here. Adding a
+// per-recruiter fetch would be a second round trip for data the panel already
+// holds, and would create a second definition of "is a recruiter" that could
+// drift from this list.
+// ---------------------------------------------------------------------------
+const listAdminRecruiters = async (req, res, next) => {
+  try {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 50);
+    const skip = (page - 1) * limit;
+
+    const filter = { role: 'recruiter' };
+
+    const { q, company, dateRange } = req.query;
+
+    // Company is a free-text field on the recruiter profile, so this is an exact
+    // match on what the recruiter typed — never a fuzzy or case-insensitive
+    // guess that could merge two genuinely different companies.
+    if (company && company.trim()) {
+      filter.companyName = company.trim();
+    }
+
+    if (dateRange) {
+      const start = new Date();
+      if (dateRange === 'today') {
+        start.setHours(0, 0, 0, 0);
+      } else {
+        const days = Math.min(Math.max(parseInt(dateRange, 10) || 7, 1), 365);
+        start.setDate(start.getDate() - days);
+      }
+      filter.createdAt = { $gte: start };
+    }
+
+    // Search spans the recruiter's identity (profile name, job title, company)
+    // and the account's email. The first three live on Profile and the email on
+    // User, so the email arm matches the joined account below.
+    const searchRegex =
+      q && q.trim() ? new RegExp(escapeRegex(q.trim()), 'i') : null;
+
+    const pipeline = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: User.collection.name,
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'account',
+        },
+      },
+      { $unwind: '$account' },
+    ];
+
+    if (searchRegex) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { fullName: searchRegex },
+            { jobTitle: searchRegex },
+            { companyName: searchRegex },
+            { 'account.email': searchRegex },
+          ],
+        },
+      });
+    }
+
+    pipeline.push({ $sort: { createdAt: -1 } });
+    pipeline.push({
+      $facet: {
+        rows: [{ $skip: skip }, { $limit: limit }],
+        total: [{ $count: 'count' }],
+      },
+    });
+
+    const [result] = await Profile.aggregate(pipeline);
+    const profiles = result.rows || [];
+    const total = result.total.length ? result.total[0].count : 0;
+
+    const userIds = profiles.map((p) => p.userId);
+
+    const { jobsByOwner, applicationsByOwner } = await hiringCountsByRecruiter(
+      userIds
+    );
+
+    const recruiters = profiles.map((profile) => {
+      const key = String(profile.userId);
+      const email = (profile.account && profile.account.email) || '';
+      return {
+        id: profile.userId,
+        name: profile.fullName || email,
+        email,
+        phone: profile.phone || '',
+        location: profile.location || '',
+        avatarUrl: profile.avatarUrl || '',
+        // Recruiter-only profile fields, used by the detail panel and by the
+        // company search arm above.
+        jobTitle: profile.jobTitle || '',
+        company: profile.companyName || '',
+        companyWebsite: profile.companyWebsite || '',
+        // Real aggregates, and genuinely zero for a recruiter with no activity.
+        jobs: jobsByOwner.get(key) || 0,
+        applications: applicationsByOwner.get(key) || 0,
+        // The profile's own creation date: when this workspace was set up.
+        joinedAt: profile.createdAt,
+        // Where the account is right now (navigation), which is independent of
+        // whether it holds a recruiter profile.
+        activeWorkspace: (profile.account && profile.account.role) || '',
+      };
+    });
+
+    return res.status(200).json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      recruiters,
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid filter id' });
+    }
+    return next(err);
+  }
+};
+
+// Count jobs posted and applications received for a page of recruiter accounts.
+//
+// Applications have no recruiter of their own — they belong to a job, and a
+// job belongs to whoever posted it — so "applications received" is resolved in
+// two steps: group the accounts' jobs by owner, then group applications by job
+// and attribute each job's total to its owner. A recruiter with no jobs
+// produces no entries at all and is reported as a real zero.
+//
+// Two fixed-cost queries regardless of how many recruiters are on the page.
+const hiringCountsByRecruiter = async (userIds) => {
+  const jobsByOwner = new Map();
+  const applicationsByOwner = new Map();
+
+  if (!userIds.length) {
+    return { jobsByOwner, applicationsByOwner };
+  }
+
+  const jobs = await Job.find({ postedBy: { $in: userIds } })
+    .select('_id postedBy')
+    .lean();
+
+  if (!jobs.length) {
+    return { jobsByOwner, applicationsByOwner };
+  }
+
+  // job id -> owning account id, so each job's application total can be
+  // attributed to the recruiter who posted it.
+  const ownerByJobId = new Map();
+  for (const job of jobs) {
+    const owner = String(job.postedBy);
+    ownerByJobId.set(String(job._id), owner);
+    jobsByOwner.set(owner, (jobsByOwner.get(owner) || 0) + 1);
+  }
+
+  const rows = await Application.aggregate([
+    { $match: { jobId: { $in: jobs.map((job) => job._id) } } },
+    { $group: { _id: '$jobId', count: { $sum: 1 } } },
+  ]);
+
+  for (const { _id, count } of rows) {
+    const owner = ownerByJobId.get(String(_id));
+    if (owner) {
+      applicationsByOwner.set(owner, (applicationsByOwner.get(owner) || 0) + count);
+    }
+  }
+
+  return { jobsByOwner, applicationsByOwner };
+};
+
+// ---------------------------------------------------------------------------
 // GET /api/admin/applications?page=1&limit=8
 //
 // Backs two consumers at once:
@@ -1004,6 +1205,7 @@ module.exports = {
   getApplicationsTrend,
   getAdminJobseeker,
   listAdminJobseekers,
+  listAdminRecruiters,
   listAdminApplications,
   getAdminApplication,
   updateAdminApplicationStatus,

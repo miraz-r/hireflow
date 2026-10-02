@@ -1,20 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Select from '../ui/Select';
-import Toast from '../Toast';
 import Avatar from '../Avatar';
-import { avatarFallback } from '../../lib/media';
+import { avatarFallback, resolveMediaUrl } from '../../lib/media';
+import { getAdminRecruiters } from '../../utils/adminApi';
 import './AdminRecruitersPage.css';
 
 const PAGE_SIZE = 10;
-
-const STATUS_META = {
-  active: { label: 'Active', tone: 'active' },
-  suspended: { label: 'Suspended', tone: 'suspended' },
-  pending: { label: 'Pending', tone: 'pending' },
-};
-const STATUS_OPTIONS = Object.keys(STATUS_META);
 
 const DATE_OPTIONS = [
   { value: '', label: 'Any date' },
@@ -23,6 +16,15 @@ const DATE_OPTIONS = [
   { value: '30', label: 'Last 30 days' },
   { value: '90', label: 'Last 90 days' },
 ];
+
+// The account's active workspace, as reported by the API. `User.role` records
+// only where the person is working right now, which is not the same question as
+// which workspaces they hold.
+const WORKSPACE_LABELS = {
+  jobseeker: 'Jobseeker',
+  recruiter: 'Recruiter',
+  admin: 'Admin',
+};
 
 const SEARCH_ICON = (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -35,12 +37,6 @@ const X_ICON = (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
-const CHECK_ICON = (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 
@@ -64,35 +60,6 @@ const ARROW_RIGHT = (
   </svg>
 );
 
-// Static per-company extras used by the detail panel. Mock data until the
-// admin recruiters API exists; joined dates are fixed so the date filter can
-// still compare them against today.
-const COMPANY_META = {
-  'Stark Industries': { website: 'starkindustries.com', status: 'active' },
-  'LexCorp': { website: 'lexcorp.com', status: 'active' },
-  'Aperture Science': { website: 'aperturescience.com', status: 'active' },
-  'OmniCorp': { website: 'omnicorp.com', status: 'active' },
-  'Umbrella Corp.': { website: 'umbrellacorp.com', status: 'suspended' },
-};
-
-const MOCK_RECRUITERS = [
-  { id: '1', name: 'Daniel Morgan', email: 'daniel.morgan@stark.com', phone: '+1 (212) 555-0147', location: 'New York, NY', company: 'Stark Industries', status: 'active', jobs: 15, applications: 120, joinedAt: '2026-09-01T10:00:00.000Z' },
-  { id: '2', name: 'Sophia Carter', email: 'sophia.carter@lexcorp.com', phone: '+1 (415) 555-0192', location: 'San Francisco, CA', company: 'LexCorp', status: 'active', jobs: 12, applications: 98, joinedAt: '2026-09-05T10:00:00.000Z' },
-  { id: '3', name: 'Marcus Lee', email: 'marcus.lee@aperture.com', phone: '+1 (512) 555-0114', location: 'Austin, TX', company: 'Aperture Science', status: 'pending', jobs: 8, applications: 42, joinedAt: '2026-10-10T10:00:00.000Z' },
-  { id: '4', name: 'Ava Williams', email: 'ava.williams@omnicorp.com', phone: '+1 (425) 555-0168', location: 'Seattle, WA', company: 'OmniCorp', status: 'active', jobs: 20, applications: 178, joinedAt: '2026-08-12T10:00:00.000Z' },
-  { id: '5', name: 'Leo Garcia', email: 'leo.garcia@umbrella.com', phone: '+1 (305) 555-0121', location: 'Miami, FL', company: 'Umbrella Corp.', status: 'suspended', jobs: 6, applications: 34, joinedAt: '2025-11-15T10:00:00.000Z' },
-  { id: '6', name: 'Emily Tran', email: 'emily.tran@stark.com', phone: '+1 (312) 555-0183', location: 'Chicago, IL', company: 'Stark Industries', status: 'active', jobs: 18, applications: 143, joinedAt: '2026-06-02T10:00:00.000Z' },
-  { id: '7', name: 'Noah Patel', email: 'noah.patel@omnicorp.com', phone: '+1 (206) 555-0159', location: 'Seattle, WA', company: 'OmniCorp', status: 'pending', jobs: 4, applications: 21, joinedAt: '2026-11-01T10:00:00.000Z' },
-  { id: '8', name: 'Mia Kowalski', email: 'mia.kowalski@lexcorp.com', phone: '+1 (646) 555-0117', location: 'New York, NY', company: 'LexCorp', status: 'active', jobs: 11, applications: 87, joinedAt: '2026-07-19T10:00:00.000Z' },
-  { id: '9', name: 'Lucas Braun', email: 'lucas.braun@aperture.com', phone: '+1 (617) 555-0198', location: 'Boston, MA', company: 'Aperture Science', status: 'suspended', jobs: 5, applications: 29, joinedAt: '2025-10-08T10:00:00.000Z' },
-  { id: '10', name: 'Hannah Kim', email: 'hannah.kim@stark.com', phone: '+1 (213) 555-0134', location: 'Los Angeles, CA', company: 'Stark Industries', status: 'active', jobs: 14, applications: 105, joinedAt: '2026-04-25T10:00:00.000Z' },
-  { id: '11', name: 'Oliver Bennett', email: 'oliver.bennett@umbrella.com', phone: '+1 (303) 555-0165', location: 'Denver, CO', company: 'Umbrella Corp.', status: 'active', jobs: 9, applications: 51, joinedAt: '2026-02-14T10:00:00.000Z' },
-  { id: '12', name: 'Zoe Chen', email: 'zoe.chen@omnicorp.com', phone: '+1 (408) 555-0127', location: 'San Jose, CA', company: 'OmniCorp', status: 'pending', jobs: 3, applications: 10, joinedAt: '2026-11-20T10:00:00.000Z' },
-  { id: '13', name: 'Adrian Foster', email: 'adrian.foster@aperture.com', phone: '+1 (602) 555-0140', location: 'Phoenix, AZ', company: 'Aperture Science', status: 'active', jobs: 16, applications: 122, joinedAt: '2026-01-30T10:00:00.000Z' },
-  { id: '14', name: 'Nora Silva', email: 'nora.silva@lexcorp.com', phone: '+1 (713) 555-0189', location: 'Houston, TX', company: 'LexCorp', status: 'suspended', jobs: 7, applications: 39, joinedAt: '2025-09-17T10:00:00.000Z' },
-  { id: '15', name: 'Ethan Brooks', email: 'ethan.brooks@stark.com', phone: '+1 (404) 555-0172', location: 'Atlanta, GA', company: 'Stark Industries', status: 'active', jobs: 13, applications: 96, joinedAt: '2026-03-11T10:00:00.000Z' },
-];
-
 const formatJoinedDate = (iso) => {
   if (!iso) return '—';
   const date = new Date(iso);
@@ -114,21 +81,55 @@ const getPageItems = (page, totalPages) => {
   return items;
 };
 
+// Union the companies seen so far with the ones just returned, keeping the
+// selected value present. Without this, filtering by a company would shrink the
+// dropdown to just that company and leave no way back to "All companies".
+const mergeCompanies = (previous, incoming, selected) => {
+  const set = new Set(previous);
+  for (const value of incoming) if (value) set.add(value);
+  if (selected && selected !== 'all') set.add(selected);
+  return [...set].sort();
+};
+
 /**
  * AdminRecruitersPage - the /admin/recruiters workspace.
  *
- * Lists recruiters with local search (name/email/company) plus status, company,
- * and date filters, selected-row state, a compact row action menu, pagination,
- * and a right-side detail panel for the selected recruiter. Data is UI mock
- * data for now; status changes stay local for the current session.
+ * Fully backed by GET /api/admin/recruiters. Search, the company and date
+ * filters, ordering, and paging all run on the server, so the page keeps no
+ * second copy of the list to filter locally and the footer counts are real
+ * totals.
+ *
+ * Rows come from each account's RECRUITER workspace profile, so a person whose
+ * account is currently active in the jobseeker workspace still appears here.
+ *
+ * There is no status column, status filter, or status action: the User model
+ * has no status field, so no activity state can be reported for an account
+ * without inventing one. The row menu therefore offers the one real
+ * cross-workspace action instead.
+ *
+ * There is also no detail request. Every value the detail panel shows is
+ * already on the list row, so the panel renders from it directly rather than
+ * paying for a second round trip.
  */
 export default function AdminRecruitersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [recruiters, setRecruiters] = useState(MOCK_RECRUITERS);
+  const navigate = useNavigate();
+
+  // Debounced term actually sent to the server; `searchInput` is what the box
+  // holds, so typing does not fire a request per keystroke.
   const [searchInput, setSearchInput] = useState('');
-  const [status, setStatus] = useState('all');
-  const [company, setCompany] = useState('all');
+  const [q, setQ] = useState('');
+  const [companyFilter, setCompanyFilter] = useState('all');
   const [dateRange, setDateRange] = useState('');
+
+  const [list, setList] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [companies, setCompanies] = useState([]);
+
+  const [selectedId, setSelectedId] = useState(null);
+  const [activeMenuId, setActiveMenuId] = useState(null);
 
   // The current page lives in the URL (?page=N) so a browser refresh or a
   // Back/Forward step restores the exact page instead of falling back to 1.
@@ -149,23 +150,19 @@ export default function AdminRecruitersPage() {
     [searchParams, setSearchParams]
   );
 
-  const [selectedId, setSelectedId] = useState(null);
-  const [activeMenuId, setActiveMenuId] = useState(null);
-  const [toast, setToast] = useState(null);
-
-  const showToast = useCallback((message) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 3200);
-  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setQ(searchInput.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Any filter or search change jumps back to page 1 and clears the selection
   // so it never points at a row that left the visible page. Only reacts to an
   // actual filter change, so a refresh with ?page=N never drops the param.
-  const prevFiltersRef = useRef(`${searchInput}|${status}|${company}|${dateRange}`);
+  const filterKey = JSON.stringify({ q, companyFilter, dateRange });
+  const lastFilterKeyRef = useRef(filterKey);
   useEffect(() => {
-    const filtersKey = `${searchInput}|${status}|${company}|${dateRange}`;
-    if (filtersKey === prevFiltersRef.current) return;
-    prevFiltersRef.current = filtersKey;
+    if (lastFilterKeyRef.current === filterKey) return;
+    lastFilterKeyRef.current = filterKey;
     setSelectedId(null);
     if (searchParams.has('page')) {
       const params = new URLSearchParams(searchParams);
@@ -173,81 +170,86 @@ export default function AdminRecruitersPage() {
       setSearchParams(params, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchInput, status, company, dateRange]);
+  }, [filterKey]);
 
-  const uniqueCompanies = useMemo(
-    () => [...new Set(recruiters.map((r) => r.company))].sort(),
-    [recruiters]
-  );
+  const loadList = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getAdminRecruiters({
+        page,
+        limit: PAGE_SIZE,
+        q,
+        company: companyFilter,
+        dateRange,
+      });
+      setList(data);
+      setCompanies((prev) =>
+        mergeCompanies(
+          prev,
+          (data.recruiters || []).map((r) => r.company),
+          companyFilter
+        )
+      );
+    } catch (err) {
+      setError(err);
+      setList(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, q, companyFilter, dateRange]);
 
-  const filtered = useMemo(() => {
-    const q = searchInput.trim().toLowerCase();
-    return recruiters.filter((r) => {
-      if (status !== 'all' && r.status !== status) return false;
-      if (company !== 'all' && r.company !== company) return false;
-      if (dateRange) {
-        const cutoff = new Date();
-        if (dateRange === 'today') {
-          cutoff.setHours(0, 0, 0, 0);
-        } else {
-          cutoff.setDate(cutoff.getDate() - Number(dateRange));
-        }
-        if (new Date(r.joinedAt) < cutoff) return false;
-      }
-      if (q) {
-        const haystack = `${r.name} ${r.email} ${r.company}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [recruiters, searchInput, status, company, dateRange]);
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
 
-  const filtersActive = searchInput !== '' || status !== 'all' || company !== 'all' || dateRange !== '';
+  const filtersActive = q !== '' || companyFilter !== 'all' || dateRange !== '';
 
   const clearFilters = useCallback(() => {
     setSearchInput('');
-    setStatus('all');
-    setCompany('all');
+    setCompanyFilter('all');
     setDateRange('');
   }, []);
 
+  // Selection is deliberate only: a row is picked by clicking it, never by the
+  // page loading or the result set changing.
   const selectRecruiter = useCallback((id) => {
     setSelectedId(id);
     setActiveMenuId(null);
   }, []);
 
-  const changeStatus = useCallback(
-    (id, nextStatus) => {
+  // Hands the selected recruiter's activity over to the existing Admin
+  // Applications workspace, which seeds its search box from ?search= and so
+  // already resolves the applications posted on this recruiter's jobs. No new
+  // page and no extra state.
+  const viewApplications = useCallback(
+    (recruiter) => {
       setActiveMenuId(null);
-      setRecruiters((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: nextStatus } : r))
-      );
-      const recruiter = recruiters.find((r) => r.id === id);
-      if (recruiter) {
-        showToast(`“${recruiter.name}” moved to ${STATUS_META[nextStatus].label.toLowerCase()} status`);
-      }
+      navigate(`/admin/applications?search=${encodeURIComponent(recruiter.name)}`);
     },
-    [recruiters, showToast]
+    [navigate]
   );
 
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-  const listStart = total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
-  const listEnd = Math.min(safePage * PAGE_SIZE, total);
+  const total = list?.total ?? 0;
+  const totalPages = Math.max(1, list?.totalPages ?? 1);
+  const rows = list?.recruiters ?? [];
+  const listStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const listEnd = Math.min(page * PAGE_SIZE, total);
 
-  // An invalid or out-of-range ?page=N (e.g. after a refresh with stale data)
-  // is repaired to a valid page instead of silently showing an empty one.
+  // An invalid or out-of-range ?page=N (a stale deep link, or the last page
+  // disappearing after a filter change) is repaired to a valid page instead of
+  // silently showing an empty table. Waited on the request so a page number is
+  // never compared against totals the server has not returned yet.
   useEffect(() => {
+    if (loading || error) return;
     if (pageInvalid) goToPage(1, { replace: true });
-    else if (page > totalPages) goToPage(totalPages, { replace: true });
-  }, [page, pageInvalid, totalPages, goToPage]);
+    else if (total > 0 && page > totalPages) goToPage(totalPages, { replace: true });
+  }, [loading, error, pageInvalid, total, page, totalPages, goToPage]);
 
-  // Read the selection straight from the live list so a status change lands in
-  // both the table row and the detail panel on the same render.
-  const selected =
-    recruiters.find((r) => String(r.id) === String(selectedId)) || null;
+  const selected = useMemo(
+    () => rows.find((r) => String(r.id) === String(selectedId)) || null,
+    [rows, selectedId]
+  );
 
   return (
     <div className="admin-page admin-recruiters">
@@ -279,27 +281,13 @@ export default function AdminRecruitersPage() {
 
           <div className="admin-recruiters-filter">
             <Select
-              id="admin-recruiters-status"
-              name="status"
-              className="admin-recruiters-filter-select"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              aria-label="Status"
-              options={[
-                { value: 'all', label: 'All statuses' },
-                ...STATUS_OPTIONS.map((value) => ({ value, label: STATUS_META[value].label })),
-              ]}
-            />
-          </div>
-          <div className="admin-recruiters-filter">
-            <Select
               id="admin-recruiters-company"
               name="company"
               className="admin-recruiters-filter-select"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
+              value={companyFilter}
+              onChange={(e) => setCompanyFilter(e.target.value)}
               aria-label="Company"
-              options={[{ value: 'all', label: 'All companies' }, ...uniqueCompanies.map((name) => ({ value: name, label: name }))]}
+              options={[{ value: 'all', label: 'All companies' }, ...companies.map((name) => ({ value: name, label: name }))]}
             />
           </div>
           <div className="admin-recruiters-filter">
@@ -327,7 +315,6 @@ export default function AdminRecruitersPage() {
             <colgroup>
               <col className="admin-recruiters-col-recruiter" />
               <col className="admin-recruiters-col-company" />
-              <col className="admin-recruiters-col-status" />
               <col className="admin-recruiters-col-jobs" />
               <col className="admin-recruiters-col-applications" />
               <col className="admin-recruiters-col-joined" />
@@ -337,7 +324,6 @@ export default function AdminRecruitersPage() {
               <tr>
                 <th className="admin-recruiters-col-recruiter">Recruiter</th>
                 <th className="admin-recruiters-col-company">Company</th>
-                <th className="admin-recruiters-col-status">Status</th>
                 <th className="admin-recruiters-col-jobs">Jobs</th>
                 <th className="admin-recruiters-col-applications">Applications</th>
                 <th className="admin-recruiters-col-joined">Joined</th>
@@ -347,12 +333,35 @@ export default function AdminRecruitersPage() {
               </tr>
             </thead>
             <tbody>
-              {pageItems.length === 0 ? (
+              {loading && rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="admin-recruiters-state">
+                  <td colSpan={6} className="admin-recruiters-state">
+                    <span className="admin-recruiters-state-title">Loading recruiters...</span>
+                    <span className="admin-recruiters-state-text">
+                      Fetching the latest recruiters from the server.
+                    </span>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="admin-recruiters-state">
+                    <span className="admin-recruiters-state-title">Unable to load recruiters</span>
+                    <span className="admin-recruiters-state-text">
+                      {error?.message || 'Something went wrong while fetching recruiters.'}
+                    </span>
+                    <button type="button" className="admin-recruiters-btn" onClick={loadList}>
+                      Try again
+                    </button>
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="admin-recruiters-state">
                     <span className="admin-recruiters-state-title">No recruiters found</span>
                     <span className="admin-recruiters-state-text">
-                      Try adjusting your search or filters.
+                      {filtersActive
+                        ? 'Try adjusting your search or filters.'
+                        : 'No recruiter profiles have been created yet.'}
                     </span>
                     {filtersActive && (
                       <button type="button" className="admin-recruiters-btn" onClick={clearFilters}>
@@ -362,8 +371,7 @@ export default function AdminRecruitersPage() {
                   </td>
                 </tr>
               ) : (
-                pageItems.map((recruiter) => {
-                  const meta = STATUS_META[recruiter.status] || STATUS_META.active;
+                rows.map((recruiter) => {
                   const isSelected = String(recruiter.id) === String(selectedId);
                   return (
                     <tr
@@ -374,7 +382,7 @@ export default function AdminRecruitersPage() {
                       <td className="admin-recruiters-col-recruiter">
                         <span className="admin-recruiters-recruiter">
                           <Avatar
-                            src={null}
+                            src={recruiter.avatarUrl ? resolveMediaUrl(recruiter.avatarUrl) : null}
                             fallbackSrc={avatarFallback(recruiter.name, recruiter.email)}
                             imgClassName="admin-recruiters-avatar"
                             placeholderClassName="admin-recruiters-avatar admin-recruiters-avatar--initials"
@@ -383,17 +391,12 @@ export default function AdminRecruitersPage() {
                           />
                           <span className="admin-recruiters-recruiter-text">
                             <span className="admin-recruiters-recruiter-name">{recruiter.name}</span>
-                            <span className="admin-recruiters-recruiter-email">{recruiter.email}</span>
+                            <span className="admin-recruiters-recruiter-email">{recruiter.email || '—'}</span>
                           </span>
                         </span>
                       </td>
                       <td className="admin-recruiters-col-company">
-                        <span className="admin-recruiters-company">{recruiter.company}</span>
-                      </td>
-                      <td className="admin-recruiters-col-status">
-                        <span className={`admin-recruiters-badge admin-recruiters-badge--${meta.tone}`}>
-                          {meta.label}
-                        </span>
+                        <span className="admin-recruiters-company">{recruiter.company || '—'}</span>
                       </td>
                       <td className="admin-recruiters-col-jobs">
                         <span className="admin-recruiters-count">{recruiter.jobs}</span>
@@ -405,7 +408,7 @@ export default function AdminRecruitersPage() {
                         <span className="admin-recruiters-date">{formatJoinedDate(recruiter.joinedAt)}</span>
                       </td>
                       <td className="admin-recruiters-col-actions" onClick={(e) => e.stopPropagation()}>
-                        <RowMenu
+                        <RowActions
                           recruiter={recruiter}
                           open={activeMenuId === String(recruiter.id)}
                           onToggle={() =>
@@ -414,7 +417,7 @@ export default function AdminRecruitersPage() {
                             )
                           }
                           onClose={() => setActiveMenuId(null)}
-                          onChangeStatus={changeStatus}
+                          onViewApplications={viewApplications}
                         />
                       </td>
                     </tr>
@@ -427,20 +430,28 @@ export default function AdminRecruitersPage() {
 
         <footer className="admin-recruiters-footer">
           <p className="admin-recruiters-footer-count">
-            Showing <strong>{listStart}–{listEnd}</strong> of <strong>{total}</strong> recruiters
+            {loading && rows.length === 0 ? (
+              'Loading recruiters...'
+            ) : error ? (
+              'Recruiters could not be loaded'
+            ) : (
+              <>
+                Showing <strong>{listStart}–{listEnd}</strong> of <strong>{total}</strong> recruiters
+              </>
+            )}
           </p>
-          {totalPages > 1 && (
+          {!loading && !error && totalPages > 1 && (
             <nav className="admin-recruiters-pagination" aria-label="Recruiters pagination">
               <button
                 type="button"
                 className="admin-recruiters-page-btn admin-recruiters-page-btn--nav"
                 onClick={() => goToPage(Math.max(1, page - 1))}
-                disabled={safePage <= 1}
+                disabled={page <= 1}
               >
                 {ARROW_LEFT}
                 Previous
               </button>
-              {getPageItems(safePage, totalPages).map((item, index) =>
+              {getPageItems(page, totalPages).map((item, index) =>
                 item === '…' ? (
                   <span key={`gap-${index}`} className="admin-recruiters-page-gap">
                     {item}
@@ -449,10 +460,10 @@ export default function AdminRecruitersPage() {
                   <button
                     key={item}
                     type="button"
-                    className={`admin-recruiters-page-btn${item === safePage ? ' admin-recruiters-page-btn--current' : ''}`}
+                    className={`admin-recruiters-page-btn${item === page ? ' admin-recruiters-page-btn--current' : ''}`}
                     onClick={() => goToPage(item)}
                     aria-label={`Go to page ${item}`}
-                    aria-current={item === safePage ? 'page' : undefined}
+                    aria-current={item === page ? 'page' : undefined}
                   >
                     {item}
                   </button>
@@ -462,7 +473,7 @@ export default function AdminRecruitersPage() {
                 type="button"
                 className="admin-recruiters-page-btn admin-recruiters-page-btn--nav"
                 onClick={() => goToPage(Math.min(totalPages, page + 1))}
-                disabled={safePage >= totalPages}
+                disabled={page >= totalPages}
               >
                 Next
                 {ARROW_RIGHT}
@@ -474,7 +485,7 @@ export default function AdminRecruitersPage() {
 
       <aside className="admin-recruiters-panel" aria-label="Recruiter details">
         {selected ? (
-          <DetailPanel recruiter={selected} notify={showToast} />
+          <DetailPanel recruiter={selected} onViewApplications={viewApplications} />
         ) : (
           <div className="admin-recruiters-panel-state">
             <span className="admin-recruiters-state-title">Select a recruiter</span>
@@ -484,28 +495,20 @@ export default function AdminRecruitersPage() {
           </div>
         )}
       </aside>
-
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </div>
   );
 }
 
 /* ------------------------------------------------------------------------ */
-/* Row action menu - compact three-dot menu portaled to <body>, anchored     */
-/* near the trigger, closed on outside click / Escape / scroll / resize.    */
-/* The single action, Change Status, opens a status submenu that flips the   */
-/* local mock status.                                                        */
+/* Row action menu - compact three-dot menu with the same interaction        */
+/* language as the other Admin workspaces: portaled to <body>, anchored near */
+/* the trigger, closed on outside click / Escape / scroll / resize.          */
 /* ------------------------------------------------------------------------ */
 
-function RowMenu({ recruiter, open, onToggle, onClose, onChangeStatus }) {
+function RowActions({ recruiter, open, onToggle, onClose, onViewApplications }) {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
   const [pos, setPos] = useState(null);
-  const [statusView, setStatusView] = useState(false);
-
-  useEffect(() => {
-    if (!open) setStatusView(false);
-  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -584,50 +587,15 @@ function RowMenu({ recruiter, open, onToggle, onClose, onChangeStatus }) {
               minWidth: 196,
             }}
           >
-            {statusView ? (
-              <>
-                <div className="admin-recruiters-menu-head">
-                  <button
-                    type="button"
-                    className="admin-recruiters-menu-subhead"
-                    onClick={() => setStatusView(false)}
-                    aria-label="Back"
-                  >
-                    {ARROW_LEFT}
-                  </button>
-                  <span className="admin-recruiters-menu-label">Change status</span>
-                </div>
-                <div className="admin-recruiters-menu-divider" />
-                {STATUS_OPTIONS.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={recruiter.status === value}
-                    className={`admin-recruiters-menu-item${
-                      recruiter.status === value ? ' admin-recruiters-menu-item--selected' : ''
-                    }`}
-                    onClick={() => onChangeStatus(recruiter.id, value)}
-                  >
-                    <span className="admin-recruiters-menu-check">
-                      {recruiter.status === value ? CHECK_ICON : null}
-                    </span>
-                    <span className="admin-recruiters-menu-item-label">{STATUS_META[value].label}</span>
-                  </button>
-                ))}
-              </>
-            ) : (
-              <button
-                type="button"
-                role="menuitem"
-                className="admin-recruiters-menu-item"
-                onClick={() => setStatusView(true)}
-              >
-                <span className="admin-recruiters-menu-check" />
-                <span className="admin-recruiters-menu-item-label">Change Status</span>
-                <span className="admin-recruiters-menu-chevron" aria-hidden="true">{ARROW_RIGHT}</span>
-              </button>
-            )}
+            <button
+              type="button"
+              role="menuitem"
+              className="admin-recruiters-menu-item"
+              onClick={() => onViewApplications(recruiter)}
+            >
+              <span className="admin-recruiters-menu-check" />
+              <span className="admin-recruiters-menu-item-label">View applications</span>
+            </button>
           </div>,
           document.body
         )}
@@ -636,29 +604,30 @@ function RowMenu({ recruiter, open, onToggle, onClose, onChangeStatus }) {
 }
 
 /* ------------------------------------------------------------------------ */
-/* Right-side detail panel - contextual inspector for the selected row.      */
-/* There is no company route yet, so View Company surfaces feedback through  */
-/* the existing Toast.                                                       */
+/* Right-side detail panel - contextual inspector for the selected recruiter. */
+/* Every value shown here is already on the list row, so the panel renders     */
+/* from that row directly and needs no second request.                        */
 /* ------------------------------------------------------------------------ */
 
-function DetailPanel({ recruiter, notify }) {
-  const companyMeta = COMPANY_META[recruiter.company] || { website: '—', status: 'active' };
-  const companyStatus = STATUS_META[companyMeta.status] || STATUS_META.active;
+function DetailPanel({ recruiter, onViewApplications }) {
+  const name = recruiter.name;
+  const email = recruiter.email || '—';
+  const website = recruiter.companyWebsite || '—';
 
   return (
     <div className="admin-recruiters-detail">
       <header className="admin-recruiters-detail-head">
         <Avatar
-          src={null}
-          fallbackSrc={avatarFallback(recruiter.name, recruiter.email)}
+          src={recruiter.avatarUrl ? resolveMediaUrl(recruiter.avatarUrl) : null}
+          fallbackSrc={avatarFallback(name, email)}
           imgClassName="admin-recruiters-avatar admin-recruiters-detail-avatar"
           placeholderClassName="admin-recruiters-avatar admin-recruiters-avatar--initials admin-recruiters-detail-avatar"
           imgAlt=""
           iconSize={16}
         />
         <div className="admin-recruiters-detail-titles">
-          <h2 className="admin-recruiters-detail-name">{recruiter.name}</h2>
-          <p className="admin-recruiters-detail-email">{recruiter.email}</p>
+          <h2 className="admin-recruiters-detail-name">{name}</h2>
+          <p className="admin-recruiters-detail-email">{email}</p>
         </div>
       </header>
 
@@ -667,19 +636,27 @@ function DetailPanel({ recruiter, notify }) {
         <dl className="admin-recruiters-detail-list">
           <div className="admin-recruiters-detail-row">
             <dt>Full name</dt>
-            <dd>{recruiter.name}</dd>
+            <dd>{name}</dd>
           </div>
           <div className="admin-recruiters-detail-row">
             <dt>Email</dt>
-            <dd>{recruiter.email}</dd>
+            <dd>{email}</dd>
           </div>
           <div className="admin-recruiters-detail-row">
             <dt>Phone</dt>
-            <dd>{recruiter.phone}</dd>
+            <dd>{recruiter.phone || '—'}</dd>
           </div>
           <div className="admin-recruiters-detail-row">
             <dt>Location</dt>
-            <dd>{recruiter.location}</dd>
+            <dd>{recruiter.location || '—'}</dd>
+          </div>
+          {/* Where the account is working right now. Reported because it is not
+              the same question as "is this a recruiter": an account can hold
+              this recruiter profile while being active in the jobseeker
+              workspace. */}
+          <div className="admin-recruiters-detail-row">
+            <dt>Active workspace</dt>
+            <dd>{WORKSPACE_LABELS[recruiter.activeWorkspace] || recruiter.activeWorkspace || '—'}</dd>
           </div>
         </dl>
       </section>
@@ -689,15 +666,11 @@ function DetailPanel({ recruiter, notify }) {
         <dl className="admin-recruiters-detail-list">
           <div className="admin-recruiters-detail-row">
             <dt>Company name</dt>
-            <dd>{recruiter.company}</dd>
+            <dd>{recruiter.company || '—'}</dd>
           </div>
           <div className="admin-recruiters-detail-row">
             <dt>Company website</dt>
-            <dd>{companyMeta.website}</dd>
-          </div>
-          <div className="admin-recruiters-detail-row">
-            <dt>Company status</dt>
-            <dd>{companyStatus.label}</dd>
+            <dd>{website}</dd>
           </div>
         </dl>
       </section>
@@ -725,9 +698,9 @@ function DetailPanel({ recruiter, notify }) {
           <button
             type="button"
             className="admin-recruiters-btn"
-            onClick={() => notify('Company profiles are not available in this preview.')}
+            onClick={() => onViewApplications(recruiter)}
           >
-            View Company
+            View Applications
           </button>
         </div>
       </footer>

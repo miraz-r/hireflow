@@ -70,9 +70,9 @@
 }
 
 /* ---------- Toolbar ----------
-   One aligned row: flexible search, three compact Select filters, and a
-   secondary Clear Filters action hairline-separated on the right. Mirrors the
-   Admin Applications toolbar exactly. */
+   One aligned row: flexible search, two compact Select filters, and a secondary
+   Clear Filters action hairline-separated on the right. Mirrors the Admin
+   Applications toolbar exactly. */
 .admin-recruiters-toolbar {
   display: flex;
   align-items: center;
@@ -274,10 +274,6 @@
   width: 150px;
 }
 
-.admin-recruiters-col-status {
-  width: 108px;
-}
-
 .admin-recruiters-col-jobs {
   width: 84px;
 }
@@ -305,10 +301,6 @@
     width: 132px;
   }
 
-  .admin-recruiters-col-status {
-    width: 100px;
-  }
-
   .admin-recruiters-col-jobs {
     width: 78px;
   }
@@ -331,10 +323,6 @@
     width: 170px;
   }
 
-  .admin-recruiters-col-status {
-    width: 120px;
-  }
-
   .admin-recruiters-col-applications {
     width: 126px;
   }
@@ -348,15 +336,13 @@
   }
 }
 
-/* Column alignment - Recruiter, Company, and Status stay left-aligned;
-   Jobs, Applications, Joined, and Actions are centered. Headers and cells
-   share alignment. */
+/* Column alignment - Recruiter and Company stay left-aligned; Jobs,
+   Applications, Joined, and Actions are centered. Headers and cells share
+   alignment. */
 .admin-recruiters-table thead th.admin-recruiters-col-recruiter,
 .admin-recruiters-table tbody td.admin-recruiters-col-recruiter,
 .admin-recruiters-table thead th.admin-recruiters-col-company,
-.admin-recruiters-table tbody td.admin-recruiters-col-company,
-.admin-recruiters-table thead th.admin-recruiters-col-status,
-.admin-recruiters-table tbody td.admin-recruiters-col-status {
+.admin-recruiters-table tbody td.admin-recruiters-col-company {
   text-align: left;
 }
 
@@ -455,59 +441,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* ---------- Status badge ----------
-   Same badge language as Applications/Jobs (dot + soft tint), per-status
-   colors with explicit dark variants - never pure-black fills. */
-.admin-recruiters-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.4;
-  white-space: nowrap;
-}
-
-.admin-recruiters-badge::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: currentColor;
-}
-
-.admin-recruiters-badge--active {
-  color: #065f46;
-  background-color: #d1fae5;
-}
-
-.admin-recruiters-badge--suspended {
-  color: #475569;
-  background-color: #e2e8f0;
-}
-
-.admin-recruiters-badge--pending {
-  color: #92400e;
-  background-color: #fef3c7;
-}
-
-html[data-theme="dark"] .admin-recruiters-badge--active {
-  color: #a7f3d0;
-  background-color: #064e3b;
-}
-
-html[data-theme="dark"] .admin-recruiters-badge--suspended {
-  color: #cbd5e1;
-  background-color: #1e293b;
-}
-
-html[data-theme="dark"] .admin-recruiters-badge--pending {
-  color: #fde68a;
-  background-color: #422006;
 }
 
 /* ---------- Numeric counts + Joined date ---------- */
@@ -673,8 +606,7 @@ html[data-theme="dark"] .admin-recruiters-badge--pending {
 }
 
 /* ---------- Panel header ----------
-   Compact row: 32px circular initials avatar, name + email stack, status
-   badge tucked into the top-right corner. */
+   Compact row: 32px circular avatar plus a name / email stack. */
 .admin-recruiters-detail-head {
   display: flex;
   align-items: flex-start;
@@ -843,63 +775,6 @@ html[data-theme="dark"] .admin-recruiters-menu {
   color: #f1f5f9;
 }
 
-.admin-recruiters-menu-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 10px 8px;
-}
-
-.admin-recruiters-menu-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #6b7280;
-}
-
-html[data-theme="dark"] .admin-recruiters-menu-label {
-  color: #94a3b8;
-}
-
-.admin-recruiters-menu-subhead {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 4px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  color: #4f46e5;
-  background: none;
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-html[data-theme="dark"] .admin-recruiters-menu-subhead {
-  color: #a5b4fc;
-}
-
-.admin-recruiters-menu-subhead:hover {
-  background-color: #eef2ff;
-}
-
-html[data-theme="dark"] .admin-recruiters-menu-subhead:hover {
-  background-color: rgba(129, 140, 248, 0.12);
-}
-
-.admin-recruiters-menu-divider {
-  height: 1px;
-  margin: 0 12px 4px;
-  background-color: #e5e7eb;
-}
-
-html[data-theme="dark"] .admin-recruiters-menu-divider {
-  background-color: #2b3a52;
-}
-
 .admin-recruiters-menu-item {
   display: flex;
   align-items: center;
@@ -934,15 +809,6 @@ html[data-theme="dark"] .admin-recruiters-menu-item:hover:not(:disabled) {
   background-color: rgba(148, 163, 184, 0.08);
 }
 
-.admin-recruiters-menu-item--selected {
-  color: #4f46e5;
-  font-weight: 600;
-}
-
-html[data-theme="dark"] .admin-recruiters-menu-item--selected {
-  color: #a5b4fc;
-}
-
 .admin-recruiters-menu-item:focus-visible {
   outline: 2px solid #4f46e5;
   outline-offset: 1px;
@@ -972,15 +838,6 @@ html[data-theme="dark"] .admin-recruiters-menu-check {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.admin-recruiters-menu-chevron {
-  display: inline-flex;
-  color: #9ca3af;
-}
-
-html[data-theme="dark"] .admin-recruiters-menu-chevron {
-  color: #64748b;
 }
 
 /* ---------- Dark-mode contrast tune ----------

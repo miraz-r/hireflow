@@ -158,3 +158,28 @@ export async function getAdminJobseekers({
   const res = await api.get('/admin/jobseekers', { params });
   return res.data;
 }
+
+// The Admin Recruiters workspace list. Search, company, date range, ordering,
+// and paging all happen on the server, so the page holds no second copy of the
+// list to filter locally.
+//
+// Sourced from each account's recruiter workspace profile, so a person whose
+// account is currently active in the jobseeker workspace still appears, with
+// `activeWorkspace` telling the admin which workspace they are in.
+//
+// There is deliberately no `status` filter: the User model has no status field,
+// so no activity state can be reported without inventing one.
+export async function getAdminRecruiters({
+  page = 1,
+  limit = 10,
+  q = '',
+  company = 'all',
+  dateRange = '',
+} = {}) {
+  const params = { page, limit };
+  if (q && q.trim()) params.q = q.trim();
+  if (company && company !== 'all') params.company = company;
+  if (dateRange) params.dateRange = dateRange;
+  const res = await api.get('/admin/recruiters', { params });
+  return res.data;
+}

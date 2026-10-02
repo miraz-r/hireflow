@@ -5,6 +5,7 @@ const {
   getApplicationsTrend,
   getAdminJobseeker,
   listAdminJobseekers,
+  listAdminRecruiters,
   listAdminApplications,
   getAdminApplication,
   updateAdminApplicationStatus,
@@ -19,6 +20,7 @@ const {
   adminApplicationQueryValidators,
   jobseekerIdParamValidators,
   adminJobseekerQueryValidators,
+  adminRecruiterQueryValidators,
 } = require('../validators/application.validators');
 
 const router = express.Router();
@@ -83,6 +85,17 @@ router.get(
   authorize('admin'),
   jobseekerIdParamValidators,
   getAdminJobseeker
+);
+// Recruiters workspace: a paginated list of every account holding a recruiter
+// profile. Admin-only. There is no per-recruiter detail route because the
+// workspace panel renders entirely from the list row — see the controller for
+// why a second definition of "is a recruiter" is deliberately avoided.
+router.get(
+  '/recruiters',
+  authenticate,
+  authorize('admin'),
+  adminRecruiterQueryValidators,
+  listAdminRecruiters
 );
 // Jobs workspace: paginated list, single-job detail, and non-destructive
 // moderation (activate/pending/draft/close). All admin-only.
