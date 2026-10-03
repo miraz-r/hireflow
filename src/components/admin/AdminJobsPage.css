@@ -1341,17 +1341,20 @@ html[data-theme="dark"] .admin-page.admin-jobs {
 }
 
 /* ---------- Responsive ---------- */
-/* < 1280px: single column. The admin shell narrows its sidebar to 232px and its
-   content padding to 24px across 1024-1279px, which leaves the two-column track
-   too little room for the fixed table columns - the Job column collapsed to
-   0-8px there and the table started scrolling sideways. Stacking at 1280px
-   instead of 1024px hands the table the full content width at every width that
-   cannot support the side panel, with no column narrowed and nothing hidden.
+/* < 1400px: single column. The compact column tier fixes 570px of the table,
+   and inside the two-column track the Job column is whatever the card has left
+   over - that works out to viewport - 1240px, so the Job title block collapsed
+   to zero below ~1305px and the table started scrolling sideways between
+   1024-1279px, where the shell also narrows its sidebar to 232px and its
+   padding to 24px. Stacking at 1400px instead of 1280px hands the table the
+   full content width at every width that cannot support the side panel, with no
+   column narrowed and nothing hidden. At 1400px and above the two-column track
+   still has room for the 320px panel.
 
    The panel sits above the table, matching the ordering the flex layout
    produced with column-reverse; grid lays items out in DOM order, so that
    order is stated explicitly rather than implied. */
-@media (max-width: 1279px) {
+@media (max-width: 1399px) {
   .admin-jobs-workspace {
     grid-template-columns: minmax(0, 1fr);
   }
