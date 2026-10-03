@@ -4,6 +4,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getAdminJobs, getAdminJob, updateAdminJobStatus } from '../../utils/adminApi';
 import Toast from '../Toast';
 import Avatar from '../Avatar';
+import Select from '../ui/Select';
 import { formatSalary } from '../../utils/salary';
 import { avatarFallback, resolveMediaUrl } from '../../lib/media';
 import './AdminJobsPage.css';
@@ -39,12 +40,6 @@ const X_ICON = (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
-const CHEVRON_DOWN = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 
@@ -348,39 +343,48 @@ export default function AdminJobsPage() {
               )}
             </div>
 
-            <FilterDropdown
-              id="admin-jobs-status"
-              name="status"
-              label="Status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              options={[
-                { value: 'all', label: 'All statuses' },
-                ...STATUS_OPTIONS.map((value) => ({
-                  value,
-                  label: STATUS_META[value].label,
-                })),
-              ]}
-            />
-            <FilterDropdown
-              id="admin-jobs-employment"
-              name="employmentType"
-              label="Employment Type"
-              value={employmentType}
-              onChange={(e) => setEmploymentType(e.target.value)}
-              options={[
-                { value: 'all', label: 'Any type' },
-                ...EMPLOYMENT_OPTIONS.map((value) => ({ value, label: value })),
-              ]}
-            />
-            <FilterDropdown
-              id="admin-jobs-posted"
-              name="postedDate"
-              label="Posted Date"
-              value={postedDays}
-              onChange={(e) => setPostedDays(e.target.value)}
-              options={DATE_OPTIONS}
-            />
+            <div className="admin-jobs-filter">
+              <Select
+                id="admin-jobs-status"
+                name="status"
+                className="admin-jobs-filter-select"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                aria-label="Status"
+                options={[
+                  { value: 'all', label: 'All statuses' },
+                  ...STATUS_OPTIONS.map((value) => ({
+                    value,
+                    label: STATUS_META[value].label,
+                  })),
+                ]}
+              />
+            </div>
+            <div className="admin-jobs-filter">
+              <Select
+                id="admin-jobs-employment"
+                name="employmentType"
+                className="admin-jobs-filter-select"
+                value={employmentType}
+                onChange={(e) => setEmploymentType(e.target.value)}
+                aria-label="Employment type"
+                options={[
+                  { value: 'all', label: 'Any type' },
+                  ...EMPLOYMENT_OPTIONS.map((value) => ({ value, label: value })),
+                ]}
+              />
+            </div>
+            <div className="admin-jobs-filter">
+              <Select
+                id="admin-jobs-posted"
+                name="postedDays"
+                className="admin-jobs-filter-select"
+                value={postedDays}
+                onChange={(e) => setPostedDays(e.target.value)}
+                aria-label="Posted date"
+                options={DATE_OPTIONS}
+              />
+            </div>
 
             {filtersActive && (
               <button
@@ -497,7 +501,9 @@ export default function AdminJobsPage() {
                         <td className="admin-jobs-col-apps">
                           <span className="admin-jobs-count">{appCountLabel(job.applications)}</span>
                         </td>
-                        <td className="admin-jobs-col-posted">{formatPostedDate(job.postedAt)}</td>
+                        <td className="admin-jobs-col-posted">
+                          <span className="admin-jobs-date">{formatPostedDate(job.postedAt)}</span>
+                        </td>
                         <td
                           className="admin-jobs-col-actions"
                           onClick={(e) => e.stopPropagation()}
@@ -624,79 +630,6 @@ export default function AdminJobsPage() {
 /* ------------------------------------------------------------------------ */
 /* Sub-components                                                            */
 /* ------------------------------------------------------------------------ */
-
-function FilterDropdown({ id, name, label, value, onChange, options }) {
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef(null);
-  const closeMenu = useCallback(() => setOpen(false), []);
-  const current = options.find((opt) => opt.value === value) || options[0];
-
-  return (
-    <span className="admin-jobs-filter">
-      <button
-        type="button"
-        ref={triggerRef}
-        className={`admin-jobs-filter-trigger${open ? ' admin-jobs-filter-trigger--open' : ''}`}
-        onClick={() => setOpen((prev) => !prev)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={`${id}-menu`}
-      >
-        <span className="admin-jobs-filter-head">
-          <span className="admin-jobs-filter-label">{label}</span>
-          <span className="admin-jobs-filter-value">{current.label}</span>
-        </span>
-        <span className="admin-jobs-filter-chevron" aria-hidden="true">{CHEVRON_DOWN}</span>
-      </button>
-      <select
-        id={id}
-        name={name}
-        tabIndex={-1}
-        aria-hidden="true"
-        className="admin-jobs-filter-native"
-        value={value}
-        onChange={onChange}
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <FloatingMenu
-        open={open}
-        anchorRef={triggerRef}
-        excludeRef={triggerRef}
-        onClose={closeMenu}
-        role="listbox"
-        id={`${id}-menu`}
-        label={label}
-        minWidth={176}
-      >
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            role="option"
-            aria-selected={value === opt.value}
-            className={`admin-jobs-floating-item admin-jobs-filter-option${
-              value === opt.value ? ' admin-jobs-floating-item--selected' : ''
-            }`}
-            onClick={() => {
-              onChange({ target: { value: opt.value } });
-              closeMenu();
-            }}
-          >
-            <span className="admin-jobs-floating-check">
-              {value === opt.value ? CHECK_ICON : null}
-            </span>
-            <span className="admin-jobs-floating-item-label">{opt.label}</span>
-          </button>
-        ))}
-      </FloatingMenu>
-    </span>
-  );
-}
 
 /**
  * FloatingMenu - a small portal-based dropdown rendered on <body> so the card's

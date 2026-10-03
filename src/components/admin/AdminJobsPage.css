@@ -59,17 +59,6 @@
   background-color: var(--admin-primary-hover);
 }
 
-.admin-jobs-btn--secondary {
-  color: var(--admin-text-strong);
-  background-color: var(--admin-surface);
-  border: 1px solid var(--admin-border-strong);
-}
-
-.admin-jobs-btn--secondary:hover:not(:disabled) {
-  background-color: var(--admin-hover);
-  border-color: var(--admin-text-faint);
-}
-
 .admin-jobs-btn--ghost {
   color: var(--admin-text);
   background-color: var(--admin-surface);
@@ -82,25 +71,21 @@
   border-color: var(--admin-border-strong);
 }
 
-.admin-jobs-btn--active {
-  color: var(--admin-primary);
-  border-color: var(--admin-primary);
-}
-
-.admin-jobs-btn--active:hover:not(:disabled) {
-  background-color: var(--admin-primary-soft);
-}
-
-/* ---------- Workspace: table + side panel ---------- */
+/* ---------- Workspace: table + side panel ----------
+   Two explicit tracks, the same shape the Admin Recruiters / Companies /
+   Jobseekers / Applications pages use: the table takes every pixel left over
+   (minmax(0, 1fr) so a wide table can still shrink inside its own scroll
+   container instead of stretching the grid), and the detail panel holds a
+   fixed 320px. Both collapse to a single column at 1023px. */
 .admin-jobs-workspace {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
   align-items: stretch;
   gap: 12px;
   min-width: 0;
 }
 
 .admin-jobs-card {
-  flex: 1 1 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -191,91 +176,45 @@
   background-color: var(--admin-border-strong);
 }
 
-/* Integrated select: a visual-only trigger renders the custom chrome (label +
-   value + chevron) and opens the portal dropdown. A hidden native <select>
-   remains as the true form field so the control carries a real id/name,
-   participates in autofill semantics, and never looks like a raw OS dropdown. */
+/* ---------- Filters ----------
+   The shared Select component, reskinned onto the admin tokens. Identical to
+   the Admin Recruiters / Companies / Jobseekers filter treatment: a fixed-width
+   slot in the toolbar, a 40px trigger at the sibling label typography
+   (13px / 600), and the same focus ring. The shared control brings its own
+   keyboard support (arrows, Home/End, Enter, Escape, Tab) and portal
+   positioning, so no page-local dropdown markup or styling is needed here. */
 .admin-jobs-filter {
-  position: relative;
-  display: inline-flex;
+  width: 158px;
+  flex-shrink: 0;
 }
 
-.admin-jobs-filter-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+.admin-jobs-filter-select {
   height: 40px;
   padding: 0 12px;
-  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
   background-color: var(--admin-surface);
   border: 1px solid var(--admin-border-field);
   border-radius: var(--radius-md);
-  color: var(--admin-text-faint);
-  cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), color var(--transition-fast);
 }
 
-.admin-jobs-filter-trigger:hover {
-  background-color: var(--admin-hover);
+.admin-jobs-filter-select:hover {
   border-color: var(--admin-border-field-hover);
 }
 
-.admin-jobs-filter-trigger:focus-visible {
-  outline: 2px solid var(--admin-focus);
-  outline-offset: 2px;
-}
-
-.admin-jobs-filter-trigger--open,
-.admin-jobs-filter-trigger--open:hover {
+.admin-jobs-filter-select:focus,
+.admin-jobs-filter:focus-within .hf-select-trigger {
   border-color: var(--admin-primary);
   box-shadow: 0 0 0 3px var(--admin-primary-soft);
 }
 
-.admin-jobs-filter-head {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.3;
-  min-width: 0;
-  text-align: left;
-}
-
-.admin-jobs-filter-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+.admin-jobs-filter-select .hf-select-value--placeholder {
   color: var(--admin-text-faint);
 }
 
-.admin-jobs-filter-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--admin-text-strong);
-  white-space: nowrap;
-}
-
-.admin-jobs-filter-chevron {
-  display: inline-flex;
+.admin-jobs-filter-select .hf-select-chevron {
   color: var(--admin-text-faint);
-  transition: transform var(--transition-fast);
-}
-
-.admin-jobs-filter-trigger--open .admin-jobs-filter-chevron {
-  transform: rotate(180deg);
-}
-
-/* Hidden native select - carries the form value (id/name above) but is never
-   interactively rendered, so no browser-default dropdown can ever appear. */
-.admin-jobs-filter-native {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 /* Clear Filters - secondary action, hairline-separated to the right. */
@@ -339,7 +278,7 @@
 
 .admin-jobs-table th {
   padding: 12px 10px 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -348,8 +287,8 @@
 }
 
 .admin-jobs-table td {
-  padding-top: 9px;
-  padding-bottom: 9px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--admin-border);
   color: var(--admin-text);
 }
@@ -491,7 +430,7 @@
 /* ---------- Job cell ---------- */
 .admin-jobs-job {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   width: 100%;
   padding: 0;
@@ -514,7 +453,9 @@
 
 /* Compact neutral briefcase anchor before each job title - a quiet 28px tile
    with a muted icon, matching the recruiter avatar footprint so the Job
-   column reads as one clean, aligned unit. */
+   column reads as one clean, aligned unit. The shape is a circle, the same
+   treatment every admin avatar uses (see .admin-jobs-avatar below), so the
+   two anchors either side of a row's text share one silhouette. */
 .admin-jobs-job-icon {
   flex-shrink: 0;
   display: inline-flex;
@@ -525,14 +466,20 @@
   color: var(--admin-text-faint);
   background-color: var(--admin-canvas);
   border: 1px solid var(--admin-border);
-  border-radius: var(--radius-md);
+  border-radius: 50%;
   line-height: 1;
+  /* The row is top-aligned now, so pull the 28px tile up by half the leftover
+     ((19.6px first line - 28px) / 2) to sit centred on the first line of the
+     title rather than floating above it. */
+  margin-top: -4px;
 }
 
 .admin-jobs-job-title {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  /* Two lines keeps every row the same compact height. The unclamped title is
+     still shown in full by the detail panel and the posting view. */
+  -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
@@ -680,6 +627,16 @@ html[data-theme="dark"] .admin-jobs-badge--draft {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--admin-text-strong);
+}
+
+/* ---------- Posted date ----------
+   Same treatment as the Admin Recruiters / Companies / Jobseekers date cell:
+   body-size text with tabular numerals, so the day columns line up digit for
+   digit down the table. */
+.admin-jobs-date {
+  font-size: 14px;
+  color: var(--admin-text);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Footer + pagination ---------- */
@@ -1037,10 +994,9 @@ html[data-theme="dark"] .admin-jobs-floating-chevron {
    320px inspection panel that mirrors the table card exactly: same surface,
    border, radius, and shadow, stretched to the card's full height so both
    stay aligned at the top and bottom. Content scrolls inside the panel while
-   the outer edges line up with the table section. */
+   the outer edges line up with the table section. The width is owned by the
+   workspace grid track, so no width or flex declaration is needed here. */
 .admin-jobs-panel {
-  flex: 0 0 320px;
-  width: 320px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -1049,13 +1005,6 @@ html[data-theme="dark"] .admin-jobs-floating-chevron {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-}
-
-@media (max-width: 1439px) {
-  .admin-jobs-panel {
-    flex-basis: 300px;
-    width: 300px;
-  }
 }
 
 .admin-jobs-detail {
@@ -1094,7 +1043,7 @@ html[data-theme="dark"] .admin-jobs-floating-chevron {
 
 .admin-jobs-detail-title {
   margin: 0;
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: var(--letter-spacing-tight);
   line-height: 1.3;
@@ -1196,7 +1145,7 @@ html[data-theme="dark"] .admin-jobs-floating-chevron {
 .admin-jobs-detail-sub {
   margin: 0 0 8px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--admin-text-muted);
@@ -1392,20 +1341,26 @@ html[data-theme="dark"] .admin-page.admin-jobs {
 }
 
 /* ---------- Responsive ---------- */
-/* < 1024px: the panel drops below the table and takes the full width so the
-   table keeps its grid on tablets. */
-@media (max-width: 1023px) {
+/* < 1280px: single column. The admin shell narrows its sidebar to 232px and its
+   content padding to 24px across 1024-1279px, which leaves the two-column track
+   too little room for the fixed table columns - the Job column collapsed to
+   0-8px there and the table started scrolling sideways. Stacking at 1280px
+   instead of 1024px hands the table the full content width at every width that
+   cannot support the side panel, with no column narrowed and nothing hidden.
+
+   The panel sits above the table, matching the ordering the flex layout
+   produced with column-reverse; grid lays items out in DOM order, so that
+   order is stated explicitly rather than implied. */
+@media (max-width: 1279px) {
   .admin-jobs-workspace {
-    flex-direction: column-reverse;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .admin-jobs-panel {
-    position: static;
-    flex: 1 1 0;
-    width: 100%;
-    max-height: none;
+    order: -1;
   }
 
+  /* Keeps the stacked panel from pushing the table off-screen. */
   .admin-jobs-detail {
     max-height: 420px;
   }
@@ -1423,10 +1378,6 @@ html[data-theme="dark"] .admin-page.admin-jobs {
 
   .admin-jobs-filter {
     flex: 1 1 100%;
-  }
-
-  .admin-jobs-filter-trigger {
     width: 100%;
-    justify-content: space-between;
   }
 }
