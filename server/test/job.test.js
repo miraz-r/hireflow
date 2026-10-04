@@ -90,6 +90,25 @@ beforeEach(async () => {
   await Job.deleteMany({});
 });
 
+describe('public job listing', () => {
+  it('ignores a non-numeric minSalary instead of failing with a 500', async () => {
+    const recruiter = await makeUser('list-mins@example.com');
+    await Job.create({ ...validJob, postedBy: recruiter.id });
+    const res = await request('GET', '/api/jobs?minSalary=abc');
+    assert.equal(res.status, 200);
+    assert.equal(res.body.jobs.length, 1);
+  });
+
+  it('filters by a numeric minSalary', async () => {
+    const recruiter = await makeUser('list-mins2@example.com');
+    await Job.create({ ...validJob, postedBy: recruiter.id, salary: { min: 50000, max: 90000 } });
+    await Job.create({ ...validJob, postedBy: recruiter.id, title: 'Low pay', salary: { min: 30000, max: 40000 } });
+    const res = await request('GET', '/api/jobs?minSalary=45000');
+    assert.equal(res.status, 200);
+    assert.equal(res.body.jobs.length, 1);
+  });
+});
+
 describe('recruiter publishes a job', () => {
   it('creates a job owned by the authenticated recruiter', async () => {
     const recruiter = await makeUser('owner-create@example.com');

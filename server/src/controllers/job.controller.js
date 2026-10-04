@@ -46,7 +46,13 @@ const listJobs = async (req, res, next) => {
     if (workType) filter.workType = workType;
     if (employmentType) filter.employmentType = employmentType;
     if (experienceLevel) filter.experienceLevel = experienceLevel;
-    if (minSalary) filter['salary.min'] = { $gte: Number(minSalary) };
+    if (minSalary !== undefined) {
+      const n = Number(minSalary);
+      // An unparsable minSalary is client input error, not a server crash.
+      // Fall back to "no salary floor", consistent with how invalid page
+      // bounds are handled below, instead of casting NaN into the filter.
+      if (Number.isFinite(n)) filter['salary.min'] = { $gte: n };
+    }
 
     // Only live jobs are ever part of the public catalogue. Pending/draft
     // jobs await moderation, and closed/expired jobs are no longer open to
