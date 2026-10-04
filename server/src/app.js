@@ -15,6 +15,18 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
+// Do not advertise the framework in every response.
+app.disable('x-powered-by');
+
+// Minimal, dependency-free security headers. This server returns JSON and
+// static files only, so no CSP is needed here.
+app.use((_req, res, next) => {
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('X-Frame-Options', 'DENY');
+  res.set('Referrer-Policy', 'no-referrer');
+  next();
+});
+
 // CORS restricted to the local Vite frontend
 app.use(
   cors({

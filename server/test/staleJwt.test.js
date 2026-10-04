@@ -206,6 +206,16 @@ describe('database-backed authenticate middleware', () => {
     assert.deepEqual(res.body, { error: 'Authentication required' });
   });
 
+  it('rejects a validly-signed token using a non-HS256 algorithm', async () => {
+    const user = await makeUser('alg-confusion@example.com');
+    const token = jwt.sign({ id: user.id, role: user.role }, env.jwtSecret, { algorithm: 'HS512' });
+
+    const res = await request('GET', '/api/auth/me', { token });
+
+    assert.equal(res.status, 401);
+    assert.deepEqual(res.body, { error: 'Authentication required' });
+  });
+
   it('rejects an expired token', async () => {
     const user = await makeUser('expired-token@example.com');
     const token = jwt.sign(

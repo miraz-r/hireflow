@@ -15,7 +15,7 @@ const authenticate = async (req, res, next) => {
 
   let decoded;
   try {
-    decoded = jwt.verify(token, env.jwtSecret);
+    decoded = jwt.verify(token, env.jwtSecret, { algorithms: ['HS256'] });
   } catch {
     return res.status(401).json({ error: 'Authentication required' });
   }
