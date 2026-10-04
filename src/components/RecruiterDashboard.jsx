@@ -1,7 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useId, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, Navigate } from 'react-router-dom';
-import { apiGet, apiPatch } from '../utils/api';
+import { apiGet, apiPatch, apiFetchBlobUrl } from '../utils/api';
 import { STATUS_LABELS } from '../constants/applicationStatus';
 import { useAuth } from '../context/AuthContext';
 import Select from './ui/Select';
@@ -773,6 +773,7 @@ export default function RecruiterDashboard() {
 /* the authorized detail endpoint returns; missing data hides the section.  */
 /* ======================================================================= */
 function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) {
+  const [resumeError, setResumeError] = useState('');
   const titleId = useId();
   const dialogRef = useRef(null);
 
@@ -973,14 +974,21 @@ function ApplicantDetailModal({ open, loading, error, data, onClose, onRetry }) 
             {resumeUrl && (
               <div className="rd-detail-section">
                 <h4 className="rd-detail-section-title">Resume</h4>
-                <a
+                <button
+                  type="button"
                   className="btn btn-sm btn-secondary"
-                  href={resolveMediaUrl(resumeUrl)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={async () => {
+                    try {
+                      const objectUrl = await apiFetchBlobUrl(`/applications/${data?.id}/resume`);
+                      window.open(objectUrl, '_blank', 'noopener,noreferrer');
+                    } catch {
+                      setResumeError('Unable to open the resume right now. Please try again.');
+                    }
+                  }}
                 >
                   View resume
-                </a>
+                </button>
+                {resumeError && <p className="rd-alert" role="alert">{resumeError}</p>}
               </div>
             )}
 

@@ -5,7 +5,7 @@ const User = require('../models/User');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
 const SavedJob = require('../models/SavedJob');
-const { publicPathFor, UPLOAD_ROOT, AVATAR_DIR } = require('../config/uploads');
+const { publicPathFor, UPLOAD_ROOT, AVATAR_DIR, sendResume } = require('../config/uploads');
 
 /**
  * Profile controller.
@@ -379,6 +379,25 @@ const deleteMyProfile = async (req, res, next) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// GET /api/profile/resume  — the caller's OWN resume, protected delivery.
+// ---------------------------------------------------------------------------
+const getOwnResume = async (req, res, next) => {
+  try {
+    const profile = await Profile.findOne(activeProfileQuery(req))
+      .select('resumeUrl resumeName')
+      .lean();
+    if (!profile || !profile.resumeUrl) {
+      return res.status(404).json({ error: 'No resume uploaded' });
+    }
+    return sendResume(res, profile.resumeUrl, profile.resumeName, {
+      download: req.query.download === '1',
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   getMyProfile,
   createMyProfile,
@@ -388,4 +407,5 @@ module.exports = {
   uploadResume,
   deleteMyProfile,
   removeAvatar,
+  getOwnResume,
 };

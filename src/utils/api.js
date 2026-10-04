@@ -60,4 +60,11 @@ export const apiUpload = (url, formData) =>
     timeout: 20000,
   });
 
+// Fetch a protected file (e.g. a resume) as an object URL using the shared
+// authenticated client, then hand it to the caller for preview/download.
+export const apiFetchBlobUrl = async (url) => {
+  const res = await api.get(url, { responseType: 'blob' });
+  return URL.createObjectURL(res.data);
+};
+
 export default api;

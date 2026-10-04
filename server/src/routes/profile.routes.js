@@ -13,6 +13,7 @@ const {
   uploadResume,
   deleteMyProfile,
   removeAvatar,
+  getOwnResume,
 } = require('../controllers/profile.controller');
 const { avatarUpload, resumeUpload } = require('../config/uploads');
 
@@ -40,6 +41,8 @@ router.use(authenticate);
 // GET /api/profile
 // ---------------------------------------------------------------------------
 router.get('/', getMyProfile);
+// Protected resume delivery for the caller's own profile (workspace-scoped).
+router.get('/resume', getOwnResume);
 
 // ---------------------------------------------------------------------------
 // POST /api/profile  — create profile (one-time per user)

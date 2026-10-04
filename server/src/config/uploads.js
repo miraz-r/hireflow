@@ -83,11 +83,40 @@ const publicPathFor = (absPath) => {
   return `/uploads/${rel}`;
 };
 
+const RESUME_MIME_BY_EXT = {
+  '.pdf': 'application/pdf',
+  '.doc': 'application/msword',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.txt': 'text/plain',
+};
+
+// Resolve a stored resume URL ("/uploads/resumes/<file>") to its local path
+// and stream it back with a safe basename-only resolution. The public static
+// mount only serves avatars, so every resume read goes through here after an
+// ownership/role check in the controller.
+const sendResume = (res, resumeUrl, resumeName, { download = false } = {}) => {
+  const fileName = path.basename(String(resumeUrl || ''));
+  const abs = path.join(RESUME_DIR, fileName);
+  if (!abs.startsWith(RESUME_DIR) || !fs.existsSync(abs)) {
+    return res.status(404).json({ error: 'Resume not found' });
+  }
+  const ext = path.extname(fileName).toLowerCase();
+  res.setHeader('Content-Type', RESUME_MIME_BY_EXT[ext] || 'application/octet-stream');
+  const disposition = download ? 'attachment' : 'inline';
+  res.setHeader(
+    'Content-Disposition',
+    `${disposition}; filename*=UTF-8''${encodeURIComponent(resumeName || fileName)}`
+  );
+  return res.sendFile(abs);
+};
+
 module.exports = {
   UPLOAD_ROOT,
+  UPLOAD_AVATAR_DIR: AVATAR_DIR,
   AVATAR_DIR,
   RESUME_DIR,
   avatarUpload,
   resumeUpload,
   publicPathFor,
+  sendResume,
 };

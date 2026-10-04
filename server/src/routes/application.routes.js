@@ -8,6 +8,7 @@ const {
   updateApplicationStatus,
   getApplicationDetail,
   getRecruiterActivity,
+  getApplicationResume,
 } = require('../controllers/application.controller');
 const {
   createValidators,
@@ -45,6 +46,15 @@ router.get('/my-applications', listJobseekerApplications);
 // controller against the application's own job). Defined after the literal
 // /mine and /my-applications paths so it never shadows them.
 router.get('/:id', authorize('recruiter'), applicationIdValidators, getApplicationDetail);
+
+// Protected resume delivery for an application. Application-scoped: the
+// applicant, the job's owner recruiter, or an admin.
+router.get(
+  '/:id/resume',
+  authorize('jobseeker', 'recruiter', 'admin'),
+  applicationIdValidators,
+  getApplicationResume
+);
 
 // Jobseeker-workspace action: applying to a job.
 router.post('/', authorize('jobseeker'), createValidators, createApplication);

@@ -3,6 +3,7 @@ const Profile = require('../models/Profile');
 const Application = require('../models/Application');
 const User = require('../models/User');
 const RecruiterActivity = require('../models/RecruiterActivity');
+const { sendResume } = require('../config/uploads');
 
 // ---------------------------------------------------------------------------
 // POST /api/applications  — jobseeker applies to a job
@@ -407,6 +408,53 @@ const getRecruiterActivity = async (req, res, next) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// GET /api/applications/:id/resume  — protected resume delivery.
+// Access rules: the applicant (jobseeker) themselves, the recruiter who owns
+// the application's job, or an admin. Everyone else gets a 403, and a
+// jobseeker/recruiter ID mismatch never gets a hint about the file's path.
+// ---------------------------------------------------------------------------
+const getApplicationResume = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id);
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    if (req.user.role === 'jobseeker') {
+      if (String(application.userId) !== String(req.user.id)) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    } else if (req.user.role === 'recruiter') {
+      const job = await Job.findById(application.jobId);
+      if (!job) {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+      if (String(job.postedBy) !== String(req.user.id)) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    } else if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const profile = await Profile.findOne({ userId: application.userId })
+      .select('resumeUrl resumeName')
+      .lean();
+    const resumeUrl = (application.resumeUrl || (profile ? profile.resumeUrl : '') || '').trim();
+    if (!resumeUrl) {
+      return res.status(404).json({ error: 'No resume uploaded' });
+    }
+    return sendResume(res, resumeUrl, (profile ? profile.resumeName : ''), {
+      download: req.query.download === '1',
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid application id' });
+    }
+    return next(err);
+  }
+};
+
 module.exports = {
   createApplication,
   getMyApplication,
@@ -415,5 +463,6 @@ module.exports = {
   updateApplicationStatus,
   getApplicationDetail,
   getRecruiterActivity,
+  getApplicationResume,
 };
 

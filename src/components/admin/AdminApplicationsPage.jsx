@@ -5,6 +5,7 @@ import Select from '../ui/Select';
 import Toast from '../Toast';
 import Avatar from '../Avatar';
 import { avatarFallback, resolveMediaUrl } from '../../lib/media';
+import api, { apiFetchBlobUrl } from '../../utils/api';
 import { ADMIN_STATUS_LABELS } from '../../constants/applicationStatus';
 import {
   getAdminApplications,
@@ -381,42 +382,44 @@ export default function AdminApplicationsPage() {
     [showToast]
   );
 
-  // Open the real uploaded file in a new tab.
+  // Open the real uploaded file in a new tab. The resume endpoint is
+  // protected, so it is fetched through the shared authenticated client and
+  // handed to the browser as a blob object URL.
   const viewResume = useCallback(
-    (url) => {
-      const absolute = resolveMediaUrl(url);
-      if (!absolute) return;
-      window.open(absolute, '_blank', 'noopener,noreferrer');
+    async (applicationId) => {
+      if (!applicationId) return;
+      try {
+        const objectUrl = await apiFetchBlobUrl(`/applications/${applicationId}/resume`);
+        window.open(objectUrl, '_blank', 'noopener,noreferrer');
+      } catch {
+        showToast('Could not open the resume right now.');
+      }
     },
-    []
+    [showToast]
   );
 
   // Download the real file. The API is a different origin from the app, so a
   // plain `download` attribute would be ignored by the browser; fetching the
   // bytes and handing them over as a blob object URL forces a real download.
   const downloadResume = useCallback(
-    async (url) => {
-      const absolute = resolveMediaUrl(url);
-      if (!absolute) return;
+    async (applicationId) => {
+      if (!applicationId) return;
       setDownloading(true);
       let objectUrl = null;
       try {
-        const response = await fetch(absolute);
-        if (!response.ok) {
-          throw new Error(`The server responded with ${response.status}.`);
-        }
-        const blob = await response.blob();
+        const res = await api.get(`/applications/${applicationId}/resume`, { responseType: 'blob' });
+        const blob = res.data;
         objectUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = objectUrl;
-        link.download = fileNameFromUrl(absolute);
+        link.download = `resume-${applicationId}`;
         document.body.appendChild(link);
         link.click();
         link.remove();
       } catch (err) {
         // Report the actual failure. A resume that cannot be downloaded is
         // never papered over with a success message.
-        showToast(err?.message || 'Could not download the resume.');
+        showToast(err?.response?.data?.error || err?.message || 'Could not download the resume.');
       } finally {
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         setDownloading(false);
@@ -1107,13 +1110,13 @@ function DetailPanel({
                     {fileNameFromUrl(resumeUrl)}
                   </span>
                   <span className="admin-applications-detail-resume-actions">
-                    <button type="button" onClick={() => onViewResume(resumeUrl)}>
+                    <button type="button" onClick={() => onViewResume(detail?.id)}>
                       View
                     </button>
                     <span aria-hidden="true">·</span>
                     <button
                       type="button"
-                      onClick={() => onDownloadResume(resumeUrl)}
+                      onClick={() => onDownloadResume(detail?.id)}
                       disabled={downloading}
                     >
                       {downloading ? 'Downloading...' : 'Download'}

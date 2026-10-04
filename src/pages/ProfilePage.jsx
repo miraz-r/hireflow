@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from '../utils/api';
+import { apiGet, apiPost, apiPatch, apiDelete, apiUpload, apiFetchBlobUrl } from '../utils/api';
 import { categories, workTypes, employmentTypes, experienceLevels } from '../data/mockData';
 import { STATUS_LABELS } from '../constants/applicationStatus';
 import Toast from '../components/Toast';
@@ -637,7 +637,20 @@ function ProfileTab({ user }) {
                     </span>
                     <div>
                       <strong>{form.resumeName || 'Resume'}</strong>
-                      <a href={resolveMediaUrl(form.resumeUrl)} target="_blank" rel="noreferrer" className="profile-link-url">View / download</a>
+                      <button
+                        type="button"
+                        className="profile-link-url profile-resume-view-btn"
+                        onClick={async () => {
+                          try {
+                            const objectUrl = await apiFetchBlobUrl('/profile/resume');
+                            window.open(objectUrl, '_blank', 'noopener,noreferrer');
+                          } catch {
+                            setError('Unable to open your resume right now. Please try again.');
+                          }
+                        }}
+                      >
+                        View / download
+                      </button>
                     </div>
                   </div>
                 ) : (

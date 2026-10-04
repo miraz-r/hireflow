@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const env = require('./config/env');
-const { UPLOAD_ROOT } = require('./config/uploads');
+const { UPLOAD_AVATAR_DIR } = require('./config/uploads');
 const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
@@ -36,8 +36,10 @@ app.use(
   })
 );
 
-// Uploaded avatars and resumes are served back from /uploads/...
-app.use('/uploads', express.static(UPLOAD_ROOT));
+// Uploaded avatars and resumes are stored on disk. Avatars are public static
+// assets; resumes are NOT served statically — every resume read goes through
+// an ownership-checked protected endpoint (profile/applications controllers).
+app.use('/uploads/avatars', express.static(UPLOAD_AVATAR_DIR));
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false }));
