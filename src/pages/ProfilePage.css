@@ -1716,6 +1716,19 @@ label.btn.disabled {
     align-items: flex-start;
   }
 
+  /* Narrow viewports: let the header wrap and place the status badge on its
+     own row below the name/description so it can never crowd or overlap the
+     title text. */
+  .profile-header {
+    flex-wrap: wrap;
+  }
+
+  .profile-status-badge {
+    flex-basis: 100%;
+    max-width: max-content;
+    margin-top: var(--space-1);
+  }
+
   .profile-header-card {
     padding: var(--space-5);
   }
@@ -1915,14 +1928,6 @@ label.btn.disabled {
     width: 64px;
     height: 64px;
   }
-
-  /* Danger zone - stack the description above the Delete profile button so
-     the text uses the full row width instead of wrapping word-by-word. */
-  .profile-danger-body {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-4);
-  }
 }
 
 /* Narrow phones: move the status pill onto its own row below the job
@@ -1946,6 +1951,19 @@ label.btn.disabled {
     -webkit-box-orient: unset;
     overflow: visible;
     overflow-wrap: break-word;
+  }
+
+  /* Danger zone - stack the description above the Delete profile button so
+     the text uses the full row width instead of wrapping word-by-word, and
+     the button stays fully visible. */
+  .profile-danger-body {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .profile-danger-body .btn {
+    flex-shrink: 0;
   }
 }
 

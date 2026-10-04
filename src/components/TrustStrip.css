@@ -101,3 +101,35 @@
     overflow-wrap: anywhere;
   }
 }
+
+/* Narrow phones: replace the scrolling ticker with a static three-column row
+   so every stat stays readable without squeezing, clipping, or mid-word
+   breaks. The duplicate (aria-hidden) copy is only needed for the loop. */
+@media (max-width: 480px) {
+  .trust-ticker-track {
+    animation: none;
+    width: 100%;
+  }
+
+  .trust-ticker-group {
+    flex: 1 1 100%;
+  }
+
+  .trust-ticker-group[aria-hidden="true"] {
+    display: none;
+  }
+
+  .trust-item {
+    padding: var(--space-2) var(--space-1);
+  }
+
+  .trust-value {
+    font-size: var(--font-size-base);
+    overflow-wrap: break-word;
+  }
+
+  .trust-label {
+    font-size: var(--font-size-2xs);
+    overflow-wrap: break-word;
+  }
+}

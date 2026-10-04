@@ -69,10 +69,20 @@ function FooterLink({ to, children }) {
     );
   }
 
-  // Root page link: /about, /blog
+  // Root page link: /about, /blog.
+  // Same exact location (pathname + query) only scrolls to the top. Same
+  // route with a different query (e.g. /profile?tab=post -> /profile) must
+  // still navigate: search-only changes don't trigger the global scroll
+  // restoration, so scroll to the top once navigation is issued.
   return <Link to={to} onClick={(e) => {
-    if (location.pathname === to) {
+    if (location.pathname + location.search === to) {
       handleSamePageRoot(e, to);
+      return;
+    }
+    if (location.pathname === to.split('?')[0]) {
+      e.preventDefault();
+      navigate(to);
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   }}>{children}</Link>;
 }

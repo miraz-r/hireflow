@@ -170,7 +170,7 @@
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 480px) {
   /* Email field - Verified badge + Change action align LEFT below the email
      value instead of drifting to the right edge/middle of the narrow box. */
   .email-field-end {

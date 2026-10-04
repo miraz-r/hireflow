@@ -603,6 +603,7 @@
 .mobile-drawer-nav {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   padding: 0 0 var(--space-4);
   display: flex;
@@ -706,8 +707,12 @@
   transition: background-color var(--transition-fast);
 }
 
+/* Long labels (e.g. "Open Jobseeker workspace") wrap inside the compact
+   drawer instead of extending past it or forcing a horizontal scrollbar. */
 .mobile-drawer-label {
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .mobile-drawer-link svg {

@@ -221,3 +221,34 @@
     letter-spacing: var(--letter-spacing-tight);
   }
 }
+
+/* Narrow phones: keep Previous, page numbers, and Next on one consistently
+   aligned row. Prev/Next become icon-only (their aria-labels are preserved),
+   and the page list scrolls internally if needed - never the page itself. */
+@media (max-width: 480px) {
+  .pagination {
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+  }
+
+  .pagination-pages {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    min-width: 0;
+  }
+
+  .pagination-btn {
+    padding: var(--space-2);
+    flex-shrink: 0;
+  }
+
+  .pagination-btn span {
+    display: none;
+  }
+
+  .pagination-page {
+    min-width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+}

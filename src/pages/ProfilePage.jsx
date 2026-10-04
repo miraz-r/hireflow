@@ -465,9 +465,9 @@ function ProfileTab({ user }) {
                 : 'Manage your professional profile and experience.'}
             </p>
           </div>
-          {profile && (
+          {profile && !isRecruiter && (
             <span className="badge badge-neutral profile-status-badge">
-              {isRecruiter ? 'Recruiting' : 'Looking for work'}
+              Looking for work
             </span>
           )}
         </div>
@@ -536,7 +536,7 @@ function ProfileTab({ user }) {
         </fieldset>
 
         {isRecruiter ? (
-          <fieldset className="profile-fieldset">
+          <fieldset className="profile-fieldset profile-fieldset--heading-gap">
             <legend className="profile-fieldset-title">Company</legend>
             <div className="profile-grid">
               <div className="profile-field">
