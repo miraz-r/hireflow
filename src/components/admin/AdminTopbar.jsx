@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../hooks/useTheme';
 import Avatar from '../Avatar';
 import AdminProfileMenu from './AdminProfileMenu';
+import AdminGlobalSearch from './AdminGlobalSearch';
 import useDismissible from '../../hooks/useDismissible';
 import { resolveMediaUrl } from '../../lib/media';
 import './AdminTopbar.css';
@@ -36,13 +37,6 @@ const SUN_ICON = (
   </svg>
 );
 
-const SEARCH_ICON = (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="11" cy="11" r="8" />
-    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-  </svg>
-);
-
 const BELL_ICON = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -66,7 +60,7 @@ function getPageTitle(pathname) {
 /**
  * AdminTopbar - white topbar with a route-aware page title on the left and
  * the global search field, notification control, and profile control on the
- * right. The search is a visual-only shell component in Phase 1A.
+ * right.
  */
 export default function AdminTopbar({ openBtnRef, drawerOpen, onOpenDrawer }) {
   const location = useLocation();
@@ -89,22 +83,7 @@ export default function AdminTopbar({ openBtnRef, drawerOpen, onOpenDrawer }) {
 
       <h1 className="admin-topbar-title">{getPageTitle(location.pathname)}</h1>
 
-      <div className="admin-topbar-search">
-        <label className="sr-only" htmlFor="admin-global-search">
-          Search jobs, applications, users
-        </label>
-        {SEARCH_ICON}
-        <input
-          id="admin-global-search"
-          className="admin-topbar-search-input"
-          type="search"
-          placeholder="Search jobs, applications, users..."
-          autoComplete="off"
-          spellCheck="false"
-          disabled
-          title="Global search is not available yet"
-        />
-      </div>
+      <AdminGlobalSearch />
 
       <div className="admin-topbar-group">
         <button

@@ -1,5 +1,12 @@
 import api from './api';
 
+// Global cross-entity search for the Admin topbar. Results are grouped by
+// entity type; each group is a flat array (possibly empty) of {id,label,sublabel}.
+export async function getAdminSearch(q, { signal } = {}) {
+  const res = await api.get('/admin/search', { params: { q }, signal });
+  return res.data;
+}
+
 // Admin endpoints. Unlike the public job catalogue, admin data is never
 // replaced with mock/fallback content. If the platform stats endpoint fails,
 // the Overview shows an explicit error state instead of inventing numbers.

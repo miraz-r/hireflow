@@ -15,6 +15,7 @@ const {
   listAdminJobs,
   getAdminJob,
   updateAdminJobStatus,
+  globalSearch,
 } = require('../controllers/admin.controller');
 const {
   applicationIdValidators,
@@ -131,6 +132,9 @@ router.get(
 // moderation (activate/pending/draft/close). All admin-only.
 router.get('/jobs', authenticate, authorize('admin'), listAdminJobs);
 router.get('/jobs/:id', authenticate, authorize('admin'), getAdminJob);
+// Global cross-entity search for the Admin topbar. Literal path, so it cannot
+// be shadowed by '/jobs/:id' etc.
+router.get('/search', authenticate, authorize('admin'), globalSearch);
 router.patch(
   '/jobs/:id/status',
   authenticate,

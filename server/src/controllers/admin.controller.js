@@ -1986,6 +1986,131 @@ const serializeAdminJob = (job, counts, recruiterMap) => {
   };
 };
 
+// ---------------------------------------------------------------------------
+// GET /api/admin/search?q=  — cross-entity global search for the Admin topbar.
+// One bounded lookup per entity type (PER_TYPE results each), grouped by
+// category. Email arms join the account record, same as the workspace lists.
+// ---------------------------------------------------------------------------
+const PER_TYPE = 5;
+const MIN_QUERY_LENGTH = 2;
+const MAX_QUERY_LENGTH = 80;
+
+const emptyGroups = () => ({
+  jobseekers: [],
+  recruiters: [],
+  companies: [],
+  jobs: [],
+  applications: [],
+});
+
+const globalSearch = async (req, res, next) => {
+  try {
+    const raw = req.query.q;
+    if (raw !== undefined && typeof raw !== 'string') {
+      return res.status(400).json({ error: 'q must be a string' });
+    }
+    const q = (raw || '').trim();
+
+    // Whitespace-only (or missing) query is a valid "no filter" state, not an
+    // unrestricted search: return empty groups.
+    if (!q) {
+      return res.status(200).json({ query: '', ...emptyGroups() });
+    }
+    if (q.length < MIN_QUERY_LENGTH) {
+      return res.status(400).json({ error: `q must be at least ${MIN_QUERY_LENGTH} characters` });
+    }
+    if (q.length > MAX_QUERY_LENGTH) {
+      return res.status(400).json({ error: `q must be at most ${MAX_QUERY_LENGTH} characters` });
+    }
+
+    const regex = new RegExp(escapeRegex(q), 'i');
+
+    const profileSearch = (role, extraOr) =>
+      Profile.aggregate([
+        { $match: { role } },
+        {
+          $lookup: {
+            from: User.collection.name,
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'account',
+          },
+        },
+        { $unwind: '$account' },
+        { $match: { $or: [{ fullName: regex }, { 'account.email': regex }, ...extraOr] } },
+        { $sort: { createdAt: -1 } },
+        { $limit: PER_TYPE },
+      ]);
+
+    const jobsMatching = Job.find({
+      $or: [{ title: regex }, { company: regex }, { location: regex }, { category: regex }],
+    })
+      .sort({ createdAt: -1 })
+      .limit(PER_TYPE)
+      .select('title company location category status')
+      .lean();
+
+    const matchingJobIdsPromise = Job.find({ title: regex })
+      .select('_id')
+      .limit(50)
+      .lean();
+
+    const companiesMatching = Profile.distinct('companyName', {
+      role: 'recruiter',
+      companyName: regex,
+    });
+
+    const [jobseekerRows, recruiterRows, jobRows, companyNames, matchingJobs] = await Promise.all([
+      profileSearch('jobseeker', []),
+      profileSearch('recruiter', [{ jobTitle: regex }, { companyName: regex }]),
+      jobsMatching,
+      companiesMatching,
+      matchingJobIdsPromise,
+    ]);
+
+    const matchingJobIds = matchingJobs.map((j) => j._id);
+    const applications = await Application.find({
+      $or: [{ fullName: regex }, { email: regex }, { jobId: { $in: matchingJobIds } }],
+    })
+      .sort({ createdAt: -1 })
+      .limit(PER_TYPE)
+      .populate('jobId', 'title company')
+      .select('fullName email status jobId createdAt')
+      .lean();
+
+    return res.status(200).json({
+      query: q,
+      jobseekers: jobseekerRows.map((p) => ({
+        id: String(p.userId),
+        label: p.fullName || 'Unnamed',
+        sublabel: (p.account && p.account.email) || '',
+      })),
+      recruiters: recruiterRows.map((p) => ({
+        id: String(p.userId),
+        label: p.fullName || 'Unnamed',
+        sublabel: [p.jobTitle, p.companyName].filter(Boolean).join(' · ') || (p.account && p.account.email) || '',
+      })),
+      companies: companyNames.slice(0, PER_TYPE).map((name) => ({
+        id: name,
+        label: name,
+        sublabel: 'Company',
+      })),
+      jobs: jobRows.map((job) => ({
+        id: String(job._id),
+        label: job.title || 'Untitled job',
+        sublabel: [job.company, job.location, job.status].filter(Boolean).join(' · '),
+      })),
+      applications: applications.map((app) => ({
+        id: String(app._id),
+        label: app.fullName || (app.email ?? 'Applicant'),
+        sublabel: app.jobId && app.jobId.title ? `for ${app.jobId.title}` : app.status || '',
+      })),
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   ACTIVITY_TYPES,
   getStats,
@@ -2002,4 +2127,5 @@ module.exports = {
   listAdminJobs,
   getAdminJob,
   updateAdminJobStatus,
+  globalSearch,
 };
