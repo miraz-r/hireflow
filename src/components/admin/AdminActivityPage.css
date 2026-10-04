@@ -192,6 +192,7 @@
    same three columns and nothing overflows the card horizontally. */
 .admin-activity-page-table-scroll {
   width: 100%;
+  position: relative;
   overflow-x: auto;
   overscroll-behavior-x: contain;
 }

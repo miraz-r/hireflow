@@ -254,6 +254,7 @@
    the flexible Job column. */
 .admin-jobs-table-scroll {
   width: 100%;
+  position: relative;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: thin;

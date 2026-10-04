@@ -225,6 +225,7 @@
    align with their content. */
 .admin-applications-table-scroll {
   width: 100%;
+  position: relative;
   /* Grows to absorb any extra card height so the footer stays pinned to the
      bottom when the detail panel is the taller of the two columns. No effect
      while the card is content-sized (Part 1 behavior unchanged). */

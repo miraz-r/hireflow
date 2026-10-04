@@ -1,4 +1,4 @@
-﻿/* Admin Overview - the /admin index route. Everything below composes the
+/* Admin Overview - the /admin index route. Everything below composes the
    final token-based surface, so light and dark just work via AdminShell. */
 .admin-overview {
   display: flex;
@@ -356,6 +356,7 @@
 
 /* ---------- Recent applications table ---------- */
 .admin-overview-table-scroll {
+  position: relative;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }

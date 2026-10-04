@@ -219,6 +219,7 @@
    with their rows. */
 .admin-jobseekers-table-scroll {
   width: 100%;
+  position: relative;
   /* Grows to absorb any extra card height so the footer stays pinned to the
      bottom when the detail panel is the taller of the two columns. */
   flex: 1 1 auto;

@@ -221,6 +221,7 @@
    sized for real data so nothing clips and headers always align with rows. */
 .admin-companies-table-scroll {
   width: 100%;
+  position: relative;
   flex: 1 1 auto;
   overflow-x: auto;
   overscroll-behavior-x: contain;
