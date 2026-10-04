@@ -9,8 +9,8 @@ export default function TrustStrip() {
 
   const renderStats = (ariaHidden) => (
     <div className="trust-ticker-group" aria-hidden={ariaHidden || undefined}>
-      {stats.map((stat, idx) => (
-        <div key={idx} className="trust-item">
+      {stats.map((stat) => (
+        <div key={stat.label} className="trust-item">
           <div className="trust-value">{stat.value}</div>
           <div className="trust-label">{stat.label}</div>
         </div>

@@ -44,6 +44,11 @@ export default function ConfirmModal({
     onCloseRef.current = onClose;
   }, [onClose]);
 
+  const busyRef = useRef(busy);
+  useEffect(() => {
+    busyRef.current = busy;
+  }, [busy]);
+
   useEffect(() => {
     if (!open) return undefined;
 
@@ -57,7 +62,9 @@ export default function ConfirmModal({
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        onCloseRef.current();
+        // Don't bypass the disabled Cancel/Confirm buttons while an action
+        // is in flight.
+        if (!busyRef.current) onCloseRef.current();
         return;
       }
       if (e.key !== 'Tab') return;

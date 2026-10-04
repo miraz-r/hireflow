@@ -279,7 +279,7 @@ export default function AdminJobseekersPage() {
   const viewProfile = useCallback(
     (jobseeker) => {
       setActiveMenuId(null);
-      navigate(`/admin/jobseekers/${jobseeker.id}`);
+      navigate(`/admin/jobseekers/${jobseeker.id}`, { state: { from: '/admin/jobseekers' } });
     },
     [navigate]
   );

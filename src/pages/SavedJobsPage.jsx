@@ -28,8 +28,9 @@ export default function SavedJobsPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await apiGet('/saved-jobs');
+      const res = await apiGet('/saved-jobs', { timeout: 8000 });
       setSavedJobs(res.data?.savedJobs || []);
+      setError('');
     } catch (err) {
       if (err.status === 401) {
         logout();
@@ -44,6 +45,9 @@ export default function SavedJobsPage() {
   useEffect(() => {
     if (user && user.role === 'jobseeker') {
       loadSavedJobs();
+    } else if (user) {
+      // Non-jobseeker roles have no saved jobs to load; don't spin forever.
+      setLoading(false);
     }
   }, [user, loadSavedJobs]);
 
@@ -51,8 +55,9 @@ export default function SavedJobsPage() {
     if (removing[jobId]) return;
     setRemoving((prev) => ({ ...prev, [jobId]: true }));
     try {
-      await apiDelete(`/saved-jobs/${jobId}`);
+      await apiDelete(`/saved-jobs/${jobId}`, { timeout: 8000 });
       setSavedJobs((prev) => prev.filter((j) => String(j.id) !== String(jobId)));
+      setError('');
     } catch (err) {
       setError(err?.message || 'Unable to remove this job.');
       setRemoving((prev) => { const next = { ...prev }; delete next[jobId]; return next; });

@@ -17,6 +17,8 @@ export default function ApplyPage() {
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [profileLoadError, setProfileLoadError] = useState('');
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,15 +42,27 @@ export default function ApplyPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchJobById(id).then((data) => {
-      if (cancelled) return;
-      setJob(data);
-      setLoading(false);
-      if (!data) {
-        setTimeout(() => navigate('/', { replace: true }), 2000);
-      }
-    });
-    return () => { cancelled = true; };
+    setLoadError('');
+    let navigateTimer;
+    fetchJobById(id)
+      .then((data) => {
+        if (cancelled) return;
+        setJob(data);
+        setLoading(false);
+        if (!data) {
+          navigateTimer = setTimeout(() => navigate('/', { replace: true }), 2000);
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setJob(null);
+        setLoading(false);
+        setLoadError('We could not load this job right now. Please try again later.');
+      });
+    return () => {
+      cancelled = true;
+      if (navigateTimer) clearTimeout(navigateTimer);
+    };
   }, [id, navigate]);
 
   // Fetch profile to prefill form
@@ -75,6 +89,7 @@ export default function ApplyPage() {
         if (cancelled) return;
         setEmail(user.email || '');
         setFullName(user.fullName || '');
+        setProfileLoadError('We could not load your profile. Some fields may need to be completed manually.');
       })
       .finally(() => { if (!cancelled) setProfileLoading(false); });
     return () => { cancelled = true; };
@@ -107,7 +122,9 @@ export default function ApplyPage() {
     } else if (!PHONE_CHARS_RE.test(phone.trim())) {
       errs.phone = 'Enter a valid phone number';
     }
-    if (!profile?.resumeUrl) {
+    if (!profile && profileLoadError) {
+      errs.resume = 'Resume status could not be verified. Please check your profile.';
+    } else if (!profile?.resumeUrl) {
       errs.resume = 'A resume is required. Upload one in your profile.';
     }
     if (linkedin.trim() && !/^https?:\/\/.+\..+/.test(linkedin.trim())) {
@@ -173,6 +190,20 @@ export default function ApplyPage() {
       <div className="apply-page">
         <div className="container">
           <div className="apply-loading" aria-busy="true">Loading…</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="apply-page">
+        <div className="container">
+          <div className="apply-empty" role="alert">
+            <h1>Unable to load job</h1>
+            <p>{loadError}</p>
+            <Link to="/" className="btn btn-primary">Browse jobs</Link>
+          </div>
         </div>
       </div>
     );
@@ -370,6 +401,7 @@ export default function ApplyPage() {
                   onChange={(e) => setCoverLetter(e.target.value)}
                   placeholder="Tell the employer why you're a great fit…"
                   rows={6}
+                  maxLength={5000}
                 />
                 <span className="apply-field-hint">Optional - max 5000 characters</span>
               </div>

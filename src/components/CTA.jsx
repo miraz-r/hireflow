@@ -32,18 +32,18 @@ export default function CTA() {
             <div className="cta-actions">
               {!user ? (
                 <>
-                  <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>Create free account</button>
-                  <button className="btn btn-secondary btn-lg" onClick={handleBrowse}>Browse jobs</button>
+                  <button type="button" className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>Create free account</button>
+                  <button type="button" className="btn btn-secondary btn-lg" onClick={handleBrowse}>Browse jobs</button>
                 </>
               ) : isRecruiter ? (
                 <>
-                  <button className="btn btn-primary btn-lg" onClick={() => navigate('/profile?tab=post')}>Post a job</button>
-                  <button className="btn btn-secondary btn-lg" onClick={() => navigate('/talent-search')}>Talent Search</button>
+                  <button type="button" className="btn btn-primary btn-lg" onClick={() => navigate('/profile?tab=post')}>Post a job</button>
+                  <button type="button" className="btn btn-secondary btn-lg" onClick={() => navigate('/talent-search')}>Talent Search</button>
                 </>
               ) : (
                 <>
-                  <button className="btn btn-primary btn-lg" onClick={handleBrowse}>Find jobs</button>
-                  <button className="btn btn-secondary btn-lg" onClick={() => navigate('/saved-jobs')}>Saved Jobs</button>
+                  <button type="button" className="btn btn-primary btn-lg" onClick={handleBrowse}>Find jobs</button>
+                  <button type="button" className="btn btn-secondary btn-lg" onClick={() => navigate('/saved-jobs')}>Saved Jobs</button>
                 </>
               )}
             </div>

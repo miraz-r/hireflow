@@ -161,7 +161,17 @@ export default function AdminApplicationsPage() {
   // Debounced search term actually sent to the server; `searchInput` is what the
   // box holds. Keeps typing from firing a request per keystroke.
   const [searchInput, setSearchInput] = useState(() => searchParams.get('search') || '');
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState(() => searchParams.get('search') || '');
+
+  // When the search term in the URL changes (e.g. navigating here from
+  // Recruiters/Jobseekers "View applications" while already on this route),
+  // sync the input and the active query instead of dropping the seed value.
+  useEffect(() => {
+    const seeded = searchParams.get('search') || '';
+    setSearchInput(seeded);
+    setQ(seeded);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get('search')]);
   const [status, setStatus] = useState('all');
   const [job, setJob] = useState('all');
   const [recruiter, setRecruiter] = useState('all');
@@ -421,7 +431,7 @@ export default function AdminApplicationsPage() {
         showToast('This application is not linked to an account.');
         return;
       }
-      navigate(`/admin/jobseekers/${userId}`);
+      navigate(`/admin/jobseekers/${userId}`, { state: { from: '/admin/applications' } });
     },
     [navigate, showToast]
   );
@@ -767,9 +777,28 @@ function RowActions({ app, busy, open, onToggle, onClose, onSelect, onChangeStat
     };
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Home' && e.key !== 'End') return;
+      const menu = menuRef?.current;
+      if (!menu) return;
+      const items = Array.from(menu.querySelectorAll('button:not([disabled])'));
+      if (!items.length) return;
+      const index = items.indexOf(document.activeElement);
+      let next;
+      if (e.key === 'Home') next = items[0];
+      else if (e.key === 'End') next = items[items.length - 1];
+      else if (index < 0) next = e.key === 'ArrowDown' ? items[0] : items[items.length - 1];
+      else next = items[(index + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length];
+      e.preventDefault();
+      next.focus();
     };
     document.addEventListener('mousedown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
+
+    // Move focus into the menu when it opens so keyboard users land on the
+    // first action instead of a control behind the overlay.
+    const firstItem = menuRef?.current?.querySelector('button:not([disabled])');
+    if (firstItem) firstItem.focus();
+
     return () => {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);

@@ -31,10 +31,12 @@ export default function JobDetailPage({ onSignInPrompt }) {
   };
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [applied, setApplied] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState(null);
   const [saved, setSaved] = useState(false);
   const [savingJob, setSavingJob] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [checkingSaved, setCheckingSaved] = useState(false);
 
   const isJobseeker = user?.role === 'jobseeker';
@@ -42,17 +44,25 @@ export default function JobDetailPage({ onSignInPrompt }) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchJobById(id).then((data) => {
-      if (cancelled) return;
-      setJob(data);
-      setLoading(false);
-      if (!data) {
-        notFoundTimerRef.current = setTimeout(() => {
-          notFoundTimerRef.current = null;
-          navigate('/', { replace: true });
-        }, 2000);
-      }
-    });
+    setLoadError('');
+    fetchJobById(id)
+      .then((data) => {
+        if (cancelled) return;
+        setJob(data);
+        setLoading(false);
+        if (!data) {
+          notFoundTimerRef.current = setTimeout(() => {
+            notFoundTimerRef.current = null;
+            navigate('/', { replace: true });
+          }, 2000);
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setJob(null);
+        setLoading(false);
+        setLoadError('We could not load this job right now. Please try again later.');
+      });
     return () => {
       cancelled = true;
       if (notFoundTimerRef.current) {
@@ -125,6 +135,20 @@ export default function JobDetailPage({ onSignInPrompt }) {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="job-detail-page">
+        <div className="container">
+          <div className="card job-detail-empty" role="alert">
+            <h1>Unable to load job</h1>
+            <p>{loadError}</p>
+            <Link to="/" className="btn btn-primary">Browse jobs</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!job) {
     return (
       <div className="job-detail-page">
@@ -147,6 +171,7 @@ export default function JobDetailPage({ onSignInPrompt }) {
     if (!isJobseeker || savingJob) return;
 
     setSavingJob(true);
+    setSaveError('');
     try {
       if (saved) {
         await api.delete(`/saved-jobs/${job.id}`, { timeout: 8000 });
@@ -156,7 +181,7 @@ export default function JobDetailPage({ onSignInPrompt }) {
         setSaved(true);
       }
     } catch {
-      // save failed
+      setSaveError('Unable to update saved job. Please try again.');
     } finally {
       setSavingJob(false);
     }
@@ -222,6 +247,10 @@ export default function JobDetailPage({ onSignInPrompt }) {
                   </button>
                 )}
               </div>
+
+              {saveError && (
+                <p className="job-detail-save-error" role="alert">{saveError}</p>
+              )}
 
               <div className="job-detail-tags">
                 <span className={`badge badge-${job.workType === 'Remote' ? 'success' : job.workType === 'Hybrid' ? 'primary' : 'neutral'}`}>
@@ -291,6 +320,7 @@ export default function JobDetailPage({ onSignInPrompt }) {
 
                 {!applied && !user && (
                   <button
+                    type="button"
                     className="btn btn-lg btn-primary job-detail-apply-btn"
                     onClick={() => navigate('/login')}
                   >

@@ -168,6 +168,12 @@
   pointer-events: none;
 }
 
+.job-detail-save-error {
+  margin: 0.5rem 0 0;
+  color: var(--color-error);
+  font-size: 0.875rem;
+}
+
 .job-detail-tags {
   display: flex;
   flex-wrap: wrap;

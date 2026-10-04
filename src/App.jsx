@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Link } from 'react-router-dom';
 import { categories, companies, popularSearches, workTypes, employmentTypes, experienceLevels, salaryRanges } from './data/mockData';
 import { fetchJobs } from './utils/jobsApi';
 import { useAuth } from './context/AuthContext';
@@ -62,6 +62,7 @@ export default function App() {
   const [jobsLoading, setJobsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 12;
+  const firstPageScroll = useRef(true);
 
   // Load saved jobs from the backend for authenticated jobseekers.
   useEffect(() => {
@@ -104,9 +105,11 @@ export default function App() {
     };
   }, []);
 
+  const toastTimer = useRef(null);
   const showToast = useCallback((message) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(message);
-    setTimeout(() => setToast(null), 3000);
+    toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
   const filteredJobs = useMemo(() => {
@@ -220,6 +223,11 @@ export default function App() {
   // via pagination. Uses requestAnimationFrame so the DOM has updated with the
   // new page's job cards before we scroll.
   useEffect(() => {
+    // Skip the first run so the homepage doesn't auto-scroll on load.
+    if (firstPageScroll.current) {
+      firstPageScroll.current = false;
+      return;
+    }
     if (!featuredJobsRef.current) return;
     requestAnimationFrame(() => {
       featuredJobsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -319,6 +327,7 @@ export default function App() {
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
           <Route path="/accessibility" element={<AccessibilityPage />} />
           <Route path="/dashboard" element={<RecruiterDashboard />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </PageTransition>
       </main>
@@ -328,6 +337,16 @@ export default function App() {
     </div>
   );
 }
+function NotFoundPage() {
+  return (
+    <div className="container" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
+      <h1>Page not found</h1>
+      <p>The page you're looking for doesn't exist or was moved.</p>
+      <Link to="/" className="btn btn-primary">Go to homepage</Link>
+    </div>
+  );
+}
+
 function HomePage({
   searchQuery, locationQuery, filters, savedJobs, activeCategory,
   hasActiveFilters, jobsLoading, filteredJobs, paginatedJobs, currentPage, totalPages,
@@ -419,7 +438,7 @@ function HomePage({
                   <div className="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
                   <h3>No jobs found</h3>
                   <p>Try adjusting your search or filters to find more opportunities.</p>
-                  <button className="btn btn-secondary" onClick={onClearFilters}>Clear all filters</button>
+                  <button type="button" className="btn btn-secondary" onClick={onClearFilters}>Clear all filters</button>
                 </div>
               )}
             </div>

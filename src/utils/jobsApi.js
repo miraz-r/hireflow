@@ -67,7 +67,10 @@ export async function fetchJobById(id) {
     const res = await api.get(`/jobs/${id}`, { timeout: 4000 });
     const job = res.data?.job ?? res.data;
     return job ? normalizeJob(job) : null;
-  } catch {
-    return null;
+  } catch (err) {
+    // A real 404 means "no such job". Anything else (network, 5xx, timeout)
+    // is a transient failure and must not be reported as "Job not found".
+    if (err?.status === 404) return null;
+    throw err;
   }
 }

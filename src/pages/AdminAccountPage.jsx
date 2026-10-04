@@ -91,13 +91,25 @@ export default function AdminAccountPage() {
     }
   };
 
+  const handleLocationChange = (e) => {
+    const { value } = e.target;
+    setLocation(value);
+    if (fieldErrors.location) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next.location;
+        return next;
+      });
+    }
+  };
+
   const saveAccount = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError('');
     setFieldErrors({});
     try {
-      const payload = { fullName: fullName.trim(), phone: phone.trim(), location };
+      const payload = { fullName: fullName.trim(), phone: phone.trim(), location: location.trim() };
       let saved;
       if (profile) {
         const res = await apiPatch('/profile', payload);
@@ -214,6 +226,7 @@ export default function AdminAccountPage() {
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   onChange={handleAvatarUpload}
                   disabled={uploadingAvatar}
+                  aria-label="Change profile picture"
                 />
               </label>
             </div>
@@ -274,6 +287,21 @@ export default function AdminAccountPage() {
                 placeholder="+1 555 123 4567"
               />
               {fieldError('phone')}
+            </div>
+
+            <div className="admin-account-field admin-account-field--full">
+              <label className="admin-account-label" htmlFor="admin-account-location">Location</label>
+              <input
+                id="admin-account-location"
+                name="location"
+                className={`input ${fieldErrors.location ? 'input-error' : ''}`}
+                value={location}
+                onChange={handleLocationChange}
+                placeholder="City, Country"
+                autoComplete="address-level2"
+                maxLength={160}
+              />
+              {fieldError('location')}
             </div>
           </div>
 

@@ -196,7 +196,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p className="copyright">{new Date().getFullYear()} HireFlow. All rights reserved.</p>
+          <p className="copyright">© {new Date().getFullYear()} HireFlow. All rights reserved.</p>
           <div className="footer-social">
             <FooterSocial label="X" url="https://x.com/_mirazr" />
             <FooterSocial label="LinkedIn" url="https://www.linkedin.com/in/miraz-r/" />

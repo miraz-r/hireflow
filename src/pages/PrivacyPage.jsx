@@ -119,7 +119,7 @@ export default function PrivacyPage() {
     const el = document.getElementById(id);
     if (el) {
       const top = el.getBoundingClientRect().top + window.scrollY - NAVBAR_HEIGHT - 16;
-      window.scrollTo({ top, behavior: 'smooth' });
+      window.scrollTo({ top, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }
   };
 

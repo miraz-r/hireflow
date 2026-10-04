@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import Avatar from '../Avatar';
 import { avatarFallback, resolveMediaUrl } from '../../lib/media';
 import { getAdminJobseeker } from '../../utils/adminApi';
@@ -55,6 +55,7 @@ const roleLabel = (role) => ROLE_LABELS[role] || role || 'Unknown';
  * renders an explicit empty state rather than placeholder text.
  */
 export default function AdminApplicantProfilePage() {
+  const location = useLocation();
   const { userId } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -78,14 +79,18 @@ export default function AdminApplicantProfilePage() {
     load();
   }, [load]);
 
-  const returnTo = `/admin/applications`;
+  // Prefer the page that opened this profile (e.g. Jobseekers workspace);
+  // fall back to the shared Applications list when there is no origin.
+  const returnTo = location.state?.from && typeof location.state.from === 'string'
+    ? location.state.from
+    : '/admin/applications';
 
   return (
     <div className="admin-page admin-applicant">
       <div className="admin-applicant-bar">
         <Link to={returnTo} className="admin-applicant-back">
           {ARROW_LEFT}
-          Back to Applications
+          {returnTo === '/admin/applications' ? 'Back to Applications' : 'Back'}
         </Link>
       </div>
 
@@ -97,7 +102,7 @@ export default function AdminApplicantProfilePage() {
           </span>
         </div>
       ) : error ? (
-        <div className="admin-applicant-state">
+        <div className="admin-applicant-state" role="alert">
           <span className="admin-applicant-state-title">Unable to load this profile</span>
           <span className="admin-applicant-state-text">
             {error?.message || 'Something went wrong while fetching the profile.'}

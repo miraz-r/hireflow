@@ -140,8 +140,13 @@ export default function Select({
   };
 
   const focusSelectedOption = () => {
-    const selectedIndex = options.findIndex((o) => String(o.value) === String(value ?? ''));
-    focusOption(selectedIndex >= 0 ? selectedIndex : 0);
+    const selectedIndex = options.findIndex((o) => String(o.value) === String(value ?? '') && !o.disabled);
+    if (selectedIndex >= 0) {
+      focusOption(selectedIndex);
+      return;
+    }
+    const firstEnabled = options.findIndex((o) => !o.disabled);
+    focusOption(firstEnabled >= 0 ? firstEnabled : 0);
   };
 
   const handleTriggerKeyDown = (e) => {
@@ -151,7 +156,12 @@ export default function Select({
       if (open) return;
       openMenu();
       if (e.key === 'ArrowUp') {
-        requestAnimationFrame(() => focusOption(options.length - 1));
+        requestAnimationFrame(() => {
+          for (let i = options.length - 1; i >= 0; i -= 1) {
+            if (!options[i]?.disabled) { focusOption(i); return; }
+          }
+          focusOption(options.length - 1);
+        });
       } else {
         requestAnimationFrame(focusSelectedOption);
       }
@@ -160,7 +170,11 @@ export default function Select({
 
   const handleListboxKeyDown = (e) => {
     if (!open) return;
-    const buttons = optionRefs.current.filter(Boolean);
+    // Skip disabled options: only enabled options are focusable candidates.
+    const buttons = optionRefs.current
+      .map((el, i) => ({ el, i }))
+      .filter(({ el, i }) => el && !options[i]?.disabled)
+      .map(({ el }) => el);
     if (buttons.length === 0) return;
     const index = buttons.indexOf(document.activeElement);
 
@@ -170,19 +184,21 @@ export default function Select({
       if (index < 0) {
         focusSelectedOption();
       } else {
-        focusOption((index + step + buttons.length) % buttons.length);
+        const next = buttons[(index + step + buttons.length) % buttons.length];
+        const nextIndex = optionRefs.current.indexOf(next);
+        focusOption(nextIndex);
       }
     } else if (e.key === 'Home') {
       e.preventDefault();
-      focusOption(0);
+      focusOption(optionRefs.current.indexOf(buttons[0]));
     } else if (e.key === 'End') {
       e.preventDefault();
-      focusOption(buttons.length - 1);
+      focusOption(optionRefs.current.indexOf(buttons[buttons.length - 1]));
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       const btn = document.activeElement;
       if (btn && buttons.includes(btn)) {
-        const opt = options[buttons.indexOf(btn)];
+        const opt = options[optionRefs.current.indexOf(btn)];
         if (opt && !opt.disabled) handleSelect(opt);
       }
     } else if (e.key === 'Tab') {
@@ -206,7 +222,7 @@ export default function Select({
         maxHeight: placement.maxHeight,
       }}
       role="listbox"
-      aria-label={ariaLabel}
+      aria-label={ariaLabel || triggerRef.current?.getAttribute('aria-label') || 'Options'}
       onKeyDown={handleListboxKeyDown}
     >
       <ul className="hf-select-list">

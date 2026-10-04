@@ -30,7 +30,7 @@
   /* Colors - Text - dark, slightly cool ink for premium feel */
   --color-text-primary: #111827;
   --color-text-secondary: #4B5563;
-  --color-text-tertiary: #9CA3AF;
+  --color-text-tertiary: #6B7280;
   --color-text-inverse: #ffffff;
 
   /* Hover text - muted brand tone for subtle interactive feedback */
@@ -641,7 +641,7 @@ select option {
 
 .badge-success {
   background-color: var(--color-success-bg);
-  color: var(--color-success);
+  color: #047857;
 }
 
 .badge-warning {

@@ -108,6 +108,7 @@ function ProfileTab({ user }) {
   const [fieldErrors, setFieldErrors] = useState({});
   const [toast, setToast] = useState(null);
   const [form, setForm] = useState({});
+  const [skillsText, setSkillsText] = useState(null);
   const [draftLink, setDraftLink] = useState({ label: '', url: '' });
   // null = not editing any experience entry; otherwise { index, data }
   const [expDraft, setExpDraft] = useState(null);
@@ -131,6 +132,7 @@ function ProfileTab({ user }) {
       const res = await apiGet('/profile');
       setProfile(res.data);
       setForm(res.data || {});
+      setSkillsText(null);
     } catch (err) {
       if (err.status !== 404) {
         setError(err?.message || 'Unable to load your profile.');
@@ -580,8 +582,9 @@ function ProfileTab({ user }) {
                     id="skills"
                     name="skills"
                     className={`input ${fieldErrors.skills ? 'input-error' : ''}`}
-                    value={Array.isArray(form.skills) ? form.skills.join(', ') : ''}
+                    value={skillsText !== null ? skillsText : (Array.isArray(form.skills) ? form.skills.join(', ') : '')}
                     onChange={(e) => {
+                      setSkillsText(e.target.value);
                       const skills = e.target.value.split(',').map((s) => s.trim()).filter(Boolean);
                       setForm((prev) => ({ ...prev, skills }));
                       if (fieldErrors.skills) {
@@ -592,6 +595,7 @@ function ProfileTab({ user }) {
                         });
                       }
                     }}
+                    onBlur={() => setSkillsText(null)}
                     placeholder="React, TypeScript, Next.js"
                   />
                   {fieldError('skills')}
@@ -1006,7 +1010,10 @@ function JobseekerApplicationsTab() {
         const res = await apiGet('/applications/my-applications');
         if (!cancelled) setApplications(res.data?.applications || []);
       } catch (err) {
-        if (!cancelled) setError(err?.message || 'Unable to load your applications.');
+        if (!cancelled) {
+          setApplications([]);
+          setError(err?.message || 'Unable to load your applications.');
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

@@ -165,6 +165,12 @@ export default function AdminJobsPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
 
+  // Keep the open panel in sync with the :jobId route param (Back/Forward,
+  // sidebar navigation). Without this the selection gets stuck on the old job.
+  useEffect(() => {
+    setSelectedId(urlJobId || null);
+  }, [urlJobId]);
+
   const [toast, setToast] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [activeMenuId, setActiveMenuId] = useState(null);
@@ -650,9 +656,28 @@ function FloatingMenu({ open, anchorRef, excludeRef, onClose, children, role, la
     };
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Home' && e.key !== 'End') return;
+      const menu = menuRef.current;
+      if (!menu) return;
+      const items = Array.from(menu.querySelectorAll('button:not([disabled])'));
+      if (!items.length) return;
+      const index = items.indexOf(document.activeElement);
+      let next;
+      if (e.key === 'Home') next = items[0];
+      else if (e.key === 'End') next = items[items.length - 1];
+      else if (index < 0) next = e.key === 'ArrowDown' ? items[0] : items[items.length - 1];
+      else next = items[(index + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length];
+      e.preventDefault();
+      next.focus();
     };
     document.addEventListener('mousedown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
+
+    // Move focus into the menu when it opens so keyboard users land on the
+    // first action instead of a control behind the overlay.
+    const firstItem = menuRef.current?.querySelector('button:not([disabled])');
+    if (firstItem) firstItem.focus();
+
     return () => {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);

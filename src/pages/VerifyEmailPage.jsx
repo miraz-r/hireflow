@@ -51,15 +51,15 @@ export default function VerifyEmailPage() {
   const token = searchParams.get('token');
 
   const [result, setResult] = useState(IDLE_RESULT);
-  const verifyRequested = useRef(false);
+  const verifyRequested = useRef(null);
 
   useEffect(() => {
-    if (authLoading || !token || !user || verifyRequested.current) return;
-    verifyRequested.current = true;
+    if (authLoading || !token || !user || verifyRequested.current === token) return;
+    verifyRequested.current = token;
 
     verifyEmailChange(token)
-      .then(() => refreshUser().catch(() => {}))
-      .then(() => setResult({ done: true, ok: true, signInRequired: false, error: '' }))
+      .then(() => refreshUser().then(() => true).catch(() => false))
+      .then((refreshed) => setResult({ done: true, ok: true, signInRequired: false, error: '', refreshed }))
       .catch((err) => {
         const status = err?.status;
         if (status === 401) {
@@ -131,7 +131,9 @@ export default function VerifyEmailPage() {
           <div className="verify-icon verify-icon--success">{CHECK_ICON}</div>
           <h1 className="verify-title">Email verified</h1>
           <p className="verify-desc">
-            Your account email is now <strong>{user.email}</strong>. You&apos;re all set.
+            Your account email has been updated. {result.refreshed === false
+              ? 'Sign out and back in to see the new address everywhere.'
+              : <>It is now <strong>{user.email}</strong>.</>} You&apos;re all set.
           </p>
           <div className="verify-actions">
             <Link to="/profile" className="btn btn-primary">Go to Profile</Link>

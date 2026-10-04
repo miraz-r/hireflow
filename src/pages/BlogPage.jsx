@@ -92,6 +92,7 @@ export default function BlogPage() {
             {CATEGORIES.map(cat => (
               <button
                 key={cat}
+                type="button"
                 className={`blog-category-btn${activeCategory === cat ? ' blog-category-btn--active' : ''}`}
                 onClick={() => setActiveCategory(cat)}
                 aria-pressed={activeCategory === cat}

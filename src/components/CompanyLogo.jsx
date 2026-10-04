@@ -46,6 +46,9 @@ export default function CompanyLogo({ name, domain, color, initialsStyle, imgCla
       src={src}
       alt={`${name || 'Company'} logo`}
       style={{ objectFit: 'cover', backgroundColor: '#ffffff' }}
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
       onError={() => setStage(stage === 'clearbit' ? 'ddg' : 'fail')}
     />
   );

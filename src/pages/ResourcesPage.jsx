@@ -14,15 +14,6 @@ const FEATURED_GRID = [
   { ...RESOURCES.find((r) => r.slug === 'building-your-personal-brand'), size: 'small' },
 ];
 
-const ARTICLE_RESOURCES = [
-  RESOURCES.find((r) => r.slug === 'writing-a-resume-that-gets-interviews'),
-  RESOURCES.find((r) => r.slug === 'thriving-in-a-remote-role'),
-  RESOURCES.find((r) => r.slug === 'preparing-for-technical-interviews'),
-  RESOURCES.find((r) => r.slug === 'understanding-total-compensation'),
-  RESOURCES.find((r) => r.slug === 'researching-company-culture'),
-  RESOURCES.find((r) => r.slug === 'in-demand-skills'),
-];
-
 const ChevronIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M9 18l6-6-6-6" />

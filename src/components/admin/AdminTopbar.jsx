@@ -101,6 +101,8 @@ export default function AdminTopbar({ openBtnRef, drawerOpen, onOpenDrawer }) {
           placeholder="Search jobs, applications, users..."
           autoComplete="off"
           spellCheck="false"
+          disabled
+          title="Global search is not available yet"
         />
       </div>
 

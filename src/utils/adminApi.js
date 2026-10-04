@@ -44,9 +44,9 @@ export async function getRecentActivity(limit = 8) {
 
 // The Admin Activity workspace feed: a page of the merged event stream.
 //
-// Search, the type filter, and paging all run on the server, so the page holds no
-// second copy of the feed to filter locally and the footer counts are real
-// totals. `type` is one of the canonical event types or 'all'.
+// Type filtering and paging run on the server, so the page holds no second
+// copy of the feed to filter locally and the footer counts are real totals.
+// `type` is one of the canonical event types or 'all'.
 export async function getAdminActivity({
   page = 1,
   limit = 10,

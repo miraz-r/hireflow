@@ -161,7 +161,7 @@ export default function RecruiterDashboard() {
   /* Company name for the page sub-line (non-blocking). */
   useEffect(() => {
     let cancelled = false;
-    apiGet('/api/profile', { timeout: 4000 })
+    apiGet('/profile', { timeout: 4000 })
       .then((res) => {
         if (!cancelled) setCompanyName(res.data?.companyName || '');
       })

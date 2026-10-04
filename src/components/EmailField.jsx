@@ -209,11 +209,12 @@ export default function EmailField({ currentEmail, onEmailChanged }) {
         <>
           <span className="profile-label">Email <span aria-hidden="true">*</span></span>
           <div className="email-field-box">
-            <span className="email-field-value">{pending.newEmail}</span>
+            <span className="email-field-value">{currentEmail || 'Not set'}</span>
             <span className="email-field-end">
               <span className="badge badge-warning email-field-badge">Verification required</span>
             </span>
           </div>
+          <p className="email-field-note">Pending change to <strong>{pending.newEmail}</strong> — confirm it from the link we sent there.</p>
           <div className="email-field-subrow">
             <div className="email-field-actions">
               <button type="button" className="btn btn-ghost btn-sm" onClick={handleResend} disabled={busy}>

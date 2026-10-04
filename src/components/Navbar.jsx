@@ -323,8 +323,7 @@ export default function Navbar() {
             {isRegisterPage && (
               <Link to="/login" className="sign-in-link">Sign in</Link>
             )}
-            <button
-              type="button"
+            <button type="button"
               className="navbar-theme-toggle"
               onClick={toggleTheme}
               aria-pressed={theme === 'dark'}
@@ -372,8 +371,7 @@ export default function Navbar() {
           {user ? (
             <div className="account-wrapper" ref={accountRef}>
               <span className="account-role-label">{roleLabel}</span>
-              <button
-                type="button"
+              <button type="button"
                 className="account-trigger"
                 onClick={handleAccountClick}
                 aria-expanded={menuOpen}
@@ -464,7 +462,7 @@ export default function Navbar() {
                           <rect x="14" y="12" width="7" height="9" rx="1" />
                           <rect x="3" y="16" width="7" height="5" rx="1" />
                         </svg>
-                        Admin Dashboard
+                        Dashboard
                       </Link>
                       <Link
                         to="/profile?tab=post"
@@ -484,8 +482,7 @@ export default function Navbar() {
                   {user.role !== 'admin' && (
                     <>
                       <div className="account-menu-divider" />
-                      <button
-                        type="button"
+                      <button type="button"
                         className="account-menu-item"
                         role="menuitem"
                         onClick={handleSwitchWorkspace}
@@ -501,8 +498,7 @@ export default function Navbar() {
                   </>
                 )}
                 <div className="account-menu-divider" />
-                  <button
-                    type="button"
+                  <button type="button"
                     className="account-menu-item account-menu-theme-toggle"
                     role="menuitem"
                     onClick={() => updateTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -518,8 +514,7 @@ export default function Navbar() {
                     </span>
                   </button>
                   <div className="account-menu-divider" />
-                  <button
-                    type="button"
+                  <button type="button"
                     className="account-menu-item account-menu-item--danger"
                     role="menuitem"
                     onClick={handleLogout}
@@ -539,8 +534,7 @@ export default function Navbar() {
             <>
               <Link to="/login" className="sign-in-link">Sign in</Link>
               <Link to="/register" className="sign-up-link btn btn-primary btn-sm">Sign up</Link>
-              <button
-                type="button"
+              <button type="button"
                 className="navbar-theme-toggle"
                 onClick={toggleTheme}
                 aria-pressed={theme === 'dark'}
@@ -552,7 +546,7 @@ export default function Navbar() {
           )}
         </div>
 
-        <button
+        <button type="button"
           ref={hamburgerRef}
           className="mobile-toggle"
           onClick={() => mobileOpen ? closeMobile() : openMobile()}
@@ -595,7 +589,7 @@ export default function Navbar() {
               ) : (
                 <span className="mobile-drawer-guest-label">Menu</span>
               )}
-              <button
+              <button type="button"
                 ref={closeRef}
                 className="mobile-drawer-close"
                 onClick={closeMobile}
@@ -612,8 +606,7 @@ export default function Navbar() {
               {/* Workspace switcher - above Navigation */}
               {user && user.role !== 'admin' && (
                 <div className="mobile-drawer-section">
-                  <button
-                    type="button"
+                  <button type="button"
                     className="mobile-drawer-link"
                     onClick={handleDrawerSwitchRole}
                   >
@@ -722,7 +715,7 @@ export default function Navbar() {
                           <rect x="14" y="12" width="7" height="9" rx="1" />
                           <rect x="3" y="16" width="7" height="5" rx="1" />
                         </svg>
-                        <span className="mobile-drawer-label">Admin Dashboard</span>
+                        <span className="mobile-drawer-label">Dashboard</span>
                       </Link>
                       <Link
                         to="/profile?tab=post"
@@ -738,8 +731,7 @@ export default function Navbar() {
                       </Link>
                     </>
                   )}
-                  <button
-                    type="button"
+                  <button type="button"
                     className="mobile-drawer-link mobile-drawer-theme-toggle"
                     onClick={() => updateTheme(theme === 'dark' ? 'light' : 'dark')}
                     aria-pressed={theme === 'dark'}
@@ -760,8 +752,7 @@ export default function Navbar() {
               {!user && (
                 <div className="mobile-drawer-section">
                   <span className="mobile-drawer-section-label">Preferences</span>
-                  <button
-                    type="button"
+                  <button type="button"
                     className="mobile-drawer-link mobile-drawer-theme-toggle"
                     onClick={toggleTheme}
                     aria-pressed={theme === 'dark'}
@@ -795,8 +786,7 @@ export default function Navbar() {
             {/* Logout - completely separate at the bottom */}
             {user && (
               <div className="mobile-drawer-logout">
-                <button
-                  type="button"
+                <button type="button"
                   className="mobile-drawer-link mobile-drawer-link--danger"
                   onClick={handleDrawerLogout}
                   disabled={loggingOut}

@@ -61,7 +61,15 @@ export default function PageTransition({ children }) {
   return (
     <div className="page-transition-wrapper">
       {outgoingLocation && (
-        <div className="route-layer route-outgoing" aria-hidden="true">
+        <div
+          className="route-layer route-outgoing"
+          aria-hidden="true"
+          ref={(el) => {
+            // React 18 has no `inert` DOM prop; set it imperatively so the
+            // outgoing page can't be focused or interacted with while fading.
+            if (el) el.inert = true;
+          }}
+        >
           {cloneElement(children, {
             location: outgoingLocation,
             key: `out-${outgoingLocation.pathname}-${outgoingLocation.search}`

@@ -5,7 +5,6 @@ import { AdminActivityTrendChart, AdminStatusDonut } from './AdminAnalyticsChart
 import {
   DATE_RANGE_OPTIONS,
   DEFAULT_RANGE,
-  STATUS_META,
   STATUS_FILLS,
   buildAnalyticsCsv,
 } from './adminAnalyticsData';
@@ -347,7 +346,7 @@ export default function AdminAnalyticsPage() {
                 View all activity
               </button>
             </div>
-            <ActivityTable items={activity} loading={activityError} />
+            <ActivityTable items={activity} error={activityError} />
           </section>
         </>
       )}
@@ -525,8 +524,8 @@ function StatusCounts({ items, total }) {
 
 /** ActivityTable - the real activity feed, held to a fixed layout so the header
     and every row stay aligned at any card width. */
-function ActivityTable({ items, loading }) {
-  if (loading) {
+function ActivityTable({ items, error }) {
+  if (error) {
     return <p className="admin-analytics-empty">Activity is unavailable right now.</p>;
   }
   if (!items.length) {
@@ -550,7 +549,7 @@ function ActivityTable({ items, loading }) {
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <tr key={`${item.type}-${index}`}>
+            <tr key={`${item.type}-${item.at}-${item.detail || item.entity || index}`}>
               <td className="admin-analytics-cell-activity">
                 {ACTIVITY_ICONS[item.type] || item.label}
               </td>

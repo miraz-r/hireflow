@@ -180,7 +180,7 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
       role="listbox"
       onKeyDown={handleListboxKeyDown}
     >
-      <button
+      <button type="button"
         ref={(el) => { optionRefs.current[0] = el; }}
         className={`filter-option ${!selectedIsActive ? 'selected' : ''}`}
         onClick={() => handleSelect(null)}
@@ -200,7 +200,7 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
           return optValue === selected;
         })();
         return (
-          <button
+          <button type="button"
             key={key}
             ref={(el) => { optionRefs.current[i + 1] = el; }}
             className={`filter-option ${isSelected ? 'selected' : ''}`}
@@ -217,7 +217,7 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
 
   return (
     <div className="filter-dropdown" ref={ref}>
-      <button
+      <button type="button"
         ref={triggerRef}
         className={`filter-trigger ${selectedIsActive ? 'active' : ''}`}
         onClick={(e) => {
@@ -236,7 +236,7 @@ function FilterDropdown({ label, options, selected, onChange, getOptionKey, getO
         aria-controls={listboxId}
       >
         <span>{label}: <strong>{displayLabel || 'Any'}</strong></span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="6 9 12 15 18 9"/>
         </svg>
       </button>
@@ -251,7 +251,7 @@ export default function JobFilters({ filters, onFilterChange, workTypes, employm
       <div className="filters-header">
         <h2 className="filters-title">Filters</h2>
         {hasActiveFilters && (
-          <button className="clear-filters-btn" onClick={onClearFilters}>
+          <button type="button" className="clear-filters-btn" onClick={onClearFilters}>
             Clear all
           </button>
         )}
@@ -261,7 +261,7 @@ export default function JobFilters({ filters, onFilterChange, workTypes, employm
         <h3 className="filter-group-title">Work type</h3>
         <div className="filter-buttons">
           {workTypes.map(type => (
-            <button
+            <button type="button"
               key={type}
               className={`filter-chip ${filters.workType === type ? 'active' : ''}`}
               onClick={() => onFilterChange('workType', type)}
@@ -277,7 +277,7 @@ export default function JobFilters({ filters, onFilterChange, workTypes, employm
         <h3 className="filter-group-title">Employment</h3>
         <div className="filter-buttons">
           {employmentTypes.map(type => (
-            <button
+            <button type="button"
               key={type}
               className={`filter-chip ${filters.employmentType === type ? 'active' : ''}`}
               onClick={() => onFilterChange('employmentType', type)}

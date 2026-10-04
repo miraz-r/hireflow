@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getAdminStats, getApplicationsTrend, getRecentApplications, getRecentActivity } from '../../utils/adminApi';
+import { ADMIN_STATUS_LABELS } from '../../constants/applicationStatus';
 import AdminKpiCard from './AdminKpiCard';
 import AdminStatsChart from './AdminStatsChart';
 import './AdminOverview.css';
@@ -248,7 +249,7 @@ function AdminRecentActivity({ items }) {
   return (
     <div className="admin-activity">
       {items.map((item, index) => (
-        <div className="admin-activity-item" key={`${item.type || 'activity'}-${index}`}>
+        <div className="admin-activity-item" key={`${item.type || 'activity'}-${item.at || item.createdAt || index}-${item.label || ''}`}>
           <span className={'admin-activity-dot admin-activity-dot--' + (item.kind || 'default')} aria-hidden="true" />
           <div className="admin-activity-body">
             <span className="admin-activity-label">{item.label || item.type}</span>
@@ -260,8 +261,6 @@ function AdminRecentActivity({ items }) {
     </div>
   );
 }
-
-const STATUS_COLORS = {};
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -277,4 +276,3 @@ function formatActivityTime(iso) {
   const time = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
   return time + ' · ' + d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
-import { ADMIN_STATUS_LABELS } from '../../constants/applicationStatus';
