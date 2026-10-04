@@ -23,6 +23,7 @@ module.exports = {
   nodeEnv: optional('NODE_ENV', 'development'),
   clientOrigin,
   mongoUri: required('MONGODB_URI'),
+  storageDriver: optional('STORAGE_DRIVER', 'local'),
   jwtSecret: required('JWT_SECRET'),
   jwtExpiresIn: optional('JWT_EXPIRES_IN', '7d'),
   bcryptRounds: parseInt(optional('BCRYPT_ROUNDS', '12'), 10),

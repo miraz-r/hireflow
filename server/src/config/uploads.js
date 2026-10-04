@@ -37,21 +37,7 @@ const extFromMime = (mime) => {
   }
 };
 
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    const isAvatar = file.fieldname === 'avatar';
-    cb(null, isAvatar ? AVATAR_DIR : RESUME_DIR);
-  },
-  filename(req, file, cb) {
-    const safeBase = path
-      .basename(file.originalname, path.extname(file.originalname))
-      .replace(/[^a-zA-Z0-9-_]/g, '-')
-      .slice(0, 60) || 'file';
-    const ext = extFromMime(file.mimetype);
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${safeBase}-${unique}${ext}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 // Shared filter selects the destination by field name, then validates mime.
 const fileFilter = (req, file, cb) => {
@@ -90,12 +76,31 @@ const RESUME_MIME_BY_EXT = {
   '.txt': 'text/plain',
 };
 
-// Resolve a stored resume URL ("/uploads/resumes/<file>") to its local path
-// and stream it back with a safe basename-only resolution. The public static
-// mount only serves avatars, so every resume read goes through here after an
-// ownership/role check in the controller.
-const sendResume = (res, resumeUrl, resumeName, { download = false } = {}) => {
-  const fileName = path.basename(String(resumeUrl || ''));
+// Resolve a stored resume reference (either a local "/uploads/resumes/<file>"
+// path or a driver-issued "/api/files/<id>") and stream it back with
+// basename-only resolution. The public static mount only serves avatars, so
+// every resume read goes through here after an ownership/role check in the
+// controller.
+const sendResume = async (res, resumeUrl, resumeName, { download = false } = {}) => {
+  const asString = String(resumeUrl || '');
+
+  // MongoDB-backed storage: stream from StoredFile by id.
+  if (asString.startsWith('/api/files/')) {
+    const id = asString.slice('/api/files/'.length);
+    const doc = await require('../models/StoredFile').findById(id).catch(() => null);
+    if (!doc || doc.kind !== 'resume') {
+      return res.status(404).json({ error: 'Resume not found' });
+    }
+    const disposition = download ? 'attachment' : 'inline';
+    res.setHeader('Content-Type', doc.contentType);
+    res.setHeader(
+      'Content-Disposition',
+      `${disposition}; filename*=UTF-8''${encodeURIComponent(resumeName || doc.originalName || 'resume')}`
+    );
+    return res.send(doc.data);
+  }
+
+  const fileName = path.basename(asString);
   const abs = path.join(RESUME_DIR, fileName);
   if (!abs.startsWith(RESUME_DIR) || !fs.existsSync(abs)) {
     return res.status(404).json({ error: 'Resume not found' });
@@ -119,4 +124,5 @@ module.exports = {
   resumeUpload,
   publicPathFor,
   sendResume,
+  extFromMime,
 };

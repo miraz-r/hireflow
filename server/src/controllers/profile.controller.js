@@ -6,6 +6,7 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const SavedJob = require('../models/SavedJob');
 const { publicPathFor, UPLOAD_ROOT, AVATAR_DIR, sendResume } = require('../config/uploads');
+const storage = require('../config/storage');
 
 /**
  * Profile controller.
@@ -263,13 +264,23 @@ const uploadAvatar = async (req, res, next) => {
     return res.status(400).json({ error: 'No avatar file provided' });
   }
   try {
-    const avatarUrl = publicPathFor(req.file.path);
-    const profile = await Profile.findOneAndUpdate(
-      activeProfileQuery(req),
-      { $set: { avatarUrl } },
-      { new: true, runValidators: true, context: 'query' }
-    );
+    // Persist through the active storage driver first; only expose the
+    // reference on success. A failed DB update must roll back the new
+    // stored file so it is not orphaned.
+    const avatarUrl = await storage.save('avatar', req.file);
+    let profile;
+    try {
+      profile = await Profile.findOneAndUpdate(
+        activeProfileQuery(req),
+        { $set: { avatarUrl } },
+        { new: true, runValidators: true, context: 'query' }
+      );
+    } catch (err) {
+      await storage.remove('avatar', avatarUrl);
+      throw err;
+    }
     if (!profile) {
+      await storage.remove('avatar', avatarUrl);
       return res.status(404).json({ error: 'Profile not found' });
     }
     return res.status(200).json(formatProfile(profile));
@@ -290,13 +301,23 @@ const uploadResume = async (req, res, next) => {
     return res.status(400).json({ error: 'No resume file provided' });
   }
   try {
-    const resumeUrl = publicPathFor(req.file.path);
-    const profile = await Profile.findOneAndUpdate(
-      activeProfileQuery(req),
-      { $set: { resumeUrl, resumeName: req.file.originalname } },
-      { new: true, runValidators: true, context: 'query' }
-    );
+    // Persist through the active storage driver first, then point the
+    // profile at it. Roll back the new file if the update fails so we do
+    // not replace the user's resume with a dangling reference.
+    const resumeUrl = await storage.save('resume', req.file);
+    let profile;
+    try {
+      profile = await Profile.findOneAndUpdate(
+        activeProfileQuery(req),
+        { $set: { resumeUrl, resumeName: req.file.originalname } },
+        { new: true, runValidators: true, context: 'query' }
+      );
+    } catch (err) {
+      await storage.remove('resume', resumeUrl);
+      throw err;
+    }
     if (!profile) {
+      await storage.remove('resume', resumeUrl);
       return res.status(404).json({ error: 'Profile not found' });
     }
     return res.status(200).json(formatProfile(profile));
@@ -319,27 +340,10 @@ const removeAvatar = async (req, res, next) => {
     profile.avatarUrl = '';
     await profile.save();
 
-    // Best-effort cleanup of the stored image file. Avatars live on the local
-    // filesystem under AVATAR_DIR (see config/uploads.js); clearing the DB
-    // reference is the outcome that matters, so a cleanup failure must never
-    // fail the request.
-    if (typeof prevUrl === 'string' && prevUrl.startsWith('/uploads/')) {
-      try {
-        const rel = prevUrl.slice('/uploads/'.length);
-        const absPath = path.resolve(UPLOAD_ROOT, rel);
-        const resolvedAvatarDir = path.resolve(AVATAR_DIR);
-        // Defense-in-depth: only ever unlink a file that resolves strictly
-        // inside the avatar directory. This rejects `../` traversal,
-        // absolute paths, and the directory itself, so a crafted avatarUrl
-        // can never reach fs.unlink outside the configured avatar storage.
-        const isInsideAvatarDir = absPath.startsWith(resolvedAvatarDir + path.sep);
-        if (isInsideAvatarDir && fs.existsSync(absPath)) {
-          fs.unlinkSync(absPath);
-        }
-      } catch {
-        // ignore file cleanup errors
-      }
-    }
+    // Best-effort cleanup of the stored image file. Clearing the DB
+    // reference is the outcome that matters, so a cleanup failure must
+    // never fail the request.
+    await storage.remove('avatar', prevUrl);
 
     return res.status(200).json(formatProfile(profile));
   } catch (err) {
