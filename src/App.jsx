@@ -88,7 +88,8 @@ export default function App() {
   // lands at the top of the homepage, not auto-flung to the Featured Jobs view.
   const firstFilterRender = useRef(true);
 
-  // Load jobs from the API (falls back to mock data if the backend is down).
+  // Load jobs from the API. Only real listings are shown; an empty or
+  // unreachable API falls through to the existing empty state.
   useEffect(() => {
     let cancelled = false;
     fetchJobs()

@@ -1,5 +1,4 @@
 import api from './api';
-import { jobs as mockJobs } from '../data/mockData';
 
 // Normalize an API job doc into the shape the UI expects.
 // - id: `_id` string
@@ -32,8 +31,11 @@ const timeAgo = (dateStr) => {
 };
 
 /**
- * Fetch jobs from the backend. Falls back to the local mock data if the API
- * is unreachable (e.g. backend not running), so the UI still works.
+ * Fetch jobs from the backend.
+ *
+ * Only real API data is ever returned. An empty catalogue and an unreachable
+ * API both resolve to `[]` so the caller renders its own empty state, rather
+ * than substituting placeholder listings a visitor could try to apply to.
  *
  * @returns {Promise<Array>} normalized job objects
  */
@@ -44,32 +46,28 @@ export async function fetchJobs() {
       timeout: 4000,
     });
     const rawJobs = Array.isArray(res.data?.jobs) ? res.data.jobs : [];
-    if (rawJobs.length > 0) {
-      return rawJobs.map(normalizeJob);
-    }
-    // API reachable but empty - fall back to mock so the page isn't blank.
-    return mockJobs;
+    return rawJobs.map(normalizeJob);
   } catch {
-    // Backend down - use the built-in mock catalogue.
-    return mockJobs;
+    return [];
   }
 }
 
 /**
- * Fetch a single job by id from the backend. Falls back to the local mock
- * catalogue if the API is unreachable or the job isn't found there.
+ * Fetch a single job by id from the backend.
+ *
+ * Resolves to `null` when the API has no such job (404) or cannot be reached,
+ * so the caller shows its not-found state instead of rendering a placeholder
+ * job that does not exist.
  *
  * @param {string} id
- * @returns {Promise<object>} normalized job object
+ * @returns {Promise<object|null>} normalized job object, or null
  */
 export async function fetchJobById(id) {
   try {
     const res = await api.get(`/jobs/${id}`, { timeout: 4000 });
     const job = res.data?.job ?? res.data;
-    if (job) return normalizeJob(job);
+    return job ? normalizeJob(job) : null;
   } catch {
-    // fall through to mock
+    return null;
   }
-  const mock = mockJobs.find((j) => String(j.id) === String(id));
-  return mock ? { ...mock } : null;
 }
