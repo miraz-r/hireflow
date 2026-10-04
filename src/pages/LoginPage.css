@@ -554,89 +554,25 @@
   }
 }
 
-/* Tablet - stack visual above form */
-@media (max-width: 960px) {
+/* Tablet (768px-960px): balanced two-column composition. Two columns start
+   here because this is the first width where both panels fit comfortably
+   (shell ≈736px: form ≈386px, illustration ≈350px — wide enough for the
+   150-180px carousel mockups plus readable text). Narrower viewports use
+   the single-column compact range below. Desktop (>960px) is untouched. */
+@media (min-width: 768px) and (max-width: 960px) {
   .auth-shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr);
-    max-width: 520px;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    max-width: 880px;
+  }
+
+  .auth-form-pane {
+    padding: var(--space-6);
+  }
+
+  .auth-visual-pane {
+    order: 0;
     min-height: 0;
-  }
-
-  .auth-visual-pane {
-    order: -1;
-    min-height: 220px;
-  }
-
-  .auth-mock--back {
-    top: var(--space-6);
-    right: var(--space-6);
-    width: 170px;
-  }
-
-  .auth-mock--front {
-    top: var(--space-12);
-    right: var(--space-12);
-    width: 200px;
-  }
-
-  .auth-visual-content {
-    padding-top: var(--space-12);
-    padding-right: 60%;
-  }
-
-  .auth-visual-title {
-    font-size: var(--font-size-xl);
-  }
-
-  .auth-form-pane {
-    padding: var(--space-8) var(--space-8);
-  }
-
-  .auth-form-inner {
-    max-width: none;
-  }
-}
-
-/* Mobile */
-@media (max-width: 640px) {
-  .auth-page {
-    padding: var(--space-4);
-  }
-
-  .auth-shell {
-    border-radius: var(--radius-xl);
-  }
-
-  .auth-form-pane {
-    padding: var(--space-6) var(--space-5);
-  }
-
-  .auth-title {
-    font-size: var(--font-size-2xl);
-  }
-
-  .auth-visual-pane {
-    min-height: 180px;
-  }
-
-  .auth-mock--back {
-    width: 140px;
-    top: var(--space-4);
-    right: var(--space-4);
-    padding: var(--space-3);
-  }
-
-  .auth-mock--front {
-    width: 170px;
-    top: var(--space-8);
-    right: var(--space-6);
-    padding: var(--space-3);
-  }
-
-  .auth-visual-content {
-    padding-top: var(--space-10);
-    padding-right: 55%;
+    padding: var(--space-6);
   }
 
   .auth-visual-title {
@@ -645,6 +581,69 @@
 
   .auth-visual-subtitle {
     font-size: var(--font-size-xs);
+  }
+
+  /* The two columns have no split inner-cap since the panes themselves are
+     the constraint; clear the desktop 380px inner cap so the form uses the
+     width of its ~386-463px column instead of a narrow 380px slab. */
+  .auth-form-inner {
+    max-width: none;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  /* Phones: the form owns the page. The decorative brand panel is hidden
+     (same as the pre-existing ≤360px behavior, extended to all phones) so it
+     can never push the form below the fold. The page uses normal document
+     scrolling instead of a fixed-height card with nested internal scroll. */
+  .auth-page {
+    padding: var(--space-4);
+    /* height:auto + min-height lets the page grow: a short login card is
+       centered in the area below the 60/61px auth header, and a taller
+       register card (or one with validation messages) simply makes the
+       page taller so the document scrolls instead of clipping. */
+    height: auto;
+    min-height: calc(100vh - 61px);
+    min-height: calc(100dvh - 61px);
+    overflow: visible;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .auth-shell {
+    border-radius: var(--radius-xl);
+    max-height: none;
+    /* A controlled card width: full-bleed on small phones, capped at 460px
+       once the viewport allows, so inputs never stretch across the whole
+       screen and the card keeps balanced side margins. */
+    width: 100%;
+    max-width: 460px;
+    /* The base desktop rule leaves a 1fr 1fr two-track grid. Hiding the
+       visual pane then vacates the second track, which still resolves 1fr
+       to a full half of the shell — a ghost column that squeezes the form
+       pane to half its card width. Collapse to a single real track. */
+    grid-template-columns: 1fr;
+  }
+
+  .auth-visual-pane {
+    display: none;
+  }
+
+  .auth-form-pane {
+    padding: var(--space-6) var(--space-5);
+    overflow: visible;
+  }
+
+  /* Cap the form content so inputs and the button share one comfortable
+     measure inside the (now width-controlled) card, instead of stretching
+     to whatever the card happens to be. */
+  .auth-form-inner {
+    max-width: 420px;
+  }
+
+  .auth-title {
+    font-size: var(--font-size-2xl);
   }
 
   .auth-footnote {
@@ -715,11 +714,54 @@
   }
 }
 
-/* Mobile navbar is 60px tall, so the auth page fills accordingly. */
-@media (max-width: 768px) {
+/* Tablet navbar is 60px tall, so the auth page fills accordingly. Phones
+   (≤640px) use document scrolling instead — see the mobile block above. */
+@media (min-width: 641px) and (max-width: 768px) {
   .auth-page {
     height: calc(100vh - 60px);
     height: calc(100dvh - 60px);
+  }
+}
+
+/* Compact tablet (641px-767px): single column, form only. Measured content
+   says this range cannot host both panels: 609-735px of shell width leaves
+   the illustration column below ~290px against the carousel's 150-180px
+   mockups plus readable text, so a two-column split is cramped and the
+   stacked alternative puts the illustration "below the fold" in a panel
+   taller than half a viewport. Instead the decorative panel is hidden and
+   the card reuses the phone composition (460px card / 420px form), centered
+   in the area below the 61px auth header. Placed after the fixed-height
+   rule above so height:auto wins; at exactly 768px the two-column rule
+   takes over and the panel returns. */
+@media (min-width: 641px) and (max-width: 767px) {
+  .auth-page {
+    height: auto;
+    min-height: calc(100vh - 61px);
+    min-height: calc(100dvh - 61px);
+    overflow: visible;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .auth-shell {
+    /* Genuine single track — no vacuous second column left behind by the
+       hidden pane. */
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 460px;
+    max-height: none;
+  }
+
+  .auth-visual-pane {
+    display: none;
+  }
+
+  .auth-form-pane {
+    overflow: visible;
+  }
+
+  .auth-form-inner {
+    max-width: 420px;
   }
 }
 
@@ -763,10 +805,6 @@
   .auth-submit {
     padding: var(--space-3) var(--space-4);
     font-size: var(--font-size-sm);
-  }
-
-  .auth-visual-pane {
-    display: none;
   }
 
   .auth-form {

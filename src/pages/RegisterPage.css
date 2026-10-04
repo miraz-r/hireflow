@@ -147,30 +147,47 @@
   margin-top: 8px;
 }
 
+/* The workspace cards previously read `background: var(--surface, #fff)` and
+   `border: 1px solid var(--border, #e5e7eb)`. Neither custom property is
+   defined anywhere in HireFlow, so both always resolved to the fallbacks and
+   the card stayed white in dark mode. They now use the project's real theme
+   tokens, so light and dark are both driven by [data-theme] alone. */
 .auth-workspace-option {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px;
   cursor: pointer;
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #e5e7eb);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-field);
   border-radius: var(--radius-md, 8px);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 .auth-workspace-option:hover {
-  border-color: #4f46e5;
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-bg-tertiary);
 }
 
+/* Selected state: brand ring plus a subtly tinted surface so it reads as
+   chosen without washing out the label. The label keeps
+   --color-text-primary in both themes. */
 .auth-workspace-option--selected {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 1px #4f46e5;
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-light);
+  box-shadow: 0 0 0 1px var(--color-brand-primary);
+}
+
+/* Keyboard focus must stay visible on the card itself. */
+.auth-workspace-option:has(input:focus-visible) {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .auth-workspace-option input {
   margin: 0;
-  accent-color: #4f46e5;
+  accent-color: var(--color-brand-primary);
 }
 
 .auth-workspace-option-body {
@@ -183,6 +200,13 @@
 .auth-workspace-option-title {
   font-size: 14px;
   font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Submitting disables the whole fieldset; keep the cards legible but inert. */
+.auth-workspace-option:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 @media (max-width: 520px) {
