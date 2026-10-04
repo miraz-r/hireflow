@@ -6,7 +6,13 @@ const start = async () => {
   try {
     await connectDB();
   } catch (err) {
-    console.error('[startup] Continuing without database connection. Health endpoint will reflect status.');
+    console.error('[startup] Database connection failed. Health endpoint will reflect status.');
+    if (env.nodeEnv === 'production') {
+      // Never report a healthy process in production when its required
+      // dependency is missing — fail fast and let the supervisor restart.
+      console.error('[startup] NODE_ENV=production: exiting because MongoDB is unreachable.');
+      process.exit(1);
+    }
   }
 
   const server = app.listen(env.port, () => {

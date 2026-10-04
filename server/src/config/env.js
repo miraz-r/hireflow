@@ -10,10 +10,18 @@ const required = (key) => {
 
 const optional = (key, fallback) => process.env[key] ?? fallback;
 
+const isProduction = optional('NODE_ENV', 'development') === 'production';
+
+// CLIENT_ORIGIN must be explicit in production — no localhost dev origins
+// should be implicit there.
+const clientOrigin = isProduction
+  ? required('CLIENT_ORIGIN')
+  : optional('CLIENT_ORIGIN', 'http://localhost:5173');
+
 module.exports = {
   port: parseInt(optional('PORT', '5000'), 10),
   nodeEnv: optional('NODE_ENV', 'development'),
-  clientOrigin: optional('CLIENT_ORIGIN', 'http://localhost:5173'),
+  clientOrigin,
   mongoUri: required('MONGODB_URI'),
   jwtSecret: required('JWT_SECRET'),
   jwtExpiresIn: optional('JWT_EXPIRES_IN', '7d'),

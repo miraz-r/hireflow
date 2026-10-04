@@ -2,8 +2,15 @@
 // the local upload base, uploaded-file resolution, and the online
 // image/logo services used as fallbacks when no real image exists.
 
+const MEDIA_BASE_FROM_ENV = import.meta.env.VITE_MEDIA_BASE;
+if (import.meta.env.PROD && !MEDIA_BASE_FROM_ENV) {
+  throw new Error(
+    'VITE_MEDIA_BASE is required for production builds. Set it to the origin serving uploaded files, e.g. https://api.yourdomain.com'
+  );
+}
+
 // Base URL of the API server that serves uploaded avatars/resumes.
-export const MEDIA_BASE = import.meta.env.VITE_MEDIA_BASE || 'http://localhost:5000';
+export const MEDIA_BASE = MEDIA_BASE_FROM_ENV || 'http://localhost:5000';
 
 // Uploaded files (avatars, resumes) are relative paths served by the API server.
 export const resolveMediaUrl = (url) => {
