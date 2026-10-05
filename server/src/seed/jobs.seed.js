@@ -9,7 +9,14 @@
  */
 require('dotenv').config();
 const dns = require('dns');
-dns.setServers(['1.1.1.1', '1.0.0.1']);
+// Follow the same opt-in DNS override as src/config/db.js: only override the
+// resolver when DNS_SERVERS is explicitly set.
+if (process.env.DNS_SERVERS && process.env.DNS_SERVERS.trim()) {
+  const servers = process.env.DNS_SERVERS.split(',').map((s) => s.trim()).filter(Boolean);
+  if (servers.length > 0) {
+    dns.setServers(servers);
+  }
+}
 
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');

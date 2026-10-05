@@ -28,7 +28,8 @@ app.use((_req, res, next) => {
   next();
 });
 
-// CORS restricted to the local Vite frontend
+// CORS restricted to the configured client origin (CLIENT_ORIGIN — the local
+// Vite frontend in development, the deployed frontend origin in production).
 app.use(
   cors({
     origin: env.clientOrigin,
