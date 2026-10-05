@@ -2,6 +2,7 @@ const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
 const {
   listJobs,
+  listMyJobs,
   getJob,
   createJob,
   updateJob,
@@ -17,6 +18,12 @@ const router = express.Router();
 
 // Public: list + single job
 router.get('/', listQueryValidators, listJobs);
+
+// Recruiter-only: the caller's own postings (all statuses, including jobs
+// with zero applications). Defined before /:id so the literal path is never
+// shadowed by the single-job route.
+router.get('/mine', authenticate, authorize('recruiter'), listMyJobs);
+
 router.get('/:id', getJob);
 
 // Recruiter-only: create, update, delete

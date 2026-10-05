@@ -95,6 +95,7 @@ export default function RecruiterDashboard() {
   const { user } = useAuth();
 
   const [applications, setApplications] = useState(null);
+  const [ownedJobs, setOwnedJobs] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
@@ -116,6 +117,14 @@ export default function RecruiterDashboard() {
       try {
         const res = await apiGet('/applications/mine');
         if (!cancelled) setApplications(res.data?.applications || []);
+        // Owned postings are loaded independently of applications so a newly
+        // posted job appears immediately, even with zero applications.
+        try {
+          const jobsRes = await apiGet('/jobs/mine');
+          if (!cancelled) setOwnedJobs(jobsRes.data?.jobs || []);
+        } catch {
+          if (!cancelled) setOwnedJobs([]);
+        }
       } catch (err) {
         if (!cancelled) {
           setError(err?.message || 'Unable to load your applications.');
@@ -262,6 +271,17 @@ export default function RecruiterDashboard() {
       uniqueJobs.push({ id: String(jid), title: app.job?.title || 'Job' });
     }
   }
+  // Include owned postings that have no applications yet so they are
+  // selectable in the job filter from the moment they are posted.
+  for (const job of ownedJobs || []) {
+    const rawId = job._id || job.id;
+    if (!rawId) continue;
+    const sid = String(rawId);
+    if (!seenJobIds.has(sid)) {
+      seenJobIds.add(sid);
+      uniqueJobs.push({ id: sid, title: job.title || 'Job' });
+    }
+  }
 
   const searchTerm = searchQuery.trim().toLowerCase();
   const filtered = list.filter((app) => {
@@ -282,16 +302,26 @@ export default function RecruiterDashboard() {
 
   const jobsByCount = [];
   const jobCountMap = new Map();
+  // Seed from owned postings so jobs with zero applications appear with a
+  // count of 0 instead of being absent until the first application arrives.
+  for (const job of ownedJobs || []) {
+    const rawId = job._id || job.id;
+    if (!rawId) continue;
+    const sid = String(rawId);
+    if (!jobCountMap.has(sid)) {
+      jobCountMap.set(sid, { id: sid, title: job.title || 'Job', company: job.company || '', count: 0 });
+    }
+  }
   for (const app of list) {
     const jid = String(app.job?.id || app.job?._id);
     if (!jobCountMap.has(jid)) {
-      jobCountMap.set(jid, { title: app.job?.title || 'Job', company: app.job?.company || '', count: 0 });
+      jobCountMap.set(jid, { id: jid, title: app.job?.title || 'Job', company: app.job?.company || '', count: 0 });
     }
     jobCountMap.get(jid).count++;
   }
   for (const [, v] of jobCountMap) jobsByCount.push(v);
   jobsByCount.sort((a, b) => b.count - a.count);
-  const maxJobCount = jobsByCount.length > 0 ? Math.max(...jobsByCount.map((j) => j.count)) : 1;
+  const maxJobCount = jobsByCount.length > 0 ? Math.max(1, ...jobsByCount.map((j) => j.count)) : 1;
 
   const recentApps = [...list]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -360,7 +390,7 @@ export default function RecruiterDashboard() {
             <span className="rd-state-spinner" aria-hidden="true" />
             <span className="rd-state-text">Loading your hiring workspace…</span>
           </div>
-        ) : list.length === 0 ? (
+        ) : list.length === 0 && (ownedJobs || []).length === 0 ? (
           <div className="rd-empty">
             <div className="rd-empty-icon" aria-hidden="true">
               <Icon size={32}>{ICONS.inbox}</Icon>
@@ -515,14 +545,14 @@ export default function RecruiterDashboard() {
                   <div className="rd-panel-title-wrap">
                     <h2 className="rd-panel-title" id="rd-jobs-title">Applications by job</h2>
                     <span className="rd-panel-sub">
-                      {jobsByCount.length} job{jobsByCount.length === 1 ? '' : 's'} receiving applications
+                      {jobsByCount.length} job{jobsByCount.length === 1 ? '' : 's'} posted
                     </span>
                   </div>
                   <span className="rd-panel-static">All jobs</span>
                 </div>
                 <div className="rd-jobs-list">
                   {jobsByCount.map((j) => (
-                    <div className="rd-job-row" key={j.title}>
+                    <div className="rd-job-row" key={j.id}>
                       <div className="rd-job-head">
                         <span className="rd-job-title">{j.title}</span>
                         <span className="rd-job-count">{j.count}</span>

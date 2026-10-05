@@ -113,6 +113,23 @@ const getJob = async (req, res, next) => {
 };
 
 // ---------------------------------------------------------------------------
+// GET /api/jobs/mine  — the caller's own postings, all statuses
+// ---------------------------------------------------------------------------
+// Ownership is derived from the auth token, never from client input. Unlike
+// the public catalogue (live jobs only), this returns every job the recruiter
+// posted — including pending/draft/closed ones and jobs with zero
+// applications — so the recruiter dashboard can list postings independently
+// of applicant activity.
+const listMyJobs = async (req, res, next) => {
+  try {
+    const jobs = await Job.find({ postedBy: req.user.id }).sort({ createdAt: -1 });
+    return res.status(200).json({ jobs });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------------
 // POST /api/jobs  — recruiter creates a job
 // ---------------------------------------------------------------------------
 const createJob = async (req, res, next) => {
@@ -185,6 +202,7 @@ const deleteJob = async (req, res, next) => {
 
 module.exports = {
   listJobs,
+  listMyJobs,
   getJob,
   createJob,
   updateJob,

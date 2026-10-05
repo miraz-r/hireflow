@@ -13,6 +13,7 @@ const mongoose = require('mongoose');
 const env = require('../src/config/env');
 const app = require('../src/app');
 const User = require('../src/models/User');
+const Profile = require('../src/models/Profile');
 const Job = require('../src/models/Job');
 
 // Distinct DB so this file can run concurrently with other test files.
@@ -294,5 +295,60 @@ describe('IDOR guard: delete own job only', () => {
 
     assert.equal(res.status, 204);
     assert.equal(await Job.findById(seeded._id), null);
+  });
+});
+describe('recruiter own-jobs listing (GET /api/jobs/mine)', () => {
+  it('returns the recruiter own jobs including one with zero applications', async () => {
+    const recruiter = await makeUser('mine-zero-apps@example.com');
+    const other = await makeUser('mine-other@example.com');
+    const jobseeker = await makeUser('mine-js@example.com', 'jobseeker');
+    await Profile.create({
+      userId: jobseeker._id,
+      role: 'jobseeker',
+      fullName: 'Mine Applicant',
+      phone: '+1-555-0100',
+    });
+
+    const first = await request('POST', '/api/jobs', {
+      token: signTokenFor(recruiter),
+      body: validJob,
+    });
+    const second = await request('POST', '/api/jobs', {
+      token: signTokenFor(recruiter),
+      body: { ...validJob, title: 'Brand New Role' },
+    });
+    await Job.create({ ...validJob, title: 'Someone Else Job', postedBy: other._id });
+    assert.equal(first.status, 201);
+    assert.equal(second.status, 201);
+
+    // One application against the first job only; the second stays at zero.
+    const applied = await request('POST', '/api/applications', {
+      token: signTokenFor(jobseeker),
+      body: { jobId: first.body._id, resumeUrl: '/uploads/resumes/mine.pdf' },
+    });
+    assert.equal(applied.status, 201);
+
+    const res = await request('GET', '/api/jobs/mine', {
+      token: signTokenFor(recruiter),
+    });
+    assert.equal(res.status, 200);
+    const titles = res.body.jobs.map((j) => j.title);
+    assert.equal(res.body.jobs.length, 2);
+    assert.ok(titles.includes(validJob.title));
+    assert.ok(titles.includes('Brand New Role'));
+    assert.ok(!titles.includes('Someone Else Job'));
+  });
+
+  it('requires authentication', async () => {
+    const res = await request('GET', '/api/jobs/mine');
+    assert.equal(res.status, 401);
+  });
+
+  it('requires the recruiter role', async () => {
+    const jobseeker = await makeUser('mine-forbidden@example.com', 'jobseeker');
+    const res = await request('GET', '/api/jobs/mine', {
+      token: signTokenFor(jobseeker),
+    });
+    assert.equal(res.status, 403);
   });
 });
